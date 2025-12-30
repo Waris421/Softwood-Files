@@ -1,12 +1,12 @@
 'use client'
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, MouseEvent } from "react";
 import { useDebouncedCallback } from "use-debounce";
-import { AlertCircle, Check, ChevronsUpDown, Loader2 } from "lucide-react";
+import { AlertCircle, Check, ChevronsUpDown, Loader2, X } from "lucide-react";
 import { Button } from "@/_components/ui/button";
 import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from "@/_components/ui/command";
 import { Popover, PopoverContent, PopoverTrigger } from "@/_components/ui/popover";
-import { cn } from "@/lib/utils";
+import { cn } from "@/_components/generic/utils";
 
 interface ApiOption {
     value: string;
@@ -19,30 +19,50 @@ interface DropdownOption {
 }
 
 interface DropDownProps {
-    apiUrl: string;
+    apiUrl?: string;
+    isStatic?: boolean;
+    staticOptions?: DropdownOption[];
+    widthClass?: string;
     placeholder?: string;
     inputName: string;
     onSelect?: (option: DropdownOption | null) => void;
+    defaultValue?: DropdownOption;
 }
 
 export default function DropDown({
     apiUrl,
+    isStatic = false,
+    staticOptions = [],
+    widthClass = "w-75",
     placeholder = "Type to search...",
     inputName,
-    onSelect
+    onSelect,
+    defaultValue,
 }: DropDownProps) {
     const [mounted, setMounted] = useState(false);
     const [open, setOpen] = useState(false);
     const [error, setError] = useState<string | null>(null);
     const [options, setOptions] = useState<DropdownOption[]>([]);
-    const [selectedValue, setSelectedValue] = useState<DropdownOption | null>(null);
+    const [selectedValue, setSelectedValue] = useState<DropdownOption | null>(defaultValue || null);
     const [isLoading, setIsLoading] = useState(false);
 
     useEffect(() => {
         setMounted(true)
-    }, []);
+        
+        if (isStatic) {
+            setOptions(staticOptions);
+        }
+
+        if (defaultValue) {
+            setSelectedValue(defaultValue);
+
+            if (onSelect) onSelect(defaultValue);
+        }
+    }, [isStatic, staticOptions, defaultValue]);
     
     const fetchOptions = async(searchQuery: string) => {
+        if (isStatic || !apiUrl) return;
+
         if (!searchQuery) {
             setOptions([]);
             return;
@@ -78,28 +98,58 @@ export default function DropDown({
     const debouncedSearch = useDebouncedCallback((value: string) => {
         fetchOptions(value);
     }, 500);
+
+    const handleClear = (e: MouseEvent | React.PointerEvent) => {
+        e.preventDefault();
+        e.stopPropagation();
+        setSelectedValue(null);
+        if (onSelect) onSelect(null);
+    };
+
+    if (!mounted) {
+        return (
+            <div className={cn("w-40", widthClass)}>
+                <Button variant="outline" className="w-full justify-between opacity-50 cursor-not-allowed">
+                    <span className="truncate">{placeholder}</span>
+                    <ChevronsUpDown className="opacity-50" />
+                </Button>
+            </div>
+        );
+    }
     
     return (
-        <div className="w-75">
+        <div className={cn("w-40", widthClass)}>
             <Popover open={open} onOpenChange={setOpen}>
                 <PopoverTrigger asChild>
                     <Button
                         variant="outline"
                         role="combobox"
                         aria-expanded={open}
-                        className="w-full justify-between"
+                        className="w-full justify-between bg-gray-200 dark:bg-gray-600"
                     >
                         <span className="truncate">
                             {selectedValue ? selectedValue.label : placeholder}
                         </span>
-                        <ChevronsUpDown className="opacity-50" />
+                        <div className="flex items-center ml-2 border-l pl-2 gap-1">
+                            {selectedValue && (
+                                <span
+                                    role="button"
+                                    tabIndex={0}
+                                    onPointerDown={handleClear}
+                                    className="p-0.5 hover:bg-secondary rounded-sm transition-colors cursor-pointer"
+                                >
+                                    <X className="h-3.5 w-3.5 text-muted-foreground hover:text-foreground" />
+                                </span>
+                            )}
+                            <ChevronsUpDown className="h-4 w-4 opacity-50 shrink-0" />
+                        </div>
                     </Button>
                 </PopoverTrigger>
-                <PopoverContent className="w-75 p-0">
-                    <Command shouldFilter={false}>
+                <PopoverContent className={cn("p-0", widthClass)}>
+                    <Command shouldFilter={isStatic}>
                         <CommandInput 
-                        placeholder="Type to search" 
-                        onValueChange={debouncedSearch} 
+                            placeholder="Type to search" 
+                            onValueChange={isStatic ? undefined : debouncedSearch}
                         />
                         <CommandList>
                             {isLoading && (
@@ -124,7 +174,7 @@ export default function DropDown({
                                 {options.map((option) => (
                                     <CommandItem
                                     key={option.value ?? "null-identifier"}
-                                    value={option.value ?? ""} 
+                                    value={`${option.label} ${option.value}`.toLowerCase()}
                                     onSelect={() => {
                                         const newValue = selectedValue?.value === option.value ? null : option;
                                         setSelectedValue(newValue);
@@ -146,7 +196,7 @@ export default function DropDown({
                     </Command>
                 </PopoverContent>
             </Popover>
-            <input type="hidden" name={inputName} value={selectedValue?.value || ''}/>
+            <input type="hidden" name={inputName} value={selectedValue?.value ?? ""} readOnly/>
         </div>
     )
 }

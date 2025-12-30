@@ -1,7 +1,7 @@
 import * as z from "zod";
 
 const rowSchema = z.object({
-    id: z.string().optional(),
+    id: z.union([z.string(), z.number()]).optional(),
     Operation: z.string().min(1, "Required"),
     Frequency: z.number().min(1),
     StitchType: z.string().min(1, "Required"),

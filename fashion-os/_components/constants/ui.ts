@@ -6,4 +6,6 @@ export const THEME = {
     ErrorAlert: 'alert alert-error mb-4',
 
     HyperLink: 'label-text-alt link link-hover',
+
+    textInput: 'input input-bordered rounded-sm w-full text-center bg-gray-200 dark:bg-gray-600',
 }

@@ -37,6 +37,34 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
     return NextResponse.json(consumptionData);
 }
 
-export async function POST(request: NextRequest) {
+export async function POST(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
+    const { id } = await params;
+    const requestBody = await request.json();
+    const URL = `${URLs.AMServer}/consumption/thread/request/${id}/update`;
 
+    const authToken = request.cookies.get(AUTH_COOKIE_NAME);
+    if (!authToken) {
+        return NextResponse.json(
+            { error: 'Unauthorized' }, 
+            { status: 401 }
+        );
+    }
+
+    const backendResponse = await fetch(URL, {
+      method: 'POST',
+      headers: {
+        'Authorization': `${authToken.value}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(requestBody),
+    });
+
+    const data = await backendResponse.json();
+    const status = backendResponse.status;
+
+    if (!backendResponse.ok) {
+        return NextResponse.json(data, { status: status });
+    }
+
+    return NextResponse.json(data, { status });
 }

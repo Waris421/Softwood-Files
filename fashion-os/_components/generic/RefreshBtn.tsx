@@ -33,7 +33,7 @@ const RefreshBtn = () => {
             variant="ghost"
             size="icon"
             disabled={isPending}
-            className="cursor-pointer text-white hover:bg-gray-800 dark:text-gray-200"
+            className="cursor-pointer text-gray-800 hover:bg-gray-800 dark:text-gray-200"
             onClick={handleRefresh}
             aria-label="Refresh page"
           >

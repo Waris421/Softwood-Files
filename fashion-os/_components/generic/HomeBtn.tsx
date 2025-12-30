@@ -31,7 +31,7 @@ const HomeButton = () => {
           <Button
             variant="ghost"
             size="icon"
-            className="cursor-pointer text-white hover:bg-gray-800 dark:text-gray-200"
+            className="cursor-pointer text-gray-800 hover:bg-gray-800 dark:text-gray-200"
             onClick={handleClick}
             disabled={isPending}
             aria-label="Go to Home"
