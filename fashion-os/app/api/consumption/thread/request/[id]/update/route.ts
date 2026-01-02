@@ -51,12 +51,12 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
     }
 
     const backendResponse = await fetch(URL, {
-      method: 'POST',
-      headers: {
+        method: 'POST',
+        headers: {
         'Authorization': `${authToken.value}`,
         'Content-Type': 'application/json',
-      },
-      body: JSON.stringify(requestBody),
+        },
+        body: JSON.stringify(requestBody),
     });
 
     const data = await backendResponse.json();

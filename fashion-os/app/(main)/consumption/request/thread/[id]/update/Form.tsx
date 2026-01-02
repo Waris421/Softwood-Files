@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation';
 import { formSchema, FormValues } from "./Schema";
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm, useFieldArray, Controller } from 'react-hook-form';
-import { Save, Plus, Minus, Loader2, CheckCircle } from 'lucide-react';
+import { Save, Plus, Minus, Loader2, CheckCircle, Shirt } from 'lucide-react';
 import { Button } from "@/_components/ui/button";
 import {AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle} from '@/_components/ui/alert-dialog';
 import DropDown from "@/_components/Dropdown/Dropdown";
@@ -24,6 +24,7 @@ export default function ConsumptionForm({ pk }: FormProps){
 
     const [indexToDelete, setIndexToDelete] = useState<number | null>(null);
     const [threadOptions, setThreadOptions] = useState<{ label: string; value: string }[]>([]);
+    const [applicableStyles, setApplicableStyles] = useState<{Style: string}[]>([]);
     const [isFinalizing, setIsFinalizing] = useState(false);
     const [messageConfig, setMessageConfig] = useState<{
         show: boolean;
@@ -33,7 +34,7 @@ export default function ConsumptionForm({ pk }: FormProps){
     } | null>(null);
     const router = useRouter();
 
-    const { fields, append, remove } = useFieldArray({
+    const { fields, append, remove, insert } = useFieldArray({
         control,
         name: "items"
     });
@@ -69,6 +70,7 @@ export default function ConsumptionForm({ pk }: FormProps){
     ]
 
     const emptyRow = {
+        id: '',
         Operation: '', 
         Frequency: 1,
         StitchType: '',
@@ -78,7 +80,9 @@ export default function ConsumptionForm({ pk }: FormProps){
         Consumption: 1,
     }
 
-    const addEmptyRow = () => append(emptyRow)
+    const addEmptyRow = (index: number) => {
+        insert(index + 1, emptyRow);
+    }
 
     const handleRemoveClick = (index: number) => {
         const currentRow = getValues(`items.${index}`);
@@ -126,6 +130,9 @@ export default function ConsumptionForm({ pk }: FormProps){
         setThreadOptions(threadTypes);
 
         const addedData = data.addedData;
+
+        const styles = data.styles;
+        setApplicableStyles(styles);
 
         if (!addedData || addedData.length === 0) {
             reset({ items: [emptyRow] });
@@ -180,7 +187,22 @@ export default function ConsumptionForm({ pk }: FormProps){
     }
 
     return (
-        <div>
+        <div className="w-full space-y-4">
+            {applicableStyles.length > 0 && (
+                <div className="mx-4 mt-4 p-4 bg-base-200 rounded-xl border border-base-300 flex flex-wrap items-center gap-3">
+                    <div className="flex flex-col mr-4">
+                        <span className="text-xs font-bold uppercase opacity-60">Applicable Styles</span>
+                    </div>
+                    <div className="flex flex-wrap gap-2">
+                        {applicableStyles.map((item, idx) => (
+                            <div key={idx} className="badge badge-primary badge-outline gap-2 py-3 px-4 font-semibold">
+                                <Shirt className="w-5 h-5 text-primary" />
+                                {item.Style}
+                            </div>
+                        ))}
+                    </div>
+                </div>
+            )}
             <form className="space-y-4 p-4" autoComplete="off">
                 <div className="overflow-x-auto rounded-lg border border-base-300">
                     <table className="table w-full">
@@ -206,10 +228,13 @@ export default function ConsumptionForm({ pk }: FormProps){
                                 >
                                     <td className="hidden">
                                         <input 
-                                            {...register(`items.${index}.id` as const, { valueAsNumber: true })} 
+                                            {...register(`items.${index}.id` as const)} 
                                             readOnly
                                             required={false}
                                         />
+                                        {errors.items?.[index]?.id && (
+                                            <p className="text-[10px] text-red-500 mt-1">{errors.items[index]?.id?.message}</p>
+                                        )}
                                     </td>
                                     <td className="p-1 w-100">
                                         <input 
@@ -341,9 +366,9 @@ export default function ConsumptionForm({ pk }: FormProps){
                                                 variant="outline"
                                                 size="icon"
                                                 className="h-8 w-8 cursor-pointer"
-                                                onClick={addEmptyRow}
+                                                onClick={() => addEmptyRow(index)}
                                             >
-                                                <Plus className="w-4 h-4" />
+                                                <Plus className="w-4 h-4" color="#38A169" />
                                             </Button>
                                             <Button
                                                 type="button"
@@ -352,7 +377,7 @@ export default function ConsumptionForm({ pk }: FormProps){
                                                 className="h-8 w-8 cursor-pointer"
                                                 onClick={() => handleRemoveClick(index)}
                                             >
-                                                <Minus className="w-4 h-4" />
+                                                <Minus className="w-4 h-4" color="#E53E3E"/>
                                             </Button>
                                         </div>
                                     </td>

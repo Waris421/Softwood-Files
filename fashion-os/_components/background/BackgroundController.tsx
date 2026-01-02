@@ -3,7 +3,6 @@
 import { useTheme } from "next-themes";
 import { useEffect, useState } from "react";
 import Aurora from "../Aurora/Aurora";
-import MetaBalls from "../MetalBalls/MetaBalls";
 
 export default function BackgroundController() {
     const { resolvedTheme } = useTheme();
@@ -17,7 +16,7 @@ export default function BackgroundController() {
 
     return (
         <>
-            {resolvedTheme === 'dark' ? (<Aurora/>): (<MetaBalls/>)}
+            {resolvedTheme === 'dark' ? (<Aurora/>): (<></>)}
         </>
     )
 }

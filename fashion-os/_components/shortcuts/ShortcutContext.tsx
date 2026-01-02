@@ -21,7 +21,7 @@ export const ShortcutProvider = ({children} : { children: React.ReactNode }) => 
             const isMod = event.ctrlKey || event.metaKey;
 
             //Actions that don't need to be suppressed
-            const isAllowedAction = ['z', 'x', 'c', 'v', 'l'].includes(key);
+            const isAllowedAction = ['z', 'x', 'c', 'v', 'l', 'r'].includes(key);
 
             if (isMod && actionsRef.current[key]) {
                 actionsRef.current[key]();

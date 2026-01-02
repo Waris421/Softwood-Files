@@ -6,7 +6,6 @@ import HomeButton from "../generic/HomeBtn";
 import { ThemeToggle } from "../generic/ThemeToggle";
 import Link from "next/link";
 import { ChevronDown } from "lucide-react";
-import RefreshBtn from "../generic/RefreshBtn";
 
 interface NavItem {
   label: string;
@@ -89,9 +88,6 @@ const NavBar = ({ pageName }: { pageName: string }) => {
                         </div>
                         <div className="hover:bg-base-300 rounded-md transition-colors p-0.5">
                             <HomeButton />
-                        </div>
-                        <div className="hover:bg-base-300 rounded-md transition-colors p-0.5">
-                            <RefreshBtn />
                         </div>
                         <div className="hover:bg-base-300 rounded-md transition-colors p-0.5">
                             <LogoutButton />
