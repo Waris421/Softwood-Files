@@ -4,6 +4,8 @@ import { DataTable } from "@/_components/table/Table";
 import { ColumnDef } from "@tanstack/react-table";
 import { useEffect, useState } from "react";
 import { useRouter } from 'next/navigation';
+import { Button } from "@/_components/ui/button";
+import { ArrowUpDown } from "lucide-react";
 
 type ConsRequest = {
     RequestNumber: number,
@@ -16,7 +18,13 @@ type ConsRequest = {
 const requestColumns: ColumnDef<ConsRequest>[] = [
     {
         accessorKey: 'RequestNumber',
-        header: 'Request Number',
+        header: ({ column }) => {
+            return (
+                <div onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}>
+                    Request Number
+                </div>
+            )
+        },
     },
     {
         accessorKey: 'FullName',
@@ -24,7 +32,7 @@ const requestColumns: ColumnDef<ConsRequest>[] = [
     },
     {
         accessorKey: 'RequestDate',
-        header: 'Request Date',
+        header: 'Request Date'
     },
     {
         accessorKey: 'Style',
@@ -93,7 +101,6 @@ export default function PendingConsumptions() {
                 clickableColumnId='RequestNumber'
                 onCellClick={onCellClickFunction}
             />
-            
         </div>
     )
 }

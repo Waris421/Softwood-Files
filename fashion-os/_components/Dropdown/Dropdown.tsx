@@ -9,7 +9,7 @@ import { Popover, PopoverContent, PopoverTrigger } from "@/_components/ui/popove
 import { cn } from "@/_components/generic/utils";
 
 interface ApiOption {
-    value: string;
+    value: string | number;
     text: string;
 }
 
@@ -21,12 +21,12 @@ interface DropdownOption {
 interface DropDownProps {
     apiUrl?: string;
     isStatic?: boolean;
-    staticOptions?: DropdownOption[];
+    staticOptions?: any[];
     widthClass?: string;
     placeholder?: string;
     inputName: string;
     onSelect?: (option: DropdownOption | null) => void;
-    defaultValue?: DropdownOption;
+    defaultValue?: any;
 }
 
 export default function DropDown({
@@ -43,20 +43,27 @@ export default function DropDown({
     const [open, setOpen] = useState(false);
     const [error, setError] = useState<string | null>(null);
     const [options, setOptions] = useState<DropdownOption[]>([]);
-    const [selectedValue, setSelectedValue] = useState<DropdownOption | null>(defaultValue || null);
     const [isLoading, setIsLoading] = useState(false);
+
+    const sanitizeOption = (opt: any): DropdownOption | null => {
+        if (!opt) return null;
+        return {
+            value: String(opt.value ?? ""),
+            label: String(opt.label ?? opt.text ?? ""),
+        };
+    }
+    const [selectedValue, setSelectedValue] = useState<DropdownOption | null>(defaultValue || null);
 
     useEffect(() => {
         setMounted(true)
         
         if (isStatic) {
-            setOptions(staticOptions);
+            const sanitizedStatic = staticOptions.map(opt => sanitizeOption(opt)).filter(Boolean) as DropdownOption[];
+            setOptions(sanitizedStatic);
         }
 
         if (defaultValue) {
-            setSelectedValue(defaultValue);
-
-            if (onSelect) onSelect(defaultValue);
+            setSelectedValue(sanitizeOption(defaultValue));
         }
     }, [isStatic, staticOptions, defaultValue]);
     
@@ -81,8 +88,8 @@ export default function DropDown({
             
             const apiOptions: ApiOption[] = await response.json();
 
-            const formatted =  apiOptions.map(option => ({
-                value: option.value,
+            const formatted: DropdownOption[] = apiOptions.map(option => ({
+                value: String(option.value),
                 label: option.text,
             }));
             setOptions(formatted)

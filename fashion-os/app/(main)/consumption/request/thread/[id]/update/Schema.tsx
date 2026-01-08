@@ -7,7 +7,8 @@ const rowSchema = z.object({
     StitchType: z.string().min(1, "Required"),
     Factor: z.number().min(1),
     ThreadType: z.string().min(1, "Required"),
-    Count: z.string().min(1, "Required"),
+    NeedleCount: z.string().optional(),
+    LooperCount: z.string().optional(),
     Consumption: z.number().min(1, "Required"),
 })
 

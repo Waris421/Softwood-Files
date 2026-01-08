@@ -1,10 +1,10 @@
 'use client';
 
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useRouter } from 'next/navigation';
 import { formSchema, FormValues } from "./Schema";
 import { zodResolver } from '@hookform/resolvers/zod';
-import { useForm, useFieldArray, Controller } from 'react-hook-form';
+import { useForm, useFieldArray, Controller, useWatch } from 'react-hook-form';
 import { Save, Plus, Minus, Loader2, CheckCircle, Shirt } from 'lucide-react';
 import { Button } from "@/_components/ui/button";
 import {AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle} from '@/_components/ui/alert-dialog';
@@ -15,6 +15,36 @@ import MessageBox from "@/_components/generic/MessageBox";
 interface FormProps {
     pk: number;
 }
+
+const stitchTypeData = {
+    'SNLS': {label: 'Single Needle Lock Stitch', factor: 2.5},
+    'DNLS': {label: 'Double Needle Lock Stitch', factor: 5},
+    'SNCS': {label: 'Single Needle Chain Stitch', factor: 6},
+    'DNCS': {label: 'Double Needle Chain Stitch', factor: 12},
+    'FOA': {label: 'Folder', factor: 12},
+    'WB': {label: 'Waist Band', factor: 7},
+    '3TOL': {label: 'Three Thread O/L', factor: 18},
+    '4TOL': {label: 'Four Thread O/L', factor: 20},
+    '5TOL': {label: 'Five Thread O/L', factor: 24},
+    'BT': {label: 'Bartack', factor: 9},
+    'BH': {label: 'BH', factor: 20},
+    'WELT': {label: 'Welt', factor: 6},
+    'CST': {label: 'CST', factor: 22},
+    'OTH': {label: 'Other', factor: 1},
+}
+
+const stitchTypes = Object.keys(stitchTypeData).map(key => ({
+    label: stitchTypeData[key as keyof typeof stitchTypeData].label,
+    value: key,
+}));
+
+const countTypes = [
+    {value: '203', label: '20/3'},
+    {value: '203E', label: '20/3 EPIC'},
+    {value: '202', label: '20/2'},
+    {value: '202E', label: '20/2 EPIC'},
+    {value: '204', label: '20/4'},
+]
 
 export default function ConsumptionForm({ pk }: FormProps){
     const { register, control, handleSubmit, reset, getValues, setValue, formState: { isSubmitting, errors } } = useForm<FormValues>({
@@ -34,40 +64,15 @@ export default function ConsumptionForm({ pk }: FormProps){
     } | null>(null);
     const router = useRouter();
 
+    const watchedItems = useWatch({
+        control,
+        name: "items",
+    });
+
     const { fields, append, remove, insert } = useFieldArray({
         control,
         name: "items"
     });
-
-    const stitchTypeData = {
-        'SNLS': {label: 'Single Needle Lock Stitch', factor: 2.5},
-        'DNLS': {label: 'Double Needle Lock Stitch', factor: 5},
-        'SNCS': {label: 'Single Needle Chain Stitch', factor: 6},
-        'DNCS': {label: 'Double Needle Chain Stitch', factor: 12},
-        'FOA': {label: 'Folder', factor: 12},
-        'WB': {label: 'Waist Band', factor: 7},
-        '3TOL': {label: 'Three Thread O/L', factor: 18},
-        '4TOL': {label: 'Four Thread O/L', factor: 20},
-        '5TOL': {label: 'Five Thread O/L', factor: 24},
-        'BT': {label: 'Bartack', factor: 9},
-        'BH': {label: 'BH', factor: 20},
-        'WELT': {label: 'Welt', factor: 6},
-        'CST': {label: 'CST', factor: 22},
-        'OTH': {label: 'Other', factor: 1},
-    }
-
-    const stitchTypes = Object.keys(stitchTypeData).map(key => ({
-        label: stitchTypeData[key as keyof typeof stitchTypeData].label,
-        value: key,
-    }));
-
-    const countTypes = [
-        {value: '203', label: '20/3'},
-        {value: '203E', label: '20/3 EPIC'},
-        {value: '202', label: '20/2'},
-        {value: '202E', label: '20/2 EPIC'},
-        {value: '204', label: '20/4'},
-    ]
 
     const emptyRow = {
         id: '',
@@ -76,7 +81,8 @@ export default function ConsumptionForm({ pk }: FormProps){
         StitchType: '',
         Factor: 1,
         ThreadType: '',
-        Count: '',
+        NeedleCount: '203',
+        LooperCount: '202',
         Consumption: 1,
     }
 
@@ -102,6 +108,40 @@ export default function ConsumptionForm({ pk }: FormProps){
 
         setIndexToDelete(null);
     };
+
+    const summary = useMemo(() => {
+        return (watchedItems || []).reduce((acc, item) => {
+            if (!item.ThreadType) return acc;
+
+            const threadLabel = threadOptions.find(opt => opt.value === String(item.ThreadType))?.label || "Unknown";
+            const consumption = parseFloat(String(item.Consumption)) || 0;
+            const frequency = parseFloat(String(item.Frequency)) || 1;
+            const factor = parseFloat(String(item.Factor)) || 1;
+            const totalLineConsumption = (consumption * frequency * factor)/100;
+
+            if (item.NeedleCount) {
+                const key = `${item.ThreadType}-${item.NeedleCount}`;
+                const needleCountLabel = countTypes.find(opt => opt.value === item.NeedleCount)?.label || item.NeedleCount;
+
+                if (!acc[key]) {
+                    acc[key] = { label: threadLabel, count: needleCountLabel, total: 0 };
+                }
+                acc[key].total += totalLineConsumption;
+            }
+
+            if (item.LooperCount) {
+                const key = `${item.ThreadType}-${item.LooperCount}`;
+                const looperCountLabel = countTypes.find(opt => opt.value === item.LooperCount)?.label || item.LooperCount;
+
+                if (!acc[key]) {
+                    acc[key] = { label: threadLabel, count: looperCountLabel, total: 0 };
+                }
+                acc[key].total += totalLineConsumption;
+            }
+
+            return acc;
+        }, {} as Record<string, { label: string; count: string; total: number }>);
+    }, [watchedItems, threadOptions]);
 
     const fetchData = async () => {
         const response = await fetch(`/api/consumption/thread/request/${pk}/update`);
@@ -129,7 +169,10 @@ export default function ConsumptionForm({ pk }: FormProps){
         }));
         setThreadOptions(threadTypes);
 
-        const addedData = data.addedData;
+        const addedData = data.addedData?.map((item: any) => ({
+            ...item,
+            ThreadType: item.ThreadType ? String(item.ThreadType) : '',
+        }));
 
         const styles = data.styles;
         setApplicableStyles(styles);
@@ -145,7 +188,7 @@ export default function ConsumptionForm({ pk }: FormProps){
 
     useEffect(() => {
         fetchData();
-    }, [reset]);
+    }, []);
 
     const onSubmitHandler = async (data: FormValues, isFinal: boolean) => {
         if (isFinal) setIsFinalizing(true);
@@ -188,21 +231,57 @@ export default function ConsumptionForm({ pk }: FormProps){
 
     return (
         <div className="w-full space-y-4">
-            {applicableStyles.length > 0 && (
-                <div className="mx-4 mt-4 p-4 bg-base-200 rounded-xl border border-base-300 flex flex-wrap items-center gap-3">
-                    <div className="flex flex-col mr-4">
-                        <span className="text-xs font-bold uppercase opacity-60">Applicable Styles</span>
-                    </div>
+            <div className="flex flex-col lg:flex-row gap-4 px-4 mt-4">
+                <div className="lg:w-3/4 p-4 bg-base-200 rounded-xl border border-base-300">
+                    <span className="text-xs font-bold uppercase opacity-60">Applicable Styles</span>
                     <div className="flex flex-wrap gap-2">
-                        {applicableStyles.map((item, idx) => (
-                            <div key={idx} className="badge badge-primary badge-outline gap-2 py-3 px-4 font-semibold">
-                                <Shirt className="w-5 h-5 text-primary" />
-                                {item.Style}
-                            </div>
-                        ))}
+                        {applicableStyles.length > 0 ? (
+                            applicableStyles.map((item, idx) => (
+                                <div key={idx} className="badge badge-primary badge-outline gap-2 py-3 px-4 font-semibold">
+                                    <Shirt className="w-5 h-5 text-primary" />
+                                    {item.Style}
+                                </div>
+                            ))
+                        ) : (
+                            <span className="text-sm opacity-50 italic">No styles loaded</span>
+                        )}
                     </div>
                 </div>
-            )}
+                <div className="lg:w-1/4 p-4 bg-base-200 rounded-xl border border-base-300">
+                    <span className="text-xs font-bold uppercase opacity-60 block mb-3">Summary</span>
+                    <div className="overflow-x-auto">
+                        <table className="table table-xs w-full">
+                            <thead>
+                                <tr>
+                                    <th className="p-1">Thread</th>
+                                    <th className="p-1 text-right">Mtr</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {Object.values(summary).length > 0 ? (
+                                    Object.values(summary).map((row, idx) => (
+                                        <tr key={idx} className="hover">
+                                            <td className="p-1 text-[11px]">
+                                                {row.label} {row.count}
+                                            </td>
+                                            <td className="p-1 text-right">
+                                                {row.total.toFixed(2)}
+                                            </td>
+                                        </tr>
+                                    ))
+                                ):(
+                                    <tr>
+                                        <td colSpan={2} className="text-center py-4 text-xs opacity-40 italic">
+                                            No data entered.
+                                        </td>
+                                    </tr>
+                                )}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+            
             <form className="space-y-4 p-4" autoComplete="off">
                 <div className="overflow-x-auto rounded-lg border border-base-300">
                     <table className="table w-full">
@@ -213,8 +292,9 @@ export default function ConsumptionForm({ pk }: FormProps){
                                 <th className="p-1 border-b text-center w-40">Stitch Type</th>
                                 <th className="p-1 border-b text-center w-25">Factor</th>
                                 <th className="p-1 border-b text-center w-40">Thread Type</th>
-                                <th className="p-1 border-b text-center w-40">Count</th>
-                                <th className="p-1 border-b text-center w-25">Cons. (mtr)</th>
+                                <th className="p-1 border-b text-center w-40">Needle</th>
+                                <th className="p-1 border-b text-center w-40">Looper</th>
+                                <th className="p-1 border-b text-center w-25">Length (cm)</th>
                                 <th className="p-1 border-b text-center w-40">Actions</th>
                             </tr>
                         </thead>
@@ -307,8 +387,8 @@ export default function ConsumptionForm({ pk }: FormProps){
                                             control={control}
                                             name={`items.${index}.ThreadType` as const}
                                             render={({field}) => {
-                                                const selectedOption = threadOptions.find(opt => opt.value === String(field.value));
-
+                                                const selectedOption = threadOptions.find(opt => opt.value === String(field.value))
+                                                                        || (field.value ? {label: "Loading...", value: String(field.value)} : null);
                                                 return (
                                                     <DropDown 
                                                         inputName={field.name}
@@ -328,7 +408,7 @@ export default function ConsumptionForm({ pk }: FormProps){
                                     <td className="p-1">
                                         <Controller 
                                             control={control}
-                                            name={`items.${index}.Count` as const}
+                                            name={`items.${index}.NeedleCount` as const}
                                             render={({field}) => {
                                                 const selectedOption = countTypes.find(opt => opt.value === field.value);
                                                 return (
@@ -344,8 +424,31 @@ export default function ConsumptionForm({ pk }: FormProps){
                                                 )
                                             }}
                                         />
-                                        {errors.items?.[index]?.Count && (
-                                            <p className="text-[10px] text-red-500 mt-1">{errors.items[index]?.Count?.message}</p>
+                                        {errors.items?.[index]?.NeedleCount && (
+                                            <p className="text-[10px] text-red-500 mt-1">{errors.items[index]?.NeedleCount?.message}</p>
+                                        )}
+                                    </td>
+                                    <td className="p-1">
+                                        <Controller 
+                                            control={control}
+                                            name={`items.${index}.LooperCount` as const}
+                                            render={({field}) => {
+                                                const selectedOption = countTypes.find(opt => opt.value === field.value);
+                                                return (
+                                                    <DropDown 
+                                                        inputName={field.name}
+                                                        defaultValue={selectedOption}
+                                                        placeholder="Select Count..."
+                                                        widthClass="w-40"
+                                                        isStatic={true}
+                                                        staticOptions={countTypes}
+                                                        onSelect={(option) => field.onChange(option ? option.value : '')}
+                                                    />
+                                                )
+                                            }}
+                                        />
+                                        {errors.items?.[index]?.LooperCount && (
+                                            <p className="text-[10px] text-red-500 mt-1">{errors.items[index]?.LooperCount?.message}</p>
                                         )}
                                     </td>
                                     <td className="p-1 w-25">
