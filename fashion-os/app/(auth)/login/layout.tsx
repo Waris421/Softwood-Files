@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { Schibsted_Grotesk, Martian_Mono } from "next/font/google";
 import "@/app/globals.css";
-import Aurora from "@/_components/Aurora/Aurora";
+import Aurora from "@/_components/background/Aurora";
 import { ThemeProvider } from "@/_components/generic/ThemeProvider";
 
 const schibstedGrotesk = Schibsted_Grotesk({

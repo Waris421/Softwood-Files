@@ -7,6 +7,7 @@ import { Button } from "@/_components/ui/button";
 import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from "@/_components/ui/command";
 import { Popover, PopoverContent, PopoverTrigger } from "@/_components/ui/popover";
 import { cn } from "@/_components/generic/utils";
+import { THEME } from "../constants/ui";
 
 interface ApiOption {
     value: string | number;
@@ -25,8 +26,10 @@ interface DropDownProps {
     widthClass?: string;
     placeholder?: string;
     inputName: string;
-    onSelect?: (option: DropdownOption | null) => void;
+    onSelect?: (option: DropdownOption | DropdownOption[] | null) => void;
     defaultValue?: any;
+    isMultiSelect?: boolean;
+    isRequired?: boolean;
 }
 
 export default function DropDown({
@@ -38,6 +41,8 @@ export default function DropDown({
     inputName,
     onSelect,
     defaultValue,
+    isMultiSelect = false,
+    isRequired = false,
 }: DropDownProps) {
     const [mounted, setMounted] = useState(false);
     const [open, setOpen] = useState(false);
@@ -52,7 +57,9 @@ export default function DropDown({
             label: String(opt.label ?? opt.text ?? ""),
         };
     }
-    const [selectedValue, setSelectedValue] = useState<DropdownOption | null>(defaultValue || null);
+    const [selectedValue, setSelectedValue] = useState<DropdownOption | DropdownOption[] | null>(
+        isMultiSelect ? (Array.isArray(defaultValue) ? defaultValue.map(sanitizeOption).filter(Boolean) : []) : (defaultValue || null)
+    );
 
     useEffect(() => {
         setMounted(true)
@@ -106,12 +113,63 @@ export default function DropDown({
         fetchOptions(value);
     }, 500);
 
+    const handleSelect = (option: DropdownOption) => {
+        if (isMultiSelect) {
+            const currentValues = Array.isArray(selectedValue) ? selectedValue : [];
+            const isExisting = currentValues.some((item) => item.value === option.value);
+
+            const newValue = isExisting
+                ? currentValues.filter((item) => item.value !== option.value)
+                : [...currentValues, option];
+
+            setSelectedValue(newValue);
+
+            if (onSelect) onSelect(newValue);
+        } else {
+            const newValue = (selectedValue as DropdownOption)?.value === option.value ? null : option;
+
+            setSelectedValue(newValue);
+            if (onSelect) onSelect(newValue);
+            setOpen(false);
+        }
+    }
+
     const handleClear = (e: MouseEvent | React.PointerEvent) => {
         e.preventDefault();
         e.stopPropagation();
-        setSelectedValue(null);
-        if (onSelect) onSelect(null);
+
+        const emptyValue = isMultiSelect ? [] : null;
+        
+        setSelectedValue(emptyValue);
+        if (onSelect) onSelect(emptyValue);
     };
+
+    // Helper to check if an option is selected
+    const isItemSelected = (value: string) => {
+        if (isMultiSelect && Array.isArray(selectedValue)) {
+            return selectedValue.some((item) => item.value === value);
+        }
+
+        return (selectedValue as DropdownOption)?.value === value;
+    }
+
+    //Helper to check if there is a selected value or not.
+    const isPlaceholderActive = () => {
+        if (isMultiSelect && Array.isArray(selectedValue)) {
+            return selectedValue.length === 0;
+        }
+        return !selectedValue;
+    };
+    
+    // Helper to get the display label
+    const getDisplayLabel = () => {
+        if (isMultiSelect && Array.isArray(selectedValue)) {
+            return selectedValue.length > 0 
+                ? `${selectedValue.length} selected` 
+                : placeholder;
+        }
+        return (selectedValue as DropdownOption)?.label || placeholder;
+    }
 
     if (!mounted) {
         return (
@@ -132,16 +190,18 @@ export default function DropDown({
                         variant="outline"
                         role="combobox"
                         aria-expanded={open}
-                        className="w-full justify-between bg-gray-200 dark:bg-gray-600"
+                        className={THEME.DropDown}
                     >
-                        <span className="truncate">
-                            {selectedValue ? selectedValue.label : placeholder}
+                        <span className={cn(
+                            "truncate",
+                            isPlaceholderActive() ? "text-muted-foreground" : ""
+                        )}>
+                            {getDisplayLabel()}
                         </span>
                         <div className="flex items-center ml-2 border-l pl-2 gap-1">
-                            {selectedValue && (
+                            {((isMultiSelect && Array.isArray(selectedValue) && selectedValue.length > 0) || (!isMultiSelect && selectedValue)) && (
                                 <span
                                     role="button"
-                                    tabIndex={0}
                                     onPointerDown={handleClear}
                                     className="p-0.5 hover:bg-secondary rounded-sm transition-colors cursor-pointer"
                                 >
@@ -152,7 +212,7 @@ export default function DropDown({
                         </div>
                     </Button>
                 </PopoverTrigger>
-                <PopoverContent className={cn("p-0", widthClass)}>
+                <PopoverContent className="p-0 w-(--radix-popover-trigger-width) min-w-max">
                     <Command shouldFilter={isStatic}>
                         <CommandInput 
                             placeholder="Type to search" 
@@ -180,19 +240,14 @@ export default function DropDown({
                             <CommandGroup>
                                 {options.map((option) => (
                                     <CommandItem
-                                    key={option.value ?? "null-identifier"}
+                                    key={option.value}
                                     value={`${option.label} ${option.value}`.toLowerCase()}
-                                    onSelect={() => {
-                                        const newValue = selectedValue?.value === option.value ? null : option;
-                                        setSelectedValue(newValue);
-                                        if (onSelect) onSelect(newValue);
-                                        setOpen(false);
-                                    }}
+                                    onSelect={() => handleSelect(option)}
                                     >
                                     <Check
                                         className={cn(
                                         "mr-2 h-4 w-4",
-                                        selectedValue?.value === option.value ? "opacity-100" : "opacity-0"
+                                        isItemSelected(option.value) ? "opacity-100" : "opacity-0"
                                         )}
                                     />
                                     {option.label}
@@ -203,7 +258,14 @@ export default function DropDown({
                     </Command>
                 </PopoverContent>
             </Popover>
-            <input type="hidden" name={inputName} value={selectedValue?.value ?? ""} readOnly/>
+            {/* Hidden Input For submitting value to backend */}
+            {isMultiSelect && Array.isArray(selectedValue) ? (
+                selectedValue.map((opt) => (
+                    <input key={opt.value} type="hidden" name={inputName} value={opt.value} />
+                ))
+            ) : (
+                <input type="hidden" name={inputName} required={isRequired} value={(selectedValue as DropdownOption)?.value ?? ""} />
+            )}
         </div>
     )
 }

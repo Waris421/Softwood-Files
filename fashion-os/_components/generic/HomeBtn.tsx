@@ -9,8 +9,8 @@ import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '../ui/
 
 const HomeButton = () => {
   const [isPending, startTransition] = useTransition();
-  const router = useRouter();
   const { registerAction } = useShortcuts();
+  const router = useRouter();
   
   const handleClick = () => {
     startTransition(() => {

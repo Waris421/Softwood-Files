@@ -47,11 +47,13 @@ const countTypes = [
 ]
 
 export default function ConsumptionForm({ pk }: FormProps){
+    //Load the form schema
     const { register, control, handleSubmit, reset, getValues, setValue, formState: { isSubmitting, errors } } = useForm<FormValues>({
         resolver: zodResolver(formSchema),
         defaultValues: { items: [] }
     });
 
+    //Component initialisations
     const [indexToDelete, setIndexToDelete] = useState<number | null>(null);
     const [threadOptions, setThreadOptions] = useState<{ label: string; value: string }[]>([]);
     const [applicableStyles, setApplicableStyles] = useState<{Style: string}[]>([]);
@@ -63,17 +65,16 @@ export default function ConsumptionForm({ pk }: FormProps){
         action?: () => void;
     } | null>(null);
     const router = useRouter();
-
     const watchedItems = useWatch({
         control,
         name: "items",
     });
-
     const { fields, append, remove, insert } = useFieldArray({
         control,
         name: "items"
     });
 
+    //Format for empty row
     const emptyRow = {
         id: '',
         Operation: '', 
@@ -86,10 +87,12 @@ export default function ConsumptionForm({ pk }: FormProps){
         Consumption: 1,
     }
 
+    //Adding empty row
     const addEmptyRow = (index: number) => {
         insert(index + 1, emptyRow);
     }
 
+    //Code for the remove click button
     const handleRemoveClick = (index: number) => {
         const currentRow = getValues(`items.${index}`);
         const hasData = Object.values(currentRow).some(val => val !== '' && val !== 1);
@@ -101,6 +104,7 @@ export default function ConsumptionForm({ pk }: FormProps){
         }
     };
 
+    //Code to delete the row
     const executeDelete = (index: number) => {
         remove(index);
 
@@ -109,6 +113,7 @@ export default function ConsumptionForm({ pk }: FormProps){
         setIndexToDelete(null);
     };
 
+    //The summary of consumption
     const summary = useMemo(() => {
         return (watchedItems || []).reduce((acc, item) => {
             if (!item.ThreadType) return acc;
@@ -143,6 +148,7 @@ export default function ConsumptionForm({ pk }: FormProps){
         }, {} as Record<string, { label: string; count: string; total: number }>);
     }, [watchedItems, threadOptions]);
 
+    //To fetch data from the backend api
     const fetchData = async () => {
         const response = await fetch(`/api/consumption/thread/request/${pk}/update`);
         if (!response.ok) {
@@ -185,11 +191,11 @@ export default function ConsumptionForm({ pk }: FormProps){
 
         return ;
     };
-
     useEffect(() => {
         fetchData();
     }, []);
 
+    //Handle the two submit buttons
     const onSubmitHandler = async (data: FormValues, isFinal: boolean) => {
         if (isFinal) setIsFinalizing(true);
 
@@ -220,17 +226,19 @@ export default function ConsumptionForm({ pk }: FormProps){
             }
         } catch (error: any) {
                 setMessageConfig({
-                show: true,
-                subject: "Error",
-                message: `Saving Failed: ${error.message || error}`
-            });
+                    show: true,
+                    subject: "Error",
+                    message: `Saving Failed: ${error.message || error}`
+                });
         } finally {
             setIsFinalizing(false);
         }
     }
 
+    //The actual html component
     return (
         <div className="w-full space-y-4">
+            {/* The styles and summary component */}
             <div className="flex flex-col lg:flex-row gap-4 px-4 mt-4">
                 <div className="lg:w-3/4 p-4 bg-base-200 rounded-xl border border-base-300">
                     <span className="text-xs font-bold uppercase opacity-60">Applicable Styles</span>
@@ -281,7 +289,9 @@ export default function ConsumptionForm({ pk }: FormProps){
                     </div>
                 </div>
             </div>
-            
+
+
+            {/* The consumption table form */}
             <form className="space-y-4 p-4" autoComplete="off">
                 <div className="overflow-x-auto rounded-lg border border-base-300">
                     <table className="table w-full">
@@ -355,12 +365,11 @@ export default function ConsumptionForm({ pk }: FormProps){
                                                         widthClass="w-40"
                                                         staticOptions={stitchTypes}
                                                         onSelect={(option) => {
-                                                            field.onChange(option ? option.value : '')
-
-                                                            const selectedValue = option ? option.value : '';
+                                                            const selectedValue = option as { value: string; label: string } | null;
+                                                            field.onChange(selectedValue ? selectedValue.value : '');
 
                                                             if (selectedValue) {
-                                                                const newFactor = stitchTypeData[selectedValue as keyof typeof stitchTypeData].factor;
+                                                                const newFactor = stitchTypeData[selectedValue as unknown as keyof typeof stitchTypeData].factor;
                                                                 setValue(`items.${index}.Factor`, newFactor);
                                                             }
                                                         }}
@@ -397,7 +406,10 @@ export default function ConsumptionForm({ pk }: FormProps){
                                                         widthClass="w-40"
                                                         isStatic={true}
                                                         staticOptions={threadOptions}
-                                                        onSelect={(option) => field.onChange(option ? option.value : '')}
+                                                        onSelect={(option) => {
+                                                            const selected = option as { value: string; label: string } | null;
+                                                            field.onChange(selected ? selected.value : '');
+                                                        }}
                                                     />
                                                 )}}
                                         />
@@ -419,7 +431,10 @@ export default function ConsumptionForm({ pk }: FormProps){
                                                         widthClass="w-40"
                                                         isStatic={true}
                                                         staticOptions={countTypes}
-                                                        onSelect={(option) => field.onChange(option ? option.value : '')}
+                                                        onSelect={(option) => {
+                                                            const selected = option as { value: string; label: string } | null;
+                                                            field.onChange(selected ? selected.value : '');
+                                                        }}
                                                     />
                                                 )
                                             }}
@@ -442,7 +457,10 @@ export default function ConsumptionForm({ pk }: FormProps){
                                                         widthClass="w-40"
                                                         isStatic={true}
                                                         staticOptions={countTypes}
-                                                        onSelect={(option) => field.onChange(option ? option.value : '')}
+                                                        onSelect={(option) => {
+                                                            const selected = option as { value: string; label: string } | null;
+                                                            field.onChange(selected ? selected.value : '');
+                                                        }}
                                                     />
                                                 )
                                             }}
@@ -524,7 +542,8 @@ export default function ConsumptionForm({ pk }: FormProps){
                     </Button>
                 </div>
             </form>
-
+            
+            {/* Any wanrning/message box */}
             {messageConfig?.show && (
                 <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4">
                     <MessageBox 
@@ -541,6 +560,7 @@ export default function ConsumptionForm({ pk }: FormProps){
                 </div>
             )}
 
+            {/* Alert componenet for when a user tries to delete a row that contains data */}
             <AlertDialog open={indexToDelete !== null} onOpenChange={() => setIndexToDelete(null)}>
                 <AlertDialogContent>
                     <AlertDialogHeader>

@@ -1,11 +1,12 @@
 export const THEME = {
-    ButtonBasic: 'btn btn-rounded w-full bg-linear-to-b from-blue-500 to-blue-700 dark-bg-linear-to-b',
+    ButtonBasic: 'btn rounded-lg bg-linear-to-b from-blue-500 to-blue-700 dark-bg-linear-to-b',
+    ButtonOutLine: 'btn btn-outline rounded-lg ',
 
-    TextInput: 'input border rounded-lg input-bordered w-full dark:bg-gray-800 dark:border-gray-700 dark:text-white',
-
-    ErrorAlert: 'alert alert-error mb-4',
-
+    TextInput: ' input w-full rounded-lg bg-gray-300 dark:bg-gray-800',
+    DropDown: 'w-full justify-between bg-gray-300 dark:bg-gray-800',
+    Slider: 'flex-1 w-full min-w-30 rounded-lg bg-gray-300 dark:bg-gray-800',
+    CheckBox: 'checkbox rounded-lg checkbox-lg bg-gray-300 dark:bg-gray-800',
+    
     HyperLink: 'label-text-alt link link-hover',
-
-    textInput: 'input input-bordered rounded-sm w-full text-center bg-gray-200 dark:bg-gray-600',
+    ErrorText: 'label-text-alt flex items-center gap-1 text-red-500',
 }

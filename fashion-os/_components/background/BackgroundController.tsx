@@ -2,7 +2,7 @@
 
 import { useTheme } from "next-themes";
 import { useEffect, useState } from "react";
-import Aurora from "../Aurora/Aurora";
+import LiquidEther from "./LiquidEther";
 
 export default function BackgroundController() {
     const { resolvedTheme } = useTheme();
@@ -16,7 +16,13 @@ export default function BackgroundController() {
 
     return (
         <>
-            {resolvedTheme === 'dark' ? (<Aurora/>): (<></>)}
+            {resolvedTheme === 'dark' ? (
+                <LiquidEther
+                    isViscous={true}
+                />
+            ): (
+                <LiquidEther/>
+            )}
         </>
     )
 }

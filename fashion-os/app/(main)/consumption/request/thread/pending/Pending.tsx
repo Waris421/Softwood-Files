@@ -1,11 +1,9 @@
 'use client';
 
 import { DataTable } from "@/_components/table/Table";
-import { ColumnDef } from "@tanstack/react-table";
+import { Cell, ColumnDef } from "@tanstack/react-table";
 import { useEffect, useState } from "react";
 import { useRouter } from 'next/navigation';
-import { Button } from "@/_components/ui/button";
-import { ArrowUpDown } from "lucide-react";
 
 type ConsRequest = {
     RequestNumber: number,
@@ -18,13 +16,7 @@ type ConsRequest = {
 const requestColumns: ColumnDef<ConsRequest>[] = [
     {
         accessorKey: 'RequestNumber',
-        header: ({ column }) => {
-            return (
-                <div onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}>
-                    Request Number
-                </div>
-            )
-        },
+        header: 'Request Number',
     },
     {
         accessorKey: 'FullName',
@@ -79,16 +71,9 @@ export default function PendingConsumptions() {
         fetchPendingRequests();
     }, []);
 
-    const onCellClickFunction = (value: number) => {
+    const onCellClickFunction = (cell: Cell<any, any>) => {
+        const value = cell.getValue();
         router.push(`/consumption/request/thread/${value}/update`);
-    }
-
-    if (error) {
-        return (
-            <div className="container mx-auto py-10 text-red-500 font-bold">
-                Error: {error}. Check with your administrator.
-            </div>
-        );
     }
 
     return (
@@ -96,10 +81,12 @@ export default function PendingConsumptions() {
             <DataTable 
                 columns={requestColumns}
                 data={data}
-                filterKey='Style'
+                searchFilters={['Style']}
+                dropdownFilters={['FullName']}
                 isLoading={loading}
                 clickableColumnId='RequestNumber'
                 onCellClick={onCellClickFunction}
+                error={error}
             />
         </div>
     )
