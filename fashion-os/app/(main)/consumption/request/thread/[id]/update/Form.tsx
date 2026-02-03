@@ -329,7 +329,7 @@ export default function ConsumptionForm({ pk }: FormProps){
                                     <td className="p-1 w-100">
                                         <input 
                                             {...register(`items.${index}.Operation` as const)} 
-                                            className={THEME.textInput}
+                                            className={THEME.TextInput}
                                             type="text"
                                             placeholder="Enter Operation Name..."
                                             maxLength={255}
@@ -341,7 +341,7 @@ export default function ConsumptionForm({ pk }: FormProps){
                                     <td className="p-1 w-25">
                                         <input 
                                             {...register(`items.${index}.Frequency` as const, { valueAsNumber: true })} 
-                                            className={THEME.textInput}
+                                            className={THEME.TextInput}
                                             type="number" step="any"
                                             placeholder="Enter Frequency..."
                                         />
@@ -369,7 +369,7 @@ export default function ConsumptionForm({ pk }: FormProps){
                                                             field.onChange(selectedValue ? selectedValue.value : '');
 
                                                             if (selectedValue) {
-                                                                const newFactor = stitchTypeData[selectedValue as unknown as keyof typeof stitchTypeData].factor;
+                                                                const newFactor = stitchTypeData[selectedValue.value as unknown as keyof typeof stitchTypeData].factor;
                                                                 setValue(`items.${index}.Factor`, newFactor);
                                                             }
                                                         }}
@@ -383,7 +383,7 @@ export default function ConsumptionForm({ pk }: FormProps){
                                     <td className="p-1 w-25">
                                         <input 
                                             {...register(`items.${index}.Factor` as const, { valueAsNumber: true })} 
-                                            className={THEME.textInput}
+                                            className={THEME.TextInput}
                                             type="number" step="any"
                                             placeholder="Enter Factor..."
                                         />
@@ -472,7 +472,7 @@ export default function ConsumptionForm({ pk }: FormProps){
                                     <td className="p-1 w-25">
                                         <input 
                                             {...register(`items.${index}.Consumption` as const, { valueAsNumber: true })} 
-                                            className={THEME.textInput}
+                                            className={THEME.TextInput}
                                             type="number" step="any"
                                             placeholder="Enter Consumption..."
                                         />

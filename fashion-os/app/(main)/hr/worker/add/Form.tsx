@@ -1,11 +1,14 @@
 'use client';
 
-import { UserPlus, UserCheck, Check, AlertCircle, Loader2 } from 'lucide-react';
+import { UserPlus, UserCheck, Check, Loader2 } from 'lucide-react';
 import React, { useEffect, useState } from 'react';
 import Dropdown from '@/_components/Dropdown/Dropdown';
-import { THEME } from '@/_components/constants/ui';
-import MessageBox from '@/_components/generic/MessageBox';
 import DatePicker from '@/_components/Datepicker/Datepicker';
+import MessageBox from '@/_components/generic/MessageBox';
+import { FormField } from '@/_components/generic/FormItems';
+import { THEME } from '@/_components/constants/ui';
+import { useRouter } from 'next/navigation';
+
 
 //Schema of the form
 type FormSchema = {
@@ -19,6 +22,7 @@ type FormSchema = {
     CreateAccount: boolean;
     Username: string;
     Email: string;
+    CNIC: string;
 }
 
 //data type of validation schema
@@ -40,38 +44,17 @@ const VALIDATION_SCHEMA: ValidationSchemaType= {
     }
 }
 
-//Helper function to generate an error element
-const ErrorLabel = ({ message }: { message?: string }) => {
-    if (!message) return null;
-    return (
-        <label className="label py-1">
-            <span className={THEME.ErrorText}>
-                <AlertCircle size={14} /> {message}
-            </span>
-        </label>
-    )
-}
-
-//Helper function to generate a form field
-const FormField = ({ label, error, required, children }: any) => (
-    <div className="form-control w-full">
-        <label className="label font-semibold text-sm">
-            {label}{required && <span className="text-error ml-1">*</span>}
-        </label>
-        {children}
-        <ErrorLabel message={error} />
-    </div>
-);
-
 export default function WorkerAddForm(){
     const [formData, setFormData] = useState({
         Name: '', FatherSpouse: '',Department: '', SubDepartment: '', Manager: '',
         DateOfBirth: '', Gender: '', CreateAccount: false, Username: '', Email: '',
+        CNIC: ''
     });
     const [errors, setErrors] = useState<Record<string, string>>({});
     const [isLoading, setIsLoading] = useState(true);
     const [messageConfig, setMessageConfig] = useState<{ show: boolean; subject: string; message: string; action?: () => void; } | null>(null);
     const [options, setOptions] = useState({ departments: [], managers: [] });
+    const router = useRouter();
     
     useEffect(() => {
         const fetchData = async () => {
@@ -95,6 +78,20 @@ export default function WorkerAddForm(){
         fetchData();
     }, []);
 
+    //Helper function to format the CNIC in a readable format
+    const formatCNIC = (val: string) => {
+        //Remove non-digits
+        const digits = val.replace(/\D/g, '');
+        
+        if (digits.length <= 5) {
+            return digits;
+        } else if (digits.length <= 12){
+            return `${digits.slice(0, 5)}-${digits.slice(5)}`;
+        } else {
+            return `${digits.slice(0, 5)}-${digits.slice(5, 12)}-${digits.slice(12, 13)}`;
+        }
+    }
+
     //Helper function that triggers when user types something
     const handleInputChange = (field: keyof FormSchema, value: any) => {
         //Update the data in the form object
@@ -108,6 +105,15 @@ export default function WorkerAddForm(){
                 return newErrors;
             });
         }
+    }
+
+    //Helper to calculate the latest availabe dates
+    function calculateLegalAge() {
+        const eighteenYearsAgo = new Date();
+        eighteenYearsAgo.setFullYear(eighteenYearsAgo.getFullYear() - 18);
+
+        console.log(eighteenYearsAgo);
+        return eighteenYearsAgo;
     }
     
     //Check the form for errors. Return true if there is an error
@@ -152,7 +158,18 @@ export default function WorkerAddForm(){
             return ;
         }
 
-        console.log(response);
+        const employeeData = await response.json();
+        const employeeCode = employeeData['EmployeeCode']
+        if (employeeCode) {
+            router.push(`/hr/worker/${employeeCode}/edit`);
+        } else {
+            setMessageConfig({
+                show: true,
+                subject: "Error",
+                message: `Unknown error. Check with your admin`
+            });
+            return ;
+        }
     };
 
     if (isLoading) return (
@@ -169,6 +186,7 @@ export default function WorkerAddForm(){
                 <UserPlus className="text-primary w-6 h-6" />
                 <h2 className="text-2xl font-bold">Add New Employee</h2>
             </div>
+            
             <form onSubmit={handleSubmit} className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 {/* Name */}
                 <FormField label="Name" error={errors.Name} required>
@@ -183,7 +201,7 @@ export default function WorkerAddForm(){
                 {/* Date of Birth */}
                 <FormField label="Date of Birth" error={errors.DateOfBirth} required>
                     <DatePicker inputName='DateOfBirth' value={formData.DateOfBirth} required={true}
-                        disabledDates={(date) => date > new Date()} onChange={(val) => handleInputChange('DateOfBirth', val)} />
+                        disabledDates={(date) => date > calculateLegalAge()} onChange={(val) => handleInputChange('DateOfBirth', val)} />
                 </FormField>
                 
                 {/* Department */}
@@ -209,6 +227,16 @@ export default function WorkerAddForm(){
                     <Dropdown inputName='Gender' placeholder="Select option" isStatic widthClass="w-full"
                         staticOptions={[{ label: 'Male', value: 'Male' }, { label: 'Female', value: 'Female' }]}
                         onSelect={(val: any) => handleInputChange('Gender', val?.value)} />
+                </FormField>
+
+                {/* CNIC Number */}
+                <FormField label="CNIC" error={errors.CNIC}>
+                    <input type='text' className={THEME.TextInput} value={formData.CNIC} placeholder='XXXXX-XXXXXXX-X'
+                        maxLength={15}
+                        onChange={(e) => {
+                            const formatted = formatCNIC(e.target.value);
+                            handleInputChange('CNIC', formatted)
+                        }}/>
                 </FormField>
 
                 {/* --- Is user account needed? --- */}

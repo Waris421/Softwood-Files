@@ -1,7 +1,6 @@
 import Image from "next/image";
 import Link from "next/link";
 import {BarChart3, CalendarDays, Factory, ShieldCheck, ShoppingCart, Wallet, BriefcaseBusiness} from "lucide-react";
-
 import Marketing from "@/public/Marketing.png";
 import Planning from "@/public/Planning.png";
 import Procurement from "@/public/Procurement.png";

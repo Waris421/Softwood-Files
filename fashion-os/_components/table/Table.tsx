@@ -1,14 +1,16 @@
 'use client';
 
 import * as React from "react"
+import { useReactToPrint } from "react-to-print";
 import { Cell, ColumnDef, ColumnFiltersState, flexRender, getCoreRowModel, getFilteredRowModel, getPaginationRowModel, getSortedRowModel, SortingState, useReactTable } from "@tanstack/react-table";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "../ui/table";
 import { Button } from "../ui/button";
-import { ChevronLeft, ChevronRight, ChevronsLeft, ChevronsRight, ArrowUpDown, Inbox, ChevronUp, ChevronDown, AlertCircle} from "lucide-react";
+import { ChevronLeft, ChevronRight, ChevronsLeft, ChevronsRight, ArrowUpDown, Inbox, ChevronUp, ChevronDown, AlertCircle, Printer} from "lucide-react";
 import { THEME } from "../constants/ui";
 import { Skeleton } from "../ui/skeleton";
 import Dropdown from "../Dropdown/Dropdown";
 import { Slider } from "../ui/slider";
+import { PrintTable } from "../Print/Table";
 
 //Paramters for the dropdown table
 interface DataTableProps<TData, TValue> {
@@ -29,6 +31,7 @@ export function DataTable<TData, TValue> ({
     //Initialisations
     const [sorting, setSorting] = React.useState<SortingState>([]);
     const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>([]);
+    const componentRef = React.useRef<HTMLDivElement>(null);
     
     const sliderBounds = React.useMemo(() => {
         const bounds: Record<string, { min: number; max: number }> = {};
@@ -86,6 +89,11 @@ export function DataTable<TData, TValue> ({
         return typeof header === "string" ? header : columnId;
     }
 
+    const handlePrint = useReactToPrint({
+        contentRef: componentRef,
+        documentTitle: "Stock_Report",
+    });
+
     //get the options for each drop down based on the data in those cols
     const dropDownOptions = React.useMemo(() => {
         const optionsMap: Record<string, string[]> = {};
@@ -101,6 +109,8 @@ export function DataTable<TData, TValue> ({
         
         return optionsMap
     }, [data, dropdownFilters]);
+    
+    const rowsToPrint = table.getSortedRowModel().rows;
     
     //Table HTML element
     return (
@@ -183,6 +193,16 @@ export function DataTable<TData, TValue> ({
                         </div>
                     )
                 })}
+
+                {/* Print Button */}
+                <Button
+                    className="btn-primary btn-sm md:btn-md gap-2 cursor-pointer"
+                    variant="outline"
+                    onClick={handlePrint}
+                >
+                    <Printer className="h-4 w-4" />
+                    <span className="hidden md:inline">Print</span>
+                </Button>
             </div>
 
             {/*The main table*/}
@@ -325,6 +345,16 @@ export function DataTable<TData, TValue> ({
                     </div>
                 </div>
             )}
+
+            {/* Print View */}
+            <div className="hidden">
+                <PrintTable 
+                    ref={componentRef} 
+                    rows={rowsToPrint} 
+                    columns={columns} 
+                    pageHeader="Stock Report"
+                />
+            </div>
         </div>
     )
 }
