@@ -39,12 +39,12 @@ export async function POST(request: NextRequest) {
     const requestBody = await request.json();
 
     const authToken = request.cookies.get(AUTH_COOKIE_NAME);
-        if (!authToken) {
-            return NextResponse.json(
-                { error: 'Unauthorized' }, 
-                { status: 401 }
-            );
-        }
+    if (!authToken) {
+        return NextResponse.json(
+            { error: 'Unauthorized' }, 
+            { status: 401 }
+        );
+    }
     
     const backendResponse = await fetch(URL, {
         method: 'POST',

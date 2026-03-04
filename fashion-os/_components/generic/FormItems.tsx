@@ -1,7 +1,6 @@
 import { AlertCircle } from "lucide-react";
 import { THEME } from "../constants/ui";
 
-
 //Helper function to generate an error element on an input
 const ErrorLabel = ({ message }: { message?: string }) => {
     if (!message) return null;

@@ -19,8 +19,8 @@ type WorkerList = {
 }
 
 const listColumns: ColumnDef<WorkerList>[] = [
-    {accessorKey: 'Code', header: 'Code'},
-    {accessorKey: 'Name', header: 'Name'},
+    {accessorKey: 'id', header: 'Code'},
+    {accessorKey: 'WorkerName', header: 'Name'},
     {accessorKey: 'Department', header: 'Department'},
     {accessorKey: 'Manager', header: 'Manager'},
     {accessorKey: 'Age', header: 'Age'},
@@ -37,11 +37,14 @@ export default function WorkerList() {
     const router = useRouter()
 
     useEffect(() => {
+        const controller = new AbortController();
+        const signal = controller.signal;
+
         const fetchWorkers = async () => {
             try {
                 setLoading(true);
 
-                const response = await fetch('/api/hr/workers');
+                const response = await fetch('/api/hr/workers', { signal });
                 if (!response.ok) {
                     const errorData = await response.json();
                     throw new Error(errorData.details?.message || "Failed to fetch workers");
@@ -51,6 +54,7 @@ export default function WorkerList() {
 
                 setData(workers)
             } catch (err: any) {
+                if (err.name === 'AbortError') return;
                 setError(err.message);
             } finally {
                 setLoading(false);
@@ -58,6 +62,8 @@ export default function WorkerList() {
         }
 
         fetchWorkers();
+
+        return () => controller.abort();
     }, []);
     
     const handleAddWorker = () => {
@@ -81,7 +87,7 @@ export default function WorkerList() {
     }
 
     const handleWorkerUploader = () => {
-        console.log('I am clicked');
+        router.push('/hr/worker/bulk-add');
     }
 
     return (
@@ -147,8 +153,9 @@ export default function WorkerList() {
                 isLoading={loading}
                 error={error}
                 dropdownFilters={['Department']}
-                searchFilters={['Code', 'Name']}
+                searchFilters={['id', 'WorkerName']}
                 sliderFilters={['Age', 'JobDuration']}
+                showPrint={false}
             />
         </div>
     )

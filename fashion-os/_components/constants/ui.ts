@@ -1,6 +1,20 @@
 export const THEME = {
-    ButtonBasic: 'btn rounded-lg bg-linear-to-b from-blue-500 to-blue-700 dark-bg-linear-to-b',
-    ButtonOutLine: 'btn btn-outline rounded-lg ',
+    ButtonBasic: `
+        btn rounded-lg border-none text-white shadow-md 
+        bg-linear-to-b from-indigo-500 to-slate-700 
+        hover:from-indigo-600 hover:to-slate-900 
+        dark:from-indigo-600 dark:to-slate-900 dark:hover:from-indigo-500 dark:hover:to-black
+    `,
+    ButtonSecondary: `
+        btn rounded-lg border-none bg-indigo-50 text-indigo-900 hover:bg-indigo-100
+        dark:bg-slate-800 dark:text-indigo-200 dark:hover:bg-slate-700
+    `,
+
+    ButtonOutLine: `
+        btn btn-outline rounded-lg border-slate-300 text-slate-700
+        hover:bg-slate-100 hover:border-slate-400 dark:border-slate-700
+        dark:text-slate-300 dark:hover:bg-slate-800
+    `,
 
     TextInput: ' input w-full rounded-lg bg-gray-300 dark:bg-gray-800',
     DropDown: 'w-full justify-between bg-gray-300 dark:bg-gray-800',

@@ -2,10 +2,11 @@
 
 import * as React from "react"
 import { useReactToPrint } from "react-to-print";
-import { Cell, ColumnDef, ColumnFiltersState, flexRender, getCoreRowModel, getFilteredRowModel, getPaginationRowModel, getSortedRowModel, SortingState, useReactTable } from "@tanstack/react-table";
+import * as XLSX from "xlsx";
+import { Cell, ColumnDef, ColumnFiltersState, FilterFn, flexRender, getCoreRowModel, getFilteredRowModel, getPaginationRowModel, getSortedRowModel, SortingState, useReactTable } from "@tanstack/react-table";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "../ui/table";
 import { Button } from "../ui/button";
-import { ChevronLeft, ChevronRight, ChevronsLeft, ChevronsRight, ArrowUpDown, Inbox, ChevronUp, ChevronDown, AlertCircle, Printer} from "lucide-react";
+import { ChevronLeft, ChevronRight, ChevronsLeft, ChevronsRight, ArrowUpDown, Inbox, ChevronUp, ChevronDown, AlertCircle, Printer, Download} from "lucide-react";
 import { THEME } from "../constants/ui";
 import { Skeleton } from "../ui/skeleton";
 import Dropdown from "../Dropdown/Dropdown";
@@ -14,6 +15,7 @@ import { PrintTable } from "../Print/Table";
 
 //Paramters for the dropdown table
 interface DataTableProps<TData, TValue> {
+    title?: string,
     columns: ColumnDef<TData, TValue>[]
     data: TData[]
     searchFilters?: string[],
@@ -22,11 +24,14 @@ interface DataTableProps<TData, TValue> {
     isLoading?: boolean,
     onCellClick?: (cell: Cell<TData, TValue>, e?: React.MouseEvent) => void,
     clickableColumnId?: string,
+    getRowClassName?: (row: TData) => string;
     error?: string | null,
+    showPrint?: boolean,
+    showDownload?: boolean,
 }
 
 export function DataTable<TData, TValue> ({
-    columns, data, searchFilters, dropdownFilters, sliderFilters, isLoading, onCellClick, clickableColumnId, error,
+    title, columns, data, searchFilters, dropdownFilters, sliderFilters, isLoading, onCellClick, clickableColumnId, error, showPrint=true, showDownload=true, getRowClassName,
 }: DataTableProps<TData, TValue> ) {
     //Initialisations
     const [sorting, setSorting] = React.useState<SortingState>([]);
@@ -51,9 +56,21 @@ export function DataTable<TData, TValue> ({
             return bounds
     }, [data, sliderFilters]);
 
+    //Helper function to filter rows irrespective of data type or text case
+    const fuzzyFilterFn: FilterFn<any> = (row, columnId, filterValue) => {
+        const rowValue = row.getValue(columnId);
+        if (rowValue == null) return false;
+
+        return String(rowValue).toLowerCase().includes(String(filterValue).toLowerCase());
+    };
+    
+    //Table object
     const table = useReactTable({
         data,
         columns,
+        defaultColumn: {
+            filterFn: fuzzyFilterFn, 
+        },
         getCoreRowModel: getCoreRowModel(),
         getPaginationRowModel: getPaginationRowModel(),
         onSortingChange: setSorting,
@@ -89,6 +106,25 @@ export function DataTable<TData, TValue> ({
         return typeof header === "string" ? header : columnId;
     }
 
+    //Download the filtered data
+    const handleDownload = () => {
+        const rows = table.getFilteredRowModel().rows.map((row) => {
+            const rowData: Record<string, any> = {};
+            row.getVisibleCells().forEach((cell) => {
+                const header = cell.column.columnDef.header;
+                const key = typeof header === "string" ? header : cell.column.id;
+                rowData[key] = cell.getValue();
+            });
+            return rowData;
+        });
+        const worksheet = XLSX.utils.json_to_sheet(rows);
+        const workbook = XLSX.utils.book_new();
+        XLSX.utils.book_append_sheet(workbook, worksheet, title?.replace(/\s+/g, '') || 'Data');
+        
+        XLSX.writeFile(workbook, `${title?.replace(/\s+/g, '') || 'Export'}.xlsx`)
+    }
+
+    //Print the filtered data
     const handlePrint = useReactToPrint({
         contentRef: componentRef,
         documentTitle: "Stock_Report",
@@ -109,12 +145,29 @@ export function DataTable<TData, TValue> ({
         
         return optionsMap
     }, [data, dropdownFilters]);
+
+    //Options for the go to page dropdown
+    const pageOptions = React.useMemo(() => {
+        return Array.from({ length: table.getPageCount() }, (_, i) => ({
+            label: `Page ${i + 1}`,
+            value: String(i),
+        }));
+    }, [table.getPageCount()]);
     
     const rowsToPrint = table.getSortedRowModel().rows;
     
-    //Table HTML element
+    //The HTML element
     return (
         <div className="space-y-2">
+            {/* Optional Title */}
+            {title && (
+                <div className="flex justify-center w-full py-2">
+                    <h2 className="text-xl md:text-2xl font-bold text-foreground tracking-tight">
+                        {title}
+                    </h2>
+                </div>
+            )}
+            
             {/*Table filters*/}
             <div className="flex flex-nowrap items-center gap-2 w-full mb-4">
                 
@@ -194,15 +247,29 @@ export function DataTable<TData, TValue> ({
                     )
                 })}
 
-                {/* Print Button */}
-                <Button
-                    className="btn-primary btn-sm md:btn-md gap-2 cursor-pointer"
-                    variant="outline"
-                    onClick={handlePrint}
-                >
-                    <Printer className="h-4 w-4" />
-                    <span className="hidden md:inline">Print</span>
-                </Button>
+                {/* Print and download buttons */}
+                <div className="flex items-center gap-2 ml-auto">
+                    {showDownload && (
+                        <Button
+                            className="btn-primary btn-sm md:btn-md gap-2 cursor-pointer"
+                            variant="outline"
+                            onClick={handleDownload}
+                        >
+                            <Download className="h-4 w-4" />
+                            <span className="hidden md:inline">Download</span>
+                        </Button>
+                    )}
+                    {showPrint && (
+                        <Button
+                            className="btn-primary btn-sm md:btn-md gap-2 cursor-pointer"
+                            variant="outline"
+                            onClick={handlePrint}
+                        >
+                            <Printer className="h-4 w-4" />
+                            <span className="hidden md:inline">Print</span>
+                        </Button>
+                    )}
+                </div>
             </div>
 
             {/*The main table*/}
@@ -255,30 +322,33 @@ export function DataTable<TData, TValue> ({
                                 </TableCell>
                             </TableRow>
                         ) : table.getRowModel().rows?.length ? (
-                            table.getRowModel().rows.map((row) => (
-                                <TableRow key={row.id} className="hover:bg-muted/50 transition-colors">
-                                    {row.getVisibleCells().map((cell) => {
-                                        const isClickable = cell.column.id === clickableColumnId;
-                                        return (
-                                            <TableCell 
-                                                key={cell.id}
-                                                tabIndex={isClickable ? 0 : -1}
-                                                onClick={(e) => {
-                                                    if (isClickable) {
-                                                        e.currentTarget.focus();
-                                                        onCellClick?.(cell, e);
-                                                    }
-                                                }}
-                                                className={`p-4 align-middle text-center wrap-break-word whitespace-normal
-                                                    ${isClickable ? `text-blue-600 ${THEME.HyperLink}`  : "text-foreground/80"}
-                                                `}
-                                            >
-                                                {flexRender(cell.column.columnDef.cell, cell.getContext())}
-                                            </TableCell>
-                                        );
-                                    })}
-                                </TableRow>
-                            ))
+                            table.getRowModel().rows.map((row) => {
+                                const customClasses = getRowClassName ? getRowClassName(row.original) : "";
+                                return (
+                                    <TableRow key={row.id} className={`hover:bg-muted/50 transition-colors ${customClasses}`}>
+                                        {row.getVisibleCells().map((cell) => {
+                                            const isClickable = cell.column.id === clickableColumnId;
+                                            return (
+                                                <TableCell 
+                                                    key={cell.id}
+                                                    tabIndex={isClickable ? 0 : -1}
+                                                    onClick={(e) => {
+                                                        if (isClickable) {
+                                                            e.currentTarget.focus();
+                                                            onCellClick?.(cell, e);
+                                                        }
+                                                    }}
+                                                    className={`p-4 align-middle text-center wrap-break-word whitespace-normal
+                                                        ${isClickable ? `text-blue-600 ${THEME.HyperLink}`  : "text-foreground/80"}
+                                                    `}
+                                                >
+                                                    {flexRender(cell.column.columnDef.cell, cell.getContext())}
+                                                </TableCell>
+                                            );
+                                        })}
+                                    </TableRow>
+                                )
+                            })
                         ) : (
                             <TableRow>
                                 <TableCell colSpan={columns.length} className="p-4 align-middle text-center">
@@ -318,8 +388,29 @@ export function DataTable<TData, TValue> ({
                         </Button>
 
                         {/* Page Indicator */}
-                        <div className="flex w-25 items-center justify-center text-sm font-medium">
-                            Page {table.getState().pagination.pageIndex + 1} of {table.getPageCount()}
+                        <div className="flex items-center gap-2 mx-2">
+                            <span className="text-sm font-medium whitespace-nowrap">
+                                Page {table.getState().pagination.pageIndex + 1} of {table.getPageCount()}
+                            </span>
+
+                            <div className="w-32">
+                                <Dropdown 
+                                    inputName="page-selector"
+                                    placeholder="Go to..."
+                                    isStatic={true}
+                                    staticOptions={pageOptions}
+                                    widthClass="w-full"
+                                    defaultValue={{
+                                        label: `Page ${table.getState().pagination.pageIndex + 1}`,
+                                        value: String(table.getState().pagination.pageIndex),
+                                    }}
+                                    onSelect={(selected) => {
+                                        if (selected && !Array.isArray(selected)) {
+                                            table.setPageIndex(Number(selected.value));
+                                        }
+                                    }}
+                                />
+                            </div>
                         </div>
                         <div className="flex items-center space-x-2">
                             {/* Next Page */}
@@ -352,7 +443,7 @@ export function DataTable<TData, TValue> ({
                     ref={componentRef} 
                     rows={rowsToPrint} 
                     columns={columns} 
-                    pageHeader="Stock Report"
+                    pageHeader={title}
                 />
             </div>
         </div>

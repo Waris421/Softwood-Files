@@ -108,6 +108,7 @@ export default function StockReport () {
         <div className="container mx-auto py-10 relative">
             {/* The main data table */}
             <DataTable 
+                title= 'Raw Material Stock Report'
                 columns={reportColumns}
                 data={data}
                 isLoading={loading}
