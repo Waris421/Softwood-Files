@@ -8,7 +8,7 @@ import { useForm, useFieldArray, Controller, useWatch } from 'react-hook-form';
 import { Save, Plus, Minus, Loader2, CheckCircle, Shirt } from 'lucide-react';
 import { Button } from "@/_components/ui/button";
 import {AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle} from '@/_components/ui/alert-dialog';
-import DropDown from "@/_components/Dropdown/Dropdown";
+import { SingleDropdown } from "@/_components/Dropdown/Dropdown";
 import { THEME } from "@/_components/constants/ui";
 import MessageBox from "@/_components/generic/MessageBox";
 
@@ -357,14 +357,14 @@ export default function ConsumptionForm({ pk }: FormProps){
                                                 const selectedOption = stitchTypes.find(opt => opt.value === field.value);
                                                 
                                                 return (
-                                                    <DropDown 
+                                                    <SingleDropdown 
                                                         inputName={field.name}
                                                         defaultValue={selectedOption}
                                                         placeholder="Select Type..."
                                                         isStatic={true}
                                                         widthClass="w-40"
                                                         staticOptions={stitchTypes}
-                                                        onSelect={(option) => {
+                                                        onSelect={(option: { value: string; label: string; } | null) => {
                                                             const selectedValue = option as { value: string; label: string } | null;
                                                             field.onChange(selectedValue ? selectedValue.value : '');
 
@@ -399,14 +399,14 @@ export default function ConsumptionForm({ pk }: FormProps){
                                                 const selectedOption = threadOptions.find(opt => opt.value === String(field.value))
                                                                         || (field.value ? {label: "Loading...", value: String(field.value)} : null);
                                                 return (
-                                                    <DropDown 
+                                                    <SingleDropdown 
                                                         inputName={field.name}
                                                         defaultValue={selectedOption}
                                                         placeholder="Select Type..."
                                                         widthClass="w-40"
                                                         isStatic={true}
                                                         staticOptions={threadOptions}
-                                                        onSelect={(option) => {
+                                                        onSelect={(option: { value: string; label: string; } | null) => {
                                                             const selected = option as { value: string; label: string } | null;
                                                             field.onChange(selected ? selected.value : '');
                                                         }}
@@ -424,14 +424,14 @@ export default function ConsumptionForm({ pk }: FormProps){
                                             render={({field}) => {
                                                 const selectedOption = countTypes.find(opt => opt.value === field.value);
                                                 return (
-                                                    <DropDown 
+                                                    <SingleDropdown 
                                                         inputName={field.name}
                                                         defaultValue={selectedOption}
                                                         placeholder="Select Count..."
                                                         widthClass="w-40"
                                                         isStatic={true}
                                                         staticOptions={countTypes}
-                                                        onSelect={(option) => {
+                                                        onSelect={(option: { value: string; label: string; } | null) => {
                                                             const selected = option as { value: string; label: string } | null;
                                                             field.onChange(selected ? selected.value : '');
                                                         }}
@@ -450,14 +450,14 @@ export default function ConsumptionForm({ pk }: FormProps){
                                             render={({field}) => {
                                                 const selectedOption = countTypes.find(opt => opt.value === field.value);
                                                 return (
-                                                    <DropDown 
+                                                    <SingleDropdown 
                                                         inputName={field.name}
                                                         defaultValue={selectedOption}
                                                         placeholder="Select Count..."
                                                         widthClass="w-40"
                                                         isStatic={true}
                                                         staticOptions={countTypes}
-                                                        onSelect={(option) => {
+                                                        onSelect={(option: { value: string; label: string; } | null) => {
                                                             const selected = option as { value: string; label: string } | null;
                                                             field.onChange(selected ? selected.value : '');
                                                         }}

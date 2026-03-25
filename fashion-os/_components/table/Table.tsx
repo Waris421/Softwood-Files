@@ -9,7 +9,7 @@ import { Button } from "../ui/button";
 import { ChevronLeft, ChevronRight, ChevronsLeft, ChevronsRight, ArrowUpDown, Inbox, ChevronUp, ChevronDown, AlertCircle, Printer, Download} from "lucide-react";
 import { THEME } from "../constants/ui";
 import { Skeleton } from "../ui/skeleton";
-import Dropdown from "../Dropdown/Dropdown";
+import { SingleDropdown } from "../Dropdown/Dropdown";
 import { Slider } from "../ui/slider";
 import { PrintTable } from "../Print/Table";
 
@@ -198,7 +198,7 @@ export function DataTable<TData, TValue> ({
                     
                     return (
                         <div key={columnId} className="flex-1 min-w-30">
-                            <Dropdown 
+                            <SingleDropdown 
                                 inputName={`filter-${columnId}`}
                                 placeholder={`Filter ${getColumnHeaderFromId(columnId)}`}
                                 isStatic={true}
@@ -394,7 +394,7 @@ export function DataTable<TData, TValue> ({
                             </span>
 
                             <div className="w-32">
-                                <Dropdown 
+                                <SingleDropdown 
                                     inputName="page-selector"
                                     placeholder="Go to..."
                                     isStatic={true}
@@ -404,7 +404,7 @@ export function DataTable<TData, TValue> ({
                                         label: `Page ${table.getState().pagination.pageIndex + 1}`,
                                         value: String(table.getState().pagination.pageIndex),
                                     }}
-                                    onSelect={(selected) => {
+                                    onSelect={(selected: { value: any; }) => {
                                         if (selected && !Array.isArray(selected)) {
                                             table.setPageIndex(Number(selected.value));
                                         }

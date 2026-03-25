@@ -1,11 +1,12 @@
 'use client';
 
 import { DataTable } from "@/_components/table/Table";
-import { ColumnDef } from "@tanstack/react-table";
+import { Cell, ColumnDef } from "@tanstack/react-table";
 import { useEffect, useState } from "react";
 import { UserPlus, Files, Clock3, Building2, CalendarX, Plane } from "lucide-react";
 import { THEME } from "@/_components/constants/ui";
 import { useRouter } from "next/navigation";
+import Link from "next/link";
 
 type WorkerList = {
     Code: number,
@@ -66,83 +67,46 @@ export default function WorkerList() {
         return () => controller.abort();
     }, []);
     
-    const handleAddWorker = () => {
-        router.push('/hr/worker/add');
-    }
-
-    const handleShiftDefine = () => {
-        console.log('I am clicked');
-    }
-
-    const handleHolidayDefine = () => {
-        console.log('I am clicked');
-    }
-
-    const handleSaturdayDefine = () => {
-        console.log('I am clicked');
-    }
-
-    const handleOfficeDefine = () => {
-        console.log('I am clicked');
-    }
-
-    const handleWorkerUploader = () => {
-        router.push('/hr/worker/bulk-add');
+    const onCellClickFunction = (cell: Cell<any, any>, e?: React.MouseEvent) => {
+        const id = cell.getValue();
+        
+        router.push(`/hr/worker/${id}/update`);
     }
 
     return (
         <div className="container mx-auto py-10 relative">
             {/* Header Section */}
             <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6">
-                
                 <div>
                     <h1 className="text-2xl font-bold">Employees</h1>
                     <p className="text-sm text-base-content/70">Manage employees related data</p>
                 </div>
 
                 <div className="flex flex-wrap gap-2">
-                    <button
-                        className={THEME.ButtonBasic}
-                        onClick={handleAddWorker}
-                    >
+                    <Link href="/hr/worker/add" className={THEME.ButtonBasic}>
                         <UserPlus size={18} />
                         Add Employee
-                    </button>
-                    <button
-                        className={THEME.ButtonBasic}
-                        onClick={handleShiftDefine}
-                    >
+                    </Link>
+                    <Link href="/hr/worker/shift-define" className={THEME.ButtonBasic}>
                         <Clock3 size={18} />
                         Define Shift
-                    </button>
-                    <button 
-                        className={THEME.ButtonBasic}
-                        onClick={handleHolidayDefine}
-                    >
+                    </Link>
+                    <Link href="/hr/holiday/add" className={THEME.ButtonBasic}>
                         <CalendarX size={18} />
                         Define Holiday
-                    </button>
-                    <button 
-                        className={THEME.ButtonOutLine}
-                        onClick={handleSaturdayDefine}
-                    >
+                    </Link>
+                    <Link href="" className={THEME.ButtonOutLine}>
                         <Plane size={18} />
                         Define Saturday
-                    </button>
-                    <button 
-                        className={THEME.ButtonOutLine}
-                        onClick={handleOfficeDefine}
-                    >
+                    </Link>
+                    <Link href="" className={THEME.ButtonOutLine}>
                         <Building2 size={18} />
                         Define Offices
-                    </button>
-                    <button 
-                        className={THEME.ButtonOutLine}
-                        onClick={handleWorkerUploader}
-                    >
+                    </Link>
+                    <Link href="/hr/worker/bulk-add" className={THEME.ButtonOutLine}>
                         <Files size={18} />
                         Worker Uploader
-                    </button>
+                    </Link>
                 </div>
             </div>
 
@@ -156,6 +120,8 @@ export default function WorkerList() {
                 searchFilters={['id', 'WorkerName']}
                 sliderFilters={['Age', 'JobDuration']}
                 showPrint={false}
+                clickableColumnId="id"
+                onCellClick={onCellClickFunction}
             />
         </div>
     )

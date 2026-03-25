@@ -16,7 +16,7 @@ const page = async ({ params }: PageProps) => {
     const { id } = await params;
     return (
         <ConsumptionForm 
-            pk={id}
+          pk={id}
         />
     )
 }

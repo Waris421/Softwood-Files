@@ -1,23 +1,28 @@
 'use client';
 
-import { UserPlus, UserCheck, Check, Loader2 } from 'lucide-react';
-import React, { useEffect, useState } from 'react';
-import { SingleDropdown } from '@/_components/Dropdown/Dropdown';
-import DatePicker from '@/_components/Datepicker/Datepicker';
-import MessageBox from '@/_components/generic/MessageBox';
-import { FormField } from '@/_components/generic/FormItems';
-import { THEME } from '@/_components/constants/ui';
-import { useRouter } from 'next/navigation';
+import { THEME } from "@/_components/constants/ui";
+import DatePicker from "@/_components/Datepicker/Datepicker";
+import { SingleDropdown } from "@/_components/Dropdown/Dropdown";
+import { FormField } from "@/_components/generic/FormItems";
+import MessageBox from "@/_components/generic/MessageBox";
+import { Loader2, Save, UserCheck, UserRoundPen } from "lucide-react";
+import { useRouter } from "next/navigation";
+import { useEffect, useState } from "react";
 
+interface FormProps {
+    pk: number;
+}
 
 //Schema of the form
 type FormSchema = {
+    id: string;
     Name: string;
     FatherSpouse: string;
     Department: string;
     SubDepartment: string;
     Manager: string;
     DateOfBirth: string;
+    DateOfLeaving: string;
     Gender: string;
     CreateAccount: boolean;
     Username: string;
@@ -44,30 +49,33 @@ const VALIDATION_SCHEMA: ValidationSchemaType= {
     }
 }
 
-export default function WorkerAddForm(){
+export default function WorkerUpdateForm({ pk }: FormProps) {
     const [formData, setFormData] = useState({
-        Name: '', FatherSpouse: '',Department: '', SubDepartment: '', Manager: '',
-        DateOfBirth: '', Gender: '', CreateAccount: false, Username: '', Email: '',
-        CNIC: ''
+        id: '', Name: '', FatherSpouse: '',Department: '', SubDepartment: '', Manager: '',
+        DateOfBirth: '', DateOfLeaving: '', Gender: '', CreateAccount: false, Username: '',
+        Email: '', CNIC: ''
     });
     const [errors, setErrors] = useState<Record<string, string>>({});
     const [isLoading, setIsLoading] = useState(true);
     const [messageConfig, setMessageConfig] = useState<{ show: boolean; subject: string; message: string; action?: () => void; } | null>(null);
     const [options, setOptions] = useState({ departments: [], managers: [] });
     const router = useRouter();
-    
-    useEffect(() => {
+
+     useEffect(() => {
         const fetchData = async () => {
             try {
-                const response = await fetch(`/api/hr/workers/add`);
-                if (!response.ok) throw new Error("Failed to load form data.");
-                
-                const data = await response.json();
-                
+                const res = await fetch(`/api/hr/workers/${pk}/update`);
+
+                if (!res.ok) throw new Error("Failed to load worker details.");
+
+                const data = await res.json();
+
                 setOptions({
                     departments: data.departments.map((d: any) => ({ label: String(d.label), value: String(d.value) })),
                     managers: data.managers.map((m: any) => ({ label: String(m.label), value: String(m.value) }))
                 });
+
+                setFormData(data.employeeData);
             } catch (err: any) {
                 setMessageConfig({ show: true, subject: "Fetch Error", message: err.message });
             } finally {
@@ -76,7 +84,7 @@ export default function WorkerAddForm(){
         }
 
         fetchData();
-    }, []);
+     }, [pk]);
 
     //Helper function to format the CNIC in a readable format
     const formatCNIC = (val: string) => {
@@ -94,10 +102,7 @@ export default function WorkerAddForm(){
 
     //Helper function that triggers when user types something
     const handleInputChange = (field: keyof FormSchema, value: any) => {
-        //Update the data in the form object
         setFormData(prev => ({ ...prev, [field]: value }));
-
-        //Clear the error on the field if there was one previously
         if (errors[field]) {
             setErrors(prev => {
                 const newErrors = { ...prev };
@@ -111,24 +116,24 @@ export default function WorkerAddForm(){
     function calculateLegalAge() {
         const eighteenYearsAgo = new Date();
         eighteenYearsAgo.setFullYear(eighteenYearsAgo.getFullYear() - 18);
-
         return eighteenYearsAgo;
     }
-    
+
+    //Helper function to calculate the option label from the value
+    const getOptionLabel = (value: string, optionsList: { label: string; value: string }[]) => {
+        return optionsList.find(opt => opt.value === value)?.label || value;
+    }
+
     //Check the form for errors. Return true if there is an error
     const validateForm = () => {
         const newErrors: Record<string, string> = {};
-
         (Object.keys(VALIDATION_SCHEMA) as (keyof FormSchema)[]).forEach((field) => {
             const errorGetter = VALIDATION_SCHEMA[field];
-            
             if (errorGetter) {
-                // 2. Use 'formData[field]' directly; since 'val' is 'any' above, this works perfectly
                 const errorMessage = errorGetter(formData[field], formData);
                 if (errorMessage) newErrors[field] = errorMessage;
             }
         });
-
         setErrors(newErrors);
         return Object.keys(newErrors).length === 0;
     };
@@ -136,12 +141,12 @@ export default function WorkerAddForm(){
     //Handle form submission
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
-        
+
         //Errors in the form
         if (!validateForm()) return ;
-        
+
         //Form is valid now.
-        const response = await fetch(`/api/hr/workers/add`, {
+        const response = await fetch(`/api/hr/workers/${pk}/update`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(formData),
@@ -157,39 +162,36 @@ export default function WorkerAddForm(){
             return ;
         }
 
-        const employeeData = await response.json();
-        const employeeCode = employeeData['EmployeeCode']
-        if (employeeCode) {
-            router.push(`/hr/worker/${employeeCode}/edit`);
-        } else {
-            setMessageConfig({
-                show: true,
-                subject: "Error",
-                message: `Unknown error. Check with your admin`
-            });
-            return ;
-        }
-    };
+        setMessageConfig({
+            show: true,
+            subject: "Success",
+            message: `Saved Successfully`
+        });
+        return ;
+    }
 
     if (isLoading) return (
         <div className="flex flex-col items-center justify-center p-20 gap-4">
             <Loader2 className="animate-spin text-primary" size={40} />
-            <p className="text-sm font-medium">Loading form options...</p>
+            <p className="text-sm font-medium">Loading worker data...</p>
         </div>
     );
-    
+
     return (
         <div className="max-w-2xl mx-auto p-6 bg-base-100 rounded-xl shadow-xl border border-base-200">
-            {/* Employee Addition form */}
+            {/* Employee Update form */}
             <div className="flex items-center gap-3 mb-8 border-b pb-4">
-                <UserPlus className="text-primary w-6 h-6" />
-                <h2 className="text-2xl font-bold">Add New Employee</h2>
+                <UserRoundPen className="text-primary w-6 h-6" />
+                <h2 className="text-2xl font-bold">Updating Employee Data</h2>
             </div>
-            
+
             <form onSubmit={handleSubmit} className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                {/* Name */}
+                <FormField label="Code" error={errors.id}>
+                    <input type="text" className={THEME.TextInput} value={formData.id}
+                        onChange={(e) => handleInputChange('id', e.target.value)} readOnly/>
+                </FormField>
                 <FormField label="Name" error={errors.Name} required>
-                    <input type="text" placeholder="Full Name" className={THEME.TextInput} value={formData.Name}
+                    <input type="text" className={THEME.TextInput} value={formData.Name}
                         onChange={(e) => handleInputChange('Name', e.target.value)} />
                 </FormField>
                 <FormField label="Father/Spouse" error={errors.FatherSpouse} required>
@@ -197,45 +199,59 @@ export default function WorkerAddForm(){
                         onChange={(e) => handleInputChange('FatherSpouse', e.target.value)} />
                 </FormField>
 
-                {/* Date of Birth */}
                 <FormField label="Date of Birth" error={errors.DateOfBirth} required>
                     <DatePicker inputName='DateOfBirth' value={formData.DateOfBirth} required={true}
                         disabledDates={(date) => date > calculateLegalAge()} onChange={(val) => handleInputChange('DateOfBirth', val)} />
                 </FormField>
-                
-                {/* Department */}
-                <FormField label="Department" error={errors.Department} required>
-                    <SingleDropdown inputName='Department' placeholder="Select Department" isStatic staticOptions={options.departments} 
-                        widthClass="w-full" onSelect={(val: any) => handleInputChange('Department', val?.value)} />
+
+                <FormField label="Date of Leaving">
+                    <DatePicker inputName='DateOfLeaving' value={formData.DateOfLeaving} required={true}
+                        onChange={(val) => handleInputChange('DateOfLeaving', val)} />
                 </FormField>
 
-                {/* Sub department */}
+                <FormField label="Department" error={errors.Department} required>
+                    <SingleDropdown
+                        inputName='Department'
+                        placeholder="Select Department"
+                        isStatic 
+                        staticOptions={options.departments}
+                        defaultValue={formData.Department}
+                        widthClass="w-full"
+                        onSelect={(val: any) => handleInputChange('Department', val?.value)}/>
+                </FormField>
+
                 <FormField label="Sub Department">
-                    <input type="text" className={THEME.TextInput} value={formData.SubDepartment} placeholder='If applicable'
+                    <input type="text" className={THEME.TextInput} value={formData.SubDepartment}
                         onChange={(e) => handleInputChange('SubDepartment', e.target.value)} />
                 </FormField>
 
-                {/* Manager */}
                 <FormField label="Manager" error={errors.Manager}>
-                    <SingleDropdown inputName='Manager' placeholder="Select Manager" isStatic staticOptions={options.managers} 
-                        widthClass="w-full" onSelect={(val: any) => handleInputChange('Manager', val?.value)} />
+                    <SingleDropdown 
+                        inputName='Manager'
+                        placeholder="Select Manager" 
+                        isStatic
+                        staticOptions={options.managers}
+                        defaultValue={formData.Manager}
+                        widthClass="w-full"
+                        onSelect={(val: any) => handleInputChange('Manager', val?.value)}
+                    />
                 </FormField>
 
-                {/* Gender */}
                 <FormField label="Gender" error={errors.Gender}>
-                    <SingleDropdown inputName='Gender' placeholder="Select option" isStatic widthClass="w-full"
+                    <SingleDropdown 
+                        inputName='Gender' 
+                        placeholder="Select option"
+                        isStatic
+                        widthClass="w-full"
                         staticOptions={[{ label: 'Male', value: 'Male' }, { label: 'Female', value: 'Female' }]}
-                        onSelect={(val: any) => handleInputChange('Gender', val?.value)} />
+                        defaultValue={formData.Gender}
+                        onSelect={(val: any) => handleInputChange('Gender', val?.value)}
+                    />
                 </FormField>
 
-                {/* CNIC Number */}
                 <FormField label="CNIC" error={errors.CNIC}>
-                    <input type='text' className={THEME.TextInput} value={formData.CNIC} placeholder='XXXXX-XXXXXXX-X'
-                        maxLength={15}
-                        onChange={(e) => {
-                            const formatted = formatCNIC(e.target.value);
-                            handleInputChange('CNIC', formatted)
-                        }}/>
+                    <input type='text' className={THEME.TextInput} value={formData.CNIC} maxLength={15}
+                        onChange={(e) => handleInputChange('CNIC', formatCNIC(e.target.value))} />
                 </FormField>
 
                 {/* --- Is user account needed? --- */}
@@ -249,28 +265,27 @@ export default function WorkerAddForm(){
                 </div>
 
                 {/* Conditional Username and email address Field */}
-                {formData.CreateAccount && 
+                {formData.CreateAccount && (
                     <>
                         <FormField label="Username" error={errors.Username}>
-                            <input type="text" className={THEME.TextInput} value={formData.Username} placeholder='john.doe'
+                            <input type="text" className={THEME.TextInput} value={formData.Username}
                                 onChange={(e) => handleInputChange('Username', e.target.value)} />
                         </FormField>
                         <FormField label="Email Address" error={errors.Email}>
-                            <input type="email" className={THEME.TextInput} value={formData.Email} placeholder='johndoe@domain.com'
+                            <input type="email" className={THEME.TextInput} value={formData.Email}
                                 onChange={(e) => handleInputChange('Email', e.target.value)} />
                         </FormField>
                     </>
-                }
+                )}
 
                 <div className="md:col-span-2 mt-4">
                     <button type="submit" className={`${THEME.ButtonBasic} w-full`}>
-                        <Check className="w-4 h-4" />
-                        Save Employee
+                        <Save className="w-4 h-4" />
+                        Update Record
                     </button>
                 </div>
             </form>
 
-            {/* Any wanrning/message box */}
             {messageConfig?.show && (
                 <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4">
                     <MessageBox 
@@ -278,10 +293,8 @@ export default function WorkerAddForm(){
                         message={messageConfig.message}
                         confirmText="Close"
                         onConfirm={() => {
-                            if (messageConfig.action) {
-                                messageConfig.action();
-                            }
-                            setMessageConfig(null)
+                            if (messageConfig.action) messageConfig.action();
+                            setMessageConfig(null);
                         }}  
                     />
                 </div>
