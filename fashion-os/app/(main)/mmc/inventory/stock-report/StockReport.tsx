@@ -113,8 +113,9 @@ export default function StockReport () {
                 data={data}
                 isLoading={loading}
                 error={error}
-                clickableColumnId='InventoryCode'
-                onCellClick={onCellClickFunction}
+                columnClickHandlers={{
+                    InventoryCode: onCellClickFunction
+                }}
                 dropdownFilters={['Group']}
                 searchFilters={['InventoryName', 'InventoryCode']}
                 sliderFilters={['Quantity']}

@@ -95,13 +95,13 @@ export default function WorkerList() {
                         <CalendarX size={18} />
                         Define Holiday
                     </Link>
-                    <Link href="" className={THEME.ButtonOutLine}>
+                    <Link href="/hr/saturday/set" className={THEME.ButtonOutLine}>
                         <Plane size={18} />
                         Define Saturday
                     </Link>
-                    <Link href="" className={THEME.ButtonOutLine}>
+                    <Link href="/hr/office" className={THEME.ButtonOutLine}>
                         <Building2 size={18} />
-                        Define Offices
+                        Manage Offices
                     </Link>
                     <Link href="/hr/worker/bulk-add" className={THEME.ButtonOutLine}>
                         <Files size={18} />

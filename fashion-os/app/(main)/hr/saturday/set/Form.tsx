@@ -2,20 +2,18 @@
 
 import { THEME } from "@/_components/constants/ui";
 import DatePicker from "@/_components/Datepicker/Datepicker";
-import { MultiDropdown } from "@/_components/Dropdown/Dropdown";
+import { SingleDropdown } from "@/_components/Dropdown/Dropdown";
 import { DropdownOption } from "@/_components/Dropdown/types";
 import { FormField } from "@/_components/generic/FormItems";
 import MessageBox from "@/_components/generic/MessageBox";
-import { CalendarX, Check, Loader2 } from "lucide-react";
+import { CarIcon, Check, Loader2 } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 
 //Schema of the form
 type FormSchema = {
-    Departments: string[];
-    StartDate: string;
-    EndDate: string;
-    Description: string;
+    Employee: string;
+    OffSaturday: string;
 }
 
 //data type of validation schema
@@ -25,41 +23,73 @@ type ValidationSchemaType = {
 
 //Validation schema for the different fields of the form
 const VALIDATION_SCHEMA: ValidationSchemaType = {
-    Departments: (val: string[]) => {
-        if (!val || val.length === 0) {
-            return 'Select at least 1 department';
-        }
-        return null;
-    },
-    StartDate: (val) => (!val ? 'Start date is required' : null),
-    EndDate: (val) => (!val ? 'End date is required' : null),
-    Description: (val) => (!val ? 'Description is required' : null),
+    Employee: (val) => (!val ? 'Employee is required' : null),
+    OffSaturday: (val) => (!val ? 'This date is required' : null),
 }
-
-export default function HolidayForm() {
+export default function SaturdayForm() {
     const [formData, setFormData] = useState({
-        StartDate: '', EndDate: '', Departments: [], Description: '',
+        Employee: '', OffSaturday: '',
     });
     const [errors, setErrors] = useState<Record<string, string>>({});
     const [isLoading, setIsLoading] = useState(true);
     const [messageConfig, setMessageConfig] = useState<{ show: boolean; subject: string; message: string; action?: () => void; } | null>(null);
-    const [options, setOptions] = useState({ departments: []});
+    const [options, setOptions] = useState({ employees: []});
+    const [selectedEmployee, setSelectedEmployee] = useState<string | null>(null);
     const router = useRouter();
+
+    async function fetchData(employeeCode: string|null) {
+        let path = '/api/hr/workers/set-saturday';
+
+        if (employeeCode) {
+            const params = new URLSearchParams({ employee: employeeCode });
+            path += `?${params.toString()}`;
+        }
+
+        const response = await fetch(path);
+        if (!response.ok) {
+            throw new Error("Failed to load form data.");
+        }
+
+        const data = await response.json();
+
+        const employeeOptions = data.employees.map((d: any) => ({label: String(d.label), value: String(d.value)}));
+        const offSaturday = data.OffSaturday;
+
+        return {
+            employeeOptions: employeeOptions,
+            offSaturday: offSaturday,
+        };
+    }
+
+    const handleEmployeeChange = async (selectedEmployeeOption: DropdownOption) => {
+        handleInputChange('Employee', selectedEmployeeOption.value);
+        
+        try {
+            const data = await fetchData(selectedEmployeeOption.value);
+
+            if (data.offSaturday) {
+                handleInputChange('OffSaturday', data.offSaturday);
+            }
+        } catch (err: any) {
+            console.log(err);
+            setMessageConfig({ 
+                show: true, 
+                subject: "Fetch Error", 
+                message: "Could not retrieve employee schedule." 
+            });
+        }
+    }
 
     useEffect(() => {
         const loadData = async () => {
             try {
-                const response = await fetch(`/api/hr/holiday/add`);
-                if (!response.ok) throw new Error(`Failed to load form data.`);
-
-                const data = await response.json();
-
-                const departmentOptions = data.departments.map((d: any) => ({label: String(d.label), value: String(d.value)}));
+                const data = await fetchData(selectedEmployee);
 
                 setOptions(prev => ({
                     ...prev,
-
-                    departments: departmentOptions,
+                    
+                    // Only update employees on initial load (when employee is null)
+                    employees: !selectedEmployee ? data.employeeOptions : prev.employees,
                 }));
             } catch (err: any) {
                 setMessageConfig({ show: true, subject: "Fetch Error", message: err.message });
@@ -76,11 +106,6 @@ export default function HolidayForm() {
         //Update the data in the form object
         setFormData(prev => {
             const newData = { ...prev, [field]: value };
-
-            // If StartDate changes and is now AFTER the existing EndDate, reset EndDate
-            if (field === 'StartDate' && prev.EndDate && new Date(value) > new Date(prev.EndDate)) {
-                newData.EndDate = '';
-            }
 
             return newData;
         });
@@ -119,7 +144,7 @@ export default function HolidayForm() {
         if (!validateForm()) return ;
 
         //Form is valid now.
-        const response = await fetch(`/api/hr/holiday/add`, {
+        const response = await fetch(`/api/hr/workers/set-saturday`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(formData),
@@ -143,65 +168,51 @@ export default function HolidayForm() {
 
         router.push('/hr/worker');
     }
-        
+
     if (isLoading) return (
         <div className="flex flex-col items-center justify-center p-20 gap-4">
             <Loader2 className="animate-spin text-primary" size={40} />
             <p className="text-sm font-medium">Loading form options...</p>
         </div>
     );
-
+    
     return (
         <div className="max-w-2xl mx-auto p-6 bg-base-100 rounded-xl shadow-xl border border-base-200">
-            {/* Holiday Definition Form */}
+            {/* Saturday Definition Form */}
             <div className="flex items-center gap-3 mb-8 border-b pb-4">
-                <CalendarX className="text-primary w-6 h-6" />
-                <h2 className="text-2xl font-bold">Holiday Management</h2>
+                <CarIcon className="text-primary w-6 h-6" />
+                <h2 className="text-2xl font-bold">Off Saturday Management</h2>
             </div>
 
             <form onSubmit={handleSubmit} className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <FormField label='Departments' error={errors.Departments} required>
-                    <MultiDropdown 
-                        inputName='Department'
-                        placeholder='Select Departments'
+                <FormField label='Employee' error={errors.Employee} required>
+                    <SingleDropdown 
+                        inputName = 'Employee'
+                        placeholder='Select Employee'
                         isStatic
-                        staticOptions={options.departments}
+                        staticOptions={options.employees}
+                        showValue={true}
                         widthClass='w-full'
-                        showValue={false}
-                        onSelect={(selectedOptions: DropdownOption[]) => {
-                            const values = selectedOptions.map(opt => opt.value);
-                            handleInputChange('Departments', values);
-                        }}
+                        onSelect={handleEmployeeChange}
                     />
                 </FormField>
 
-                <FormField label="Start Date" error={errors.StartDate} required>
-                    <DatePicker inputName='StartDate' value={formData.StartDate} required={true}
-                        onChange={(val) => handleInputChange('StartDate', val)} />
-                </FormField>
-
-                <FormField label="End Date" error={errors.EndDate} required>
-                    <DatePicker inputName='EndDate' value={formData.EndDate} required={true}
-                        onChange={(val) => handleInputChange('EndDate', val)}
-                        disabledDates={(date) => {
-                            if (!formData.StartDate) return false;
-                            return new Date(date) < new Date(formData.StartDate);
-                        }}/>
-                </FormField>
-
-                <FormField label="Description" error={errors.Description} required>
-                    <input type="text" placeholder="Description" className={THEME.TextInput} value={formData.Description}
-                        onChange={(e) => handleInputChange('Description', e.target.value)} />
+                <FormField label="Off Saturday" error={errors.OffSaturday} required>
+                    <DatePicker inputName='EndDate' value={formData.OffSaturday} required={true}
+                        placeholder="Pick Any Off Saturday"
+                        onChange={(val) => handleInputChange('OffSaturday', val)}
+                        disabledDates={(date: Date) => (date.getDay() !== 6)}
+                    />
                 </FormField>
 
                 <div className="md:col-span-2 mt-4">
                     <button type="submit" className={`${THEME.ButtonBasic} w-full`}>
                         <Check className="w-4 h-4" />
-                        Save Holiday
+                        Save Data
                     </button>
                 </div>
             </form>
-
+            
             {messageConfig?.show && (
                 <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4">
                     <MessageBox 

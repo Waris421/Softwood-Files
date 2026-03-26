@@ -123,7 +123,6 @@ export default function WorkerAddForm(){
             const errorGetter = VALIDATION_SCHEMA[field];
             
             if (errorGetter) {
-                // 2. Use 'formData[field]' directly; since 'val' is 'any' above, this works perfectly
                 const errorMessage = errorGetter(formData[field], formData);
                 if (errorMessage) newErrors[field] = errorMessage;
             }

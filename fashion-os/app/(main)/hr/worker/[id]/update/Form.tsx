@@ -6,7 +6,6 @@ import { SingleDropdown } from "@/_components/Dropdown/Dropdown";
 import { FormField } from "@/_components/generic/FormItems";
 import MessageBox from "@/_components/generic/MessageBox";
 import { Loader2, Save, UserCheck, UserRoundPen } from "lucide-react";
-import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 
 interface FormProps {
@@ -59,7 +58,6 @@ export default function WorkerUpdateForm({ pk }: FormProps) {
     const [isLoading, setIsLoading] = useState(true);
     const [messageConfig, setMessageConfig] = useState<{ show: boolean; subject: string; message: string; action?: () => void; } | null>(null);
     const [options, setOptions] = useState({ departments: [], managers: [] });
-    const router = useRouter();
 
      useEffect(() => {
         const fetchData = async () => {

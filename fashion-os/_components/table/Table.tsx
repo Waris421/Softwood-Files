@@ -22,8 +22,7 @@ interface DataTableProps<TData, TValue> {
     dropdownFilters?: string[],
     sliderFilters?: string[],
     isLoading?: boolean,
-    onCellClick?: (cell: Cell<TData, TValue>, e?: React.MouseEvent) => void,
-    clickableColumnId?: string,
+    columnClickHandlers?: Record<string, (cell: Cell<TData, TValue>, e?: React.MouseEvent) => void>;
     getRowClassName?: (row: TData) => string;
     error?: string | null,
     showPrint?: boolean,
@@ -31,7 +30,7 @@ interface DataTableProps<TData, TValue> {
 }
 
 export function DataTable<TData, TValue> ({
-    title, columns, data, searchFilters, dropdownFilters, sliderFilters, isLoading, onCellClick, clickableColumnId, error, showPrint=true, showDownload=true, getRowClassName,
+    title, columns, data, searchFilters, dropdownFilters, sliderFilters, isLoading, columnClickHandlers, error, showPrint=true, showDownload=true, getRowClassName,
 }: DataTableProps<TData, TValue> ) {
     //Initialisations
     const [sorting, setSorting] = React.useState<SortingState>([]);
@@ -194,7 +193,6 @@ export function DataTable<TData, TValue> ({
                     }));
 
                     const currentValue = column.getFilterValue() as string;
-                    const selectedOption = currentValue ? { value: currentValue, label: currentValue } : null;
                     
                     return (
                         <div key={columnId} className="flex-1 min-w-30">
@@ -204,7 +202,7 @@ export function DataTable<TData, TValue> ({
                                 isStatic={true}
                                 staticOptions={formattedOptions}
                                 widthClass="w-full"
-                                defaultValue={selectedOption}
+                                defaultValue={currentValue}
                                 onSelect={(data) => {
                                     if (Array.isArray(data)) {
                                         const values = data.map((opt) => opt.value);
@@ -327,7 +325,9 @@ export function DataTable<TData, TValue> ({
                                 return (
                                     <TableRow key={row.id} className={`hover:bg-muted/50 transition-colors ${customClasses}`}>
                                         {row.getVisibleCells().map((cell) => {
-                                            const isClickable = cell.column.id === clickableColumnId;
+                                            const specificHandler = columnClickHandlers?.[cell.column.id];
+                                            const isClickable = !!specificHandler;
+
                                             return (
                                                 <TableCell 
                                                     key={cell.id}
@@ -335,7 +335,7 @@ export function DataTable<TData, TValue> ({
                                                     onClick={(e) => {
                                                         if (isClickable) {
                                                             e.currentTarget.focus();
-                                                            onCellClick?.(cell, e);
+                                                            specificHandler(cell, e);
                                                         }
                                                     }}
                                                     className={`p-4 align-middle text-center wrap-break-word whitespace-normal
@@ -400,10 +400,6 @@ export function DataTable<TData, TValue> ({
                                     isStatic={true}
                                     staticOptions={pageOptions}
                                     widthClass="w-full"
-                                    defaultValue={{
-                                        label: `Page ${table.getState().pagination.pageIndex + 1}`,
-                                        value: String(table.getState().pagination.pageIndex),
-                                    }}
                                     onSelect={(selected: { value: any; }) => {
                                         if (selected && !Array.isArray(selected)) {
                                             table.setPageIndex(Number(selected.value));

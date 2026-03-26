@@ -417,23 +417,11 @@ export function MultiDropdown({
                             />
                         </div>
                         <CommandList>
-                            {loading && 
+                            {loading && (
                                 <div className="p-4 flex justify-center">
                                     <Loader2 className="animate-spin h-4 w-4" />
                                 </div>
-                            }{options.map((opt) => (
-                                    <CommandItem
-                                        key={opt.value}
-                                        value={`${opt.label} ${opt.value}`.toLowerCase()}
-                                        onSelect={() => toggleOption(opt)}
-                                    >
-                                        <Checkbox 
-                                            checked={selected.some(s => s.value === opt.value)}
-                                            className="h-4 w-4"
-                                        />
-                                        {opt.label} {showValue ? `(${opt.value})` : ''}
-                                    </CommandItem>
-                                ))}
+                            )}
 
                             {!loading && error && (
                                 <div className="p-2">
@@ -448,6 +436,7 @@ export function MultiDropdown({
                                 <CommandEmpty>No results found.</CommandEmpty>
                             )}
 
+                            {/* Only render this ONCE */}
                             <CommandGroup>
                                 {options.map((opt) => (
                                     <CommandItem
@@ -456,11 +445,11 @@ export function MultiDropdown({
                                         onSelect={() => toggleOption(opt)}
                                         className="cursor-pointer"
                                     >
-                                        <Checkbox 
-                                            checked={selected.some(s => s.value === opt.value)}
-                                            className="h-4 w-4"
+                                        <Checkbox
+                                            checked={selected.some((s) => s.value === opt.value)}
+                                            className="h-4 w-4 mr-2" // Added margin for spacing
                                         />
-                                        {opt.label} {showValue ? `(${opt.value})` : ''}
+                                        {opt.label} {showValue ? `(${opt.value})` : ""}
                                     </CommandItem>
                                 ))}
                             </CommandGroup>

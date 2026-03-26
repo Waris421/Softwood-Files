@@ -19,11 +19,16 @@ interface DatePickerProps {
 }
 
 export default function DatePicker ({
-    value, onChange, placeholder = "Pick a date", required = false, disabledDates, inputName
+    value,
+    onChange,
+    placeholder = "Pick a date",
+    required = false,
+    disabledDates,
+    inputName
 }: DatePickerProps) {
     const [isOpen, setIsOpen] = useState(false)
 
-    const dateValue = value ? new Date(value) : undefined
+    const dateValue = value ? new Date(`${value}T00:00:00`) : undefined
     
     const handleClear = (e: React.MouseEvent) => {
         e.stopPropagation();
@@ -31,7 +36,9 @@ export default function DatePicker ({
     }
 
     const handleSelect = (date: Date | undefined) => {
-        onChange(date ? date.toISOString() : "");
+        const formattedDate = date ? format(date, "yyyy-MM-dd") : "";
+
+        onChange(formattedDate);
         setIsOpen(false);
     }
 

@@ -84,8 +84,9 @@ export default function PendingConsumptions() {
                 searchFilters={['Style']}
                 dropdownFilters={['FullName']}
                 isLoading={loading}
-                clickableColumnId='RequestNumber'
-                onCellClick={onCellClickFunction}
+                columnClickHandlers={{
+                    RequestNumber: onCellClickFunction
+                }}
                 error={error}
             />
         </div>

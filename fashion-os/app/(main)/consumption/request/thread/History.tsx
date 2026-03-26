@@ -2,7 +2,7 @@
 
 import { THEME } from "@/_components/constants/ui";
 import ActionDialog from "@/_components/DialogBox/ActionDialog";
-import DropDown from "@/_components/Dropdown/Dropdown";
+import { SingleDropdown } from "@/_components/Dropdown/Dropdown";
 import { DataTable } from "@/_components/table/Table";
 import { Cell, ColumnDef } from "@tanstack/react-table";
 import { Edit, Trash, Copy } from "lucide-react";
@@ -178,8 +178,9 @@ export default function ConsumptionHistory() {
                 searchFilters={['Style']}
                 dropdownFilters={['RequestBy', 'Status']}
                 isLoading={loading}
-                clickableColumnId='id'
-                onCellClick={onCellClickFunction}
+                columnClickHandlers={{
+                    id: onCellClickFunction
+                }}
                 error={error}
             />
             
@@ -202,7 +203,7 @@ export default function ConsumptionHistory() {
                             <h2 className="card-title text-primary">Select a template</h2>
                             <div className="py-4">
                                 <label className="label-text font-bold mb-2 block">Select Target Consumption</label>
-                                <DropDown 
+                                <SingleDropdown 
                                     inputName="templateTarget"
                                     isStatic={true}
                                     staticOptions={templateRequests}
