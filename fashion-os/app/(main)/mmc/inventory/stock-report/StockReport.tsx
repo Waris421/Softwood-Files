@@ -2,7 +2,9 @@
 
 import ActionDialog from "@/_components/DialogBox/ActionDialog";
 import TableDialog from "@/_components/DialogBox/TableDialog";
+import ExpandableList from "@/_components/table/ExpandableList";
 import { DataTable } from "@/_components/table/Table";
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/_components/ui/dialog";
 import { Cell, ColumnDef } from "@tanstack/react-table";
 import { View } from "lucide-react";
 import { useEffect, useState } from "react";
@@ -13,16 +15,20 @@ interface VariantDetail {
 }
 
 interface TransactionDetail {
-    InvoiceNumber: string,
+    InventoryName: string,
     PONumber: number,
+    ReceiptDate: string,
+    Quantity: number,
     Supplier: string,
+    WorkOrders: string[]
+    Styles: string[]
 }
 
 type InventoryStockReport = {
     InventoryCode: string,
     InventoryName: string,
     Group: string,
-    Quantity: number,
+    Balance: number,
     Unit: string,
     Value: string,
     VariantDetails: VariantDetail[];
@@ -43,7 +49,7 @@ const reportColumns: ColumnDef<InventoryStockReport>[] = [
         header: 'Group',
     },
     {
-        accessorKey: 'Quantity',
+        accessorKey: 'Balance',
         header: 'Stock Quantity',
         filterFn: "inNumberRange" as any,
     },
@@ -104,6 +110,9 @@ export default function StockReport () {
         { label: 'Details', icon: <View size={16}/>, onClick: () => {setIsVarTableOpen(true)} },
     ]
 
+    const totalVariantQuantity = variantDetails.reduce((acc, item) => acc + item.Quantity, 0);
+    const totalTransactionQuantity = transactionDetails.reduce((acc, item) => acc + item.Quantity, 0);
+
     return (
         <div className="container mx-auto py-10 relative">
             {/* The main data table */}
@@ -118,7 +127,7 @@ export default function StockReport () {
                 }}
                 dropdownFilters={['Group']}
                 searchFilters={['InventoryName', 'InventoryCode']}
-                sliderFilters={['Quantity']}
+                sliderFilters={['Balance']}
             />
 
             {/* Dialogue box upon clicking an inventory */}
@@ -132,26 +141,105 @@ export default function StockReport () {
             )}
 
             {/* Dialog box to show variant details */}
-            {isVarTableOpen && (
-                <TableDialog
-                    isOpen={isVarTableOpen}
-                    onClose={() => setIsVarTableOpen(false)}
-                    data={variantDetails}
-                    title="Variant Details"
-                    anchorRef={anchorRef ? { current: anchorRef } : undefined}
-                />
-            )}
+            <Dialog open={!!isVarTableOpen} onOpenChange={() => setIsVarTableOpen(false)}>
+                <DialogContent className="sm:max-w-125">
+                    <DialogHeader>
+                        <DialogTitle>Variant Details</DialogTitle>
+                        <DialogDescription>
+                            Stock breakdown for [Inventory Name]
+                        </DialogDescription>
+                    </DialogHeader>
+                    <div className="mt-4 overflow-y-auto overflow-x-auto rounded-lg border border-base-200 h-80">
+                        <table className="table table-zebra table-pin-rows w-full">
+                            <thead className="bg-base-200">
+                                <tr>
+                                    <th>Variant</th>
+                                    <th className="text-right">Quantity</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {variantDetails.map((variant, index) => (
+                                    <tr key={index} className="hover">
+                                        <td className="font-medium text-primary">
+                                            {variant.Variant}
+                                        </td>
+                                        <td className="text-right font-mono">
+                                            {variant.Quantity.toFixed(2)}
+                                        </td>
+                                    </tr>
+                                ))}
+                            </tbody>
+
+                            <tfoot className="bg-base-200 font-bold text-base-content">
+                                <tr>
+                                    <td>Total</td>
+                                    <td className="text-right font-mono text-lg">
+                                        {totalVariantQuantity.toFixed(2)}
+                                    </td>
+                                </tr>
+                            </tfoot>
+                        </table>
+                    </div>
+                </DialogContent>
+            </Dialog>
 
             {/* Dialog box to show transaction details */}
-            {isTrTableOpen && (
-                <TableDialog 
-                    isOpen={isTrTableOpen}
-                    onClose={() => setIsTrTableOpen(false)}
-                    data={transactionDetails}
-                    anchorRef={anchorRef ? {current: anchorRef} : undefined}
-                    maxWidth={500}
-                />
-            )}
+            <Dialog open={!!isTrTableOpen} onOpenChange={() => setIsTrTableOpen(false)}>
+                <DialogContent className="sm:max-w-250">
+                    <DialogHeader>
+                        <DialogTitle>Transaction History</DialogTitle>
+                        <DialogDescription>
+                            {`Stock transaction history for ${transactionDetails[0]?.InventoryName}`}
+                        </DialogDescription>
+                    </DialogHeader>
+                    <div className="mt-4 overflow-y-auto overflow-x-auto rounded-lg border border-base-200 h-120">
+                        <table className="table table-zebra table-pin-rows w-full">
+                            <thead className="bg-base-200">
+                                <tr>
+                                    <th>PO Number</th>
+                                    <th>Receipt Date</th>
+                                    <th>WOs</th>
+                                    <th>Styles</th>
+                                    <th>Supplier</th>
+                                    <th className="text-right">Receipt Qty</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {transactionDetails.map((transaction, index) => (
+                                    <tr key={index} className="hover">
+                                        <td className="font-medium text-primary">
+                                            {transaction.PONumber}
+                                        </td>
+                                        <td className="font-medium text-primary">
+                                            {transaction.ReceiptDate}
+                                        </td>
+                                        <td className="font-medium text-primary">
+                                            <ExpandableList items={transaction.WorkOrders} />
+                                        </td>
+                                        <td className="font-medium text-primary">
+                                            <ExpandableList items={transaction.Styles} />
+                                        </td>
+                                        <td className="font-medium text-primary">
+                                            {transaction.Supplier}
+                                        </td>
+                                        <td className="text-right font-mono">
+                                            {transaction.Quantity.toFixed(2)}
+                                        </td>
+                                    </tr>
+                                ))}
+                            </tbody>
+                            <tfoot className="bg-base-200 font-bold text-base-content">
+                                <tr>
+                                    <td colSpan={5} className="text-right">Total</td>
+                                    <td className="text-right font-mono text-lg text-primary">
+                                        {totalTransactionQuantity.toFixed(2)}
+                                    </td>
+                                </tr>
+                            </tfoot>
+                        </table>
+                    </div>
+                </DialogContent>
+            </Dialog>
         </div>
     )
 }

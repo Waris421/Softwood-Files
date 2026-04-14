@@ -3,7 +3,7 @@
 import { UserPlus, UserCheck, Check, Loader2 } from 'lucide-react';
 import React, { useEffect, useState } from 'react';
 import { SingleDropdown } from '@/_components/Dropdown/Dropdown';
-import DatePicker from '@/_components/Datepicker/Datepicker';
+import { DatePicker } from '@/_components/Datepicker/Datepicker';
 import MessageBox from '@/_components/generic/MessageBox';
 import { FormField } from '@/_components/generic/FormItems';
 import { THEME } from '@/_components/constants/ui';

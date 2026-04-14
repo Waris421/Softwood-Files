@@ -248,8 +248,9 @@ export default function WorkerAddForm() {
                         showPrint={false}
                         showDownload={false}
                         isLoading={isSubmitting}
-                        clickableColumnId='UserCreation'
-                        onCellClick={onCellClickFunction}
+                        columnClickHandlers={{
+                            UserCreation: onCellClickFunction
+                        }}
                         getRowClassName={(row) => {
                             if (row.HasError) return 'bg-red-900'; else return '';
                         }}

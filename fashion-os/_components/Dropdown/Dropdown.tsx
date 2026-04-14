@@ -1,7 +1,7 @@
 'use client'
 
-import { useEffect, useMemo, useState } from "react";
-import { AlertCircle, ChevronsUpDown, Loader2, X} from "lucide-react";
+import { useEffect, useMemo, useRef, useState } from "react";
+import { AlertCircle, Check, ChevronsUpDown, Loader2, X} from "lucide-react";
 import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList} from "@/_components/ui/command";
 import { cn } from "@/_components/generic/utils";
 import { Checkbox } from "../ui/checkbox";
@@ -18,7 +18,7 @@ interface DropdownOption {
 
 interface ApiOption {
     value: string | number;
-    text: string;
+    label: string;
 }
 
 interface DropDownProps {
@@ -49,7 +49,7 @@ const applySearch = ((value: String, search: String) => {
     return 0;
 })
 
-export function SingleDropdown({
+function SingleDropdown({
     apiUrl,
     isStatic = true,
     staticOptions = [],
@@ -84,20 +84,17 @@ export function SingleDropdown({
         if (isStatic) {
             const sanitizedStatic = staticOptions.map((opt: any) => sanitizeOption(opt)).filter(Boolean) as DropdownOption[];
             setOptions(sanitizedStatic);
+        } else {
+            fetchOptions('');
         }
 
         if (defaultValue) {
             setSelectedValue(sanitizeOption(defaultValue));
         }
-    }, [isStatic, staticOptions, defaultValue]);
+    }, [isStatic, apiUrl]);
 
     const fetchOptions = async(searchQuery: string) => {
         if (isStatic || !apiUrl) return;
-
-        if (!searchQuery) {
-            setOptions([]);
-            return;
-        }
 
         setIsLoading(true);
         setError(null);
@@ -114,7 +111,7 @@ export function SingleDropdown({
 
             const formatted: DropdownOption[] = apiOptions.map(option => ({
                 value: String(option.value),
-                label: option.text,
+                label: option.label,
             }));
 
             setOptions(formatted);
@@ -219,15 +216,26 @@ export function SingleDropdown({
                             )}
 
                             <CommandGroup>
-                                {options.map((option) => (
-                                    <CommandItem
-                                        key={option.value}
-                                        value={`${option.label} ${option.value}`.toLowerCase()}
-                                        onSelect={() => handleSelect(option)}
-                                    >
-                                        {option.label} {showValue ? `(${option.value})` : ''}
-                                    </CommandItem>
-                                ))}
+                                {options.map((option) => {
+                                    const isSelected = selectedValue?.value === option.value;
+                                    return(
+                                        <CommandItem
+                                            key={option.value}
+                                            value={`${option.label} ${option.value}`.toLowerCase()}
+                                            onSelect={() => handleSelect(option)}
+                                            className={cn(
+                                                "flex items-center justify-between py-2 px-3 cursor-pointer",
+                                                isSelected ? "bg-accent text-accent-foreground" : ""
+                                            )}
+                                        >
+                                            <span className="truncate flex-1">
+                                                {option.label} {showValue ? `(${option.value})` : ''}
+                                            </span>
+                                            {isSelected && (
+                                                <Check className="ml-2 h-4 w-4 shrink-0"/>
+                                            )}
+                                        </CommandItem>
+                                    )})}
                             </CommandGroup>
                         </CommandList>
                     </Command>
@@ -243,7 +251,7 @@ export function SingleDropdown({
     )
 }
 
-export function MultiDropdown({
+function MultiDropdown({
     apiUrl,
     isStatic = true,
     staticOptions = [],
@@ -263,20 +271,53 @@ export function MultiDropdown({
     const [error, setError] = useState<string | null>(null);
     const [search, setSearch] = useState("");
 
+    const inputRef = useRef<HTMLInputElement>(null);
+
     // Sync options with staticOptions only when the CONTENT changes
     useEffect(() => {
         setMounted(true);
 
         if (isStatic) {
-            const sanitizedStatic = staticOptions.map((opt: any) => sanitizeOption(opt)).filter(Boolean) as DropdownOption[];
+            const sanitizedStatic = staticOptions
+                .map((opt: any) => sanitizeOption(opt))
+                .filter(Boolean) as DropdownOption[];
 
             setOptions(prev => {
                 if (JSON.stringify(prev) === JSON.stringify(sanitizedStatic)) return prev;
                 return sanitizedStatic;
             });
+        } else {
+            fetchOptions('');
         }
-    },[isStatic, JSON.stringify(staticOptions)]);
+    }, [isStatic, JSON.stringify(staticOptions), apiUrl]);
 
+    // Set up the default values
+    useEffect(() => {
+        if (defaultValues.length > 0 && options.length > 0 && selected.length === 0) {
+            // Convert defaultValues to strings to match sanitized option values
+            const stringifiedDefaults = defaultValues.map(v => String(v));
+
+            const initiallySelected = options.filter((opt) =>
+                stringifiedDefaults.includes(opt.value)
+            );
+
+            if (initiallySelected.length > 0) {
+                setSelected(initiallySelected);
+
+                onSelect?.(initiallySelected);
+            }
+        }
+    }, [options, defaultValues]);
+
+    //Focus on search bar when popover opens
+    useEffect(() => {
+        if (open) {
+            const timer = setTimeout(() => {
+                inputRef.current?.focus();
+            }, 0);
+            return () => clearTimeout(timer);
+        }
+    }, [open]);
 
     const fetchOptions = async(searchQuery: string) => {
         if (isStatic || !apiUrl) return;
@@ -302,7 +343,7 @@ export function MultiDropdown({
 
             const formatted: DropdownOption[] = apiOptions.map(option => ({
                 value: String(option.value),
-                label: option.text,
+                label: option.label,
             }));
 
             setOptions(formatted);
@@ -408,6 +449,7 @@ export function MultiDropdown({
                                 disabled={loading || options.length === 0}
                             />
                             <CommandInput 
+                                ref={inputRef}
                                 placeholder="Search..." 
                                 onValueChange={(v) => {
                                     setSearch(v);
@@ -466,4 +508,9 @@ export function MultiDropdown({
             />
         </div>
     );
+}
+
+export {
+    SingleDropdown,
+    MultiDropdown
 }

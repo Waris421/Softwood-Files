@@ -3,7 +3,7 @@
 import { DataTable } from "@/_components/table/Table";
 import { Cell, ColumnDef } from "@tanstack/react-table";
 import { useEffect, useState } from "react";
-import { UserPlus, Files, Clock3, Building2, CalendarX, Plane } from "lucide-react";
+import { UserPlus, Files, Clock3, Building2, CalendarX, Plane, Loader2 } from "lucide-react";
 import { THEME } from "@/_components/constants/ui";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
@@ -33,9 +33,10 @@ const listColumns: ColumnDef<WorkerList>[] = [
 export default function WorkerList() {    
     const [data, setData] = useState<WorkerList[]>([]);
     const [loading, setLoading] = useState(false);
+    const [redirecting, setRedirecting] = useState(false);
     const [error, setError] = useState(null);
 
-    const router = useRouter()
+    const router = useRouter();
 
     useEffect(() => {
         const controller = new AbortController();
@@ -68,61 +69,95 @@ export default function WorkerList() {
     }, []);
     
     const onCellClickFunction = (cell: Cell<any, any>, e?: React.MouseEvent) => {
+        setRedirecting(true);
+
         const id = cell.getValue();
         
         router.push(`/hr/worker/${id}/update`);
     }
 
     return (
-        <div className="container mx-auto py-10 relative">
-            {/* Header Section */}
-            <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6">
-                <div>
-                    <h1 className="text-2xl font-bold">Employees</h1>
-                    <p className="text-sm text-base-content/70">Manage employees related data</p>
+        <>
+            {redirecting && (
+                <div className="fixed inset-0 z-50 flex items-center justify-center bg-white/50">
+                    <Loader2 className="animate-spin text-primary" size={40} />
+                </div>
+            )}  
+            <div className="container mx-auto py-10 relative">
+                {/* Header Section */}
+                <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6">
+                    <div>
+                        <h1 className="text-2xl font-bold">Employees</h1>
+                        <p className="text-sm text-base-content/70">Manage employees related data</p>
+                    </div>
+
+                    <div className="flex flex-wrap gap-2">
+                        <Link
+                            href="/hr/worker/add"
+                            className={`${THEME.ButtonBasic} ${redirecting ? 'pointer-events-none opacity-50' : ''}`}
+                            onClick={() => setRedirecting(true)}
+                        >
+                            <UserPlus size={18} />
+                            Add Employee
+                        </Link>
+                        <Link
+                            href="/hr/worker/shift-define"
+                            className={`${THEME.ButtonBasic} ${redirecting ? 'pointer-events-none opacity-50' : ''}`}
+                            onClick={() => setRedirecting(true)}
+                        >
+                            <Clock3 size={18} />
+                            Define Shift
+                        </Link>
+                        <Link
+                            href="/hr/holiday/add"
+                            className={`${THEME.ButtonBasic} ${redirecting ? 'pointer-events-none opacity-50' : ''}`}
+                            onClick={() => setRedirecting(true)}
+                        >
+                            <CalendarX size={18} />
+                            Define Holiday
+                        </Link>
+                        <Link
+                            href="/hr/saturday/set"
+                            className={`${THEME.ButtonOutLine} ${redirecting ? 'pointer-events-none opacity-50' : ''}`}
+                            onClick={() => setRedirecting(true)}
+                        >
+                            <Plane size={18} />
+                            Define Saturday
+                        </Link>
+                        <Link
+                            href="/hr/office"
+                            className={`${THEME.ButtonOutLine} ${redirecting ? 'pointer-events-none opacity-50' : ''}`}
+                            onClick={() => setRedirecting(true)}
+                        >
+                            <Building2 size={18} />
+                            Manage Offices
+                        </Link>
+                        <Link
+                            href="/hr/worker/bulk-add"
+                            className={`${THEME.ButtonOutLine} ${redirecting ? 'pointer-events-none opacity-50' : ''}`}
+                            onClick={() => setRedirecting(true)}
+                        >
+                            <Files size={18} />
+                            Worker Uploader
+                        </Link>
+                    </div>
                 </div>
 
-                <div className="flex flex-wrap gap-2">
-                    <Link href="/hr/worker/add" className={THEME.ButtonBasic}>
-                        <UserPlus size={18} />
-                        Add Employee
-                    </Link>
-                    <Link href="/hr/worker/shift-define" className={THEME.ButtonBasic}>
-                        <Clock3 size={18} />
-                        Define Shift
-                    </Link>
-                    <Link href="/hr/holiday/add" className={THEME.ButtonBasic}>
-                        <CalendarX size={18} />
-                        Define Holiday
-                    </Link>
-                    <Link href="/hr/saturday/set" className={THEME.ButtonOutLine}>
-                        <Plane size={18} />
-                        Define Saturday
-                    </Link>
-                    <Link href="/hr/office" className={THEME.ButtonOutLine}>
-                        <Building2 size={18} />
-                        Manage Offices
-                    </Link>
-                    <Link href="/hr/worker/bulk-add" className={THEME.ButtonOutLine}>
-                        <Files size={18} />
-                        Worker Uploader
-                    </Link>
-                </div>
+                {/* The main data table */}
+                <DataTable 
+                    columns={listColumns}
+                    data={data}
+                    isLoading={loading}
+                    error={error}
+                    dropdownFilters={['Department']}
+                    searchFilters={['id', 'WorkerName']}
+                    sliderFilters={['Age', 'JobDuration']}
+                    showPrint={false}
+                    columnClickHandlers={{
+                        id: onCellClickFunction
+                    }}
+                />
             </div>
-
-            {/* The main data table */}
-            <DataTable 
-                columns={listColumns}
-                data={data}
-                isLoading={loading}
-                error={error}
-                dropdownFilters={['Department']}
-                searchFilters={['id', 'WorkerName']}
-                sliderFilters={['Age', 'JobDuration']}
-                showPrint={false}
-                clickableColumnId="id"
-                onCellClick={onCellClickFunction}
-            />
-        </div>
+        </>
     )
 }

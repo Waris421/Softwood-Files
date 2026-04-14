@@ -40,6 +40,7 @@ const Page = () => {
                 alt={module.title}
                 fill
                 className="object-cover"
+                sizes="(max-width: 768px) 50vw, 25vw"
               />
             </div>
             <div className="relative z-10 flex flex-col justify-between h-full">

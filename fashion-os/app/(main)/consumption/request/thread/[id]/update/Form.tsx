@@ -353,13 +353,11 @@ export default function ConsumptionForm({ pk }: FormProps){
                                         <Controller 
                                             control={control}
                                             name={`items.${index}.StitchType` as const}
-                                            render={({field}) => {
-                                                const selectedOption = stitchTypes.find(opt => opt.value === field.value);
-                                                
+                                            render={({field}) => {                                                
                                                 return (
                                                     <SingleDropdown 
                                                         inputName={field.name}
-                                                        defaultValue={selectedOption}
+                                                        defaultValue={field.value}
                                                         placeholder="Select Type..."
                                                         isStatic={true}
                                                         widthClass="w-40"
@@ -396,12 +394,10 @@ export default function ConsumptionForm({ pk }: FormProps){
                                             control={control}
                                             name={`items.${index}.ThreadType` as const}
                                             render={({field}) => {
-                                                const selectedOption = threadOptions.find(opt => opt.value === String(field.value))
-                                                                        || (field.value ? {label: "Loading...", value: String(field.value)} : null);
                                                 return (
                                                     <SingleDropdown 
                                                         inputName={field.name}
-                                                        defaultValue={selectedOption}
+                                                        defaultValue={field.value}
                                                         placeholder="Select Type..."
                                                         widthClass="w-40"
                                                         isStatic={true}
@@ -422,11 +418,10 @@ export default function ConsumptionForm({ pk }: FormProps){
                                             control={control}
                                             name={`items.${index}.NeedleCount` as const}
                                             render={({field}) => {
-                                                const selectedOption = countTypes.find(opt => opt.value === field.value);
                                                 return (
                                                     <SingleDropdown 
                                                         inputName={field.name}
-                                                        defaultValue={selectedOption}
+                                                        defaultValue={field.value}
                                                         placeholder="Select Count..."
                                                         widthClass="w-40"
                                                         isStatic={true}
@@ -448,11 +443,10 @@ export default function ConsumptionForm({ pk }: FormProps){
                                             control={control}
                                             name={`items.${index}.LooperCount` as const}
                                             render={({field}) => {
-                                                const selectedOption = countTypes.find(opt => opt.value === field.value);
                                                 return (
                                                     <SingleDropdown 
                                                         inputName={field.name}
-                                                        defaultValue={selectedOption}
+                                                        defaultValue={field.value}
                                                         placeholder="Select Count..."
                                                         widthClass="w-40"
                                                         isStatic={true}

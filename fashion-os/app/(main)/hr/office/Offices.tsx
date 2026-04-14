@@ -1,33 +1,82 @@
 'use client';
 
 import { THEME } from "@/_components/constants/ui";
+import LocationPreview from "@/_components/DialogBox/LocationPreview";
 import { DataTable } from "@/_components/table/Table";
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/_components/ui/dialog";
 import { Cell, ColumnDef } from "@tanstack/react-table";
 import { Database, MapPinPlus, Plus } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 type OfficeList = {
-    Name: string,
-    Location: string,
-    Radius: string,
-    Employees: number
+    id: number;
+    LocationName: string;
+    Latitude: number;
+    Longitude: number;
+    Radius: string;
+    Employees: number;
 }
 
 const listColumns: ColumnDef<OfficeList>[] = [
-    {accessorKey: 'Name', header: 'Office Name'},
-    {accessorKey: 'Location', header: 'Location'},
+    {accessorKey: 'LocationName', header: 'Office Name'},
+    {
+        id: 'Location',
+        header: 'Location',
+        cell: (info) => {
+            const lat = info.row.original.Latitude;
+            const long = info.row.original.Longitude;
+            return `${lat}, ${long}`;
+        }
+    },
     {accessorKey: 'Radius', header: 'Radius'},
-    {accessorKey: 'Count', header: 'Employees'},
+    {accessorKey: 'Employees', header: 'Employees Count'},
 ]
 
 export default function OfficeList() {
     const [data, setData] = useState<OfficeList[]>([]);
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState(null);
+    const [previewOffice, setPreviewOffice] = useState(null);
     
     const router = useRouter();
+
+    useEffect(() => {
+        const fetchOffices = async () => {
+            try {
+                setLoading(true);
+
+                const response = await fetch('/api/hr/office');
+                if (!response.ok) {
+                    const errorData = await response.json();
+                    throw new Error(errorData.details?.message || "Failed to fetch offices");
+                }
+
+                const offices = await response.json();
+
+                setData(offices);
+            } catch (err: any) {
+                if (err.name === 'AbortError') return;
+                setError(err.message);
+            } finally {
+                setLoading(false);
+            }   
+        }
+
+        fetchOffices();
+    }, []);
+
+    //To go to location edit page
+    const onLocationNameClick = (cell: Cell<any, any>) => {
+        const id = cell.row.original.id;
+        router.push(`/hr/office/${id}/update`);
+    }
+
+    //To preview the location on google maps
+    const onLocationClick = (cell: Cell<any, any>) => {
+        setPreviewOffice(cell.row.original);
+    }
 
     return (
         <div className="container mx-auto py-10 relative">
@@ -64,10 +113,17 @@ export default function OfficeList() {
                 error={error}
                 showPrint={false}
                 showDownload={false}
-                searchFilters={['Name']}
+                searchFilters={['LocationName']}
                 columnClickHandlers={{
-                    Name: (cell) => console.log("Office clicked:", cell.getValue()),
+                    LocationName: onLocationNameClick,
+                    Location: onLocationClick,
                 }}
+            />
+
+            {/* The location previous dialog */}
+            <LocationPreview
+                location={previewOffice}
+                onClose={() => setPreviewOffice(null)}
             />
         </div>
     )

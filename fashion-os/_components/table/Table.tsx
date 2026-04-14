@@ -1,6 +1,5 @@
 'use client';
 
-import * as React from "react"
 import { useReactToPrint } from "react-to-print";
 import * as XLSX from "xlsx";
 import { Cell, ColumnDef, ColumnFiltersState, FilterFn, flexRender, getCoreRowModel, getFilteredRowModel, getPaginationRowModel, getSortedRowModel, SortingState, useReactTable } from "@tanstack/react-table";
@@ -12,6 +11,7 @@ import { Skeleton } from "../ui/skeleton";
 import { SingleDropdown } from "../Dropdown/Dropdown";
 import { Slider } from "../ui/slider";
 import { PrintTable } from "../Print/Table";
+import { useEffect, useMemo, useRef, useState } from "react";
 
 //Paramters for the dropdown table
 interface DataTableProps<TData, TValue> {
@@ -25,19 +25,26 @@ interface DataTableProps<TData, TValue> {
     columnClickHandlers?: Record<string, (cell: Cell<TData, TValue>, e?: React.MouseEvent) => void>;
     getRowClassName?: (row: TData) => string;
     error?: string | null,
+    pageSize?: number,
     showPrint?: boolean,
     showDownload?: boolean,
 }
 
 export function DataTable<TData, TValue> ({
-    title, columns, data, searchFilters, dropdownFilters, sliderFilters, isLoading, columnClickHandlers, error, showPrint=true, showDownload=true, getRowClassName,
+    title, columns, data, searchFilters, dropdownFilters, sliderFilters, isLoading, columnClickHandlers, error, pageSize = 20, showPrint=true, showDownload=true, getRowClassName,
 }: DataTableProps<TData, TValue> ) {
     //Initialisations
-    const [sorting, setSorting] = React.useState<SortingState>([]);
-    const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>([]);
-    const componentRef = React.useRef<HTMLDivElement>(null);
+    const [sorting, setSorting] = useState<SortingState>([]);
+    const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
+    const componentRef = useRef<HTMLDivElement>(null);
+
+    const [isMounted, setIsMounted] = useState(false);
+
+    useEffect(() => {
+        setIsMounted(true);
+    }, []);
     
-    const sliderBounds = React.useMemo(() => {
+    const sliderBounds = useMemo(() => {
         const bounds: Record<string, { min: number; max: number }> = {};
             sliderFilters?.forEach((columnId) => {
                 const values = data
@@ -90,7 +97,7 @@ export function DataTable<TData, TValue> ({
         },
         initialState: {
             pagination: {
-                pageSize: 20,
+                pageSize: pageSize,
             },
         },
     })
@@ -130,7 +137,7 @@ export function DataTable<TData, TValue> ({
     });
 
     //get the options for each drop down based on the data in those cols
-    const dropDownOptions = React.useMemo(() => {
+    const dropDownOptions = useMemo(() => {
         const optionsMap: Record<string, string[]> = {};
         
         dropdownFilters?.forEach((columnId) => {
@@ -146,7 +153,7 @@ export function DataTable<TData, TValue> ({
     }, [data, dropdownFilters]);
 
     //Options for the go to page dropdown
-    const pageOptions = React.useMemo(() => {
+    const pageOptions = useMemo(() => {
         return Array.from({ length: table.getPageCount() }, (_, i) => ({
             label: `Page ${i + 1}`,
             value: String(i),
@@ -193,9 +200,9 @@ export function DataTable<TData, TValue> ({
                     }));
 
                     const currentValue = column.getFilterValue() as string;
-                    
+
                     return (
-                        <div key={columnId} className="flex-1 min-w-30">
+                        <div key={`${columnId}-${formattedOptions.length}`} className="flex-1 min-w-30">
                             <SingleDropdown 
                                 inputName={`filter-${columnId}`}
                                 placeholder={`Filter ${getColumnHeaderFromId(columnId)}`}
@@ -271,7 +278,7 @@ export function DataTable<TData, TValue> ({
             </div>
 
             {/*The main table*/}
-            <div className="rounded-lg border bg-card shadow-sm overflow-x-auto">
+            <div className="relative rounded-lg border bg-card shadow-sm overflow-x-auto">
                 <Table className="w-full table-auto">
                     <TableHeader className="bg-muted/50">
                         {table.getHeaderGroups().map((headerGroup) => (
@@ -393,7 +400,7 @@ export function DataTable<TData, TValue> ({
                                 Page {table.getState().pagination.pageIndex + 1} of {table.getPageCount()}
                             </span>
 
-                            <div className="w-32">
+                            <div className="w-32" key={table.getPageCount()}>
                                 <SingleDropdown 
                                     inputName="page-selector"
                                     placeholder="Go to..."
@@ -434,7 +441,8 @@ export function DataTable<TData, TValue> ({
             )}
 
             {/* Print View */}
-            <div className="hidden">
+            {isMounted && (
+                <div className="hidden">
                 <PrintTable 
                     ref={componentRef} 
                     rows={rowsToPrint} 
@@ -442,6 +450,7 @@ export function DataTable<TData, TValue> ({
                     pageHeader={title}
                 />
             </div>
+            )}
         </div>
     )
 }

@@ -17,17 +17,23 @@ export const ShortcutProvider = ({children} : { children: React.ReactNode }) => 
 
     useEffect(() => {
         const handleKeyDown = (event: KeyboardEvent) => {
+            const target = event.target as HTMLElement;
+            const isInput = target.tagName === 'INPUT' || target.tagName === 'TEXTAREA' || target.isContentEditable;
+
             const key = event.key.toLowerCase();
             const isMod = event.ctrlKey || event.metaKey;
 
             //Actions that don't need to be suppressed
-            const isAllowedAction = ['z', 'x', 'c', 'v', 'l', 'r'].includes(key);
+            const isAllowedAction = ['z', 'x', 'c', 'v', 'l', 'r', 'a'].includes(key);
 
             if (isMod && actionsRef.current[key]) {
+                if (isInput) return;
+
                 actionsRef.current[key]();
+                return ;
             }
 
-            if (!isAllowedAction && isMod) {
+            if (!isAllowedAction && isMod&& !isInput) {
                 event.preventDefault();
             }
         }

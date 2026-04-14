@@ -117,11 +117,6 @@ export default function WorkerUpdateForm({ pk }: FormProps) {
         return eighteenYearsAgo;
     }
 
-    //Helper function to calculate the option label from the value
-    const getOptionLabel = (value: string, optionsList: { label: string; value: string }[]) => {
-        return optionsList.find(opt => opt.value === value)?.label || value;
-    }
-
     //Check the form for errors. Return true if there is an error
     const validateForm = () => {
         const newErrors: Record<string, string> = {};
