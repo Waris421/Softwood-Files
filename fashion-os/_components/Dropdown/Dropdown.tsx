@@ -78,6 +78,7 @@ function SingleDropdown({
         }
     }, [defaultValue, options]);
 
+    //Set the static values
     useEffect(() => {
         setMounted(true);
 
@@ -91,7 +92,7 @@ function SingleDropdown({
         if (defaultValue) {
             setSelectedValue(sanitizeOption(defaultValue));
         }
-    }, [isStatic, apiUrl]);
+    }, [apiUrl, staticOptions]);
 
     const fetchOptions = async(searchQuery: string) => {
         if (isStatic || !apiUrl) return;

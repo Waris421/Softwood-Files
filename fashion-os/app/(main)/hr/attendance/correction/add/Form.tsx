@@ -2,7 +2,7 @@
 
 import LoadingIcon from "@/_components/generic/Loading";
 import MessageBox from "@/_components/generic/MessageBox";
-import { useSearchParams } from "next/navigation";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useState } from "react";
 
 //The generic parts of the form
@@ -14,7 +14,8 @@ interface CorrectionFormProps {
 
 //Schema of the form
 type FormSchema = {
-    CorrectionTypes: string[];
+    CorrectionType: string;
+    Date: string,
 }
 
 //data type of validation schema
@@ -25,7 +26,7 @@ type ValidationSchemaType = {
 
 //Validation schema for the different fields of the form
 const VALIDATION_SCHEMA: ValidationSchemaType = {
-    CorrectionTypes: (val: string[]) => {
+    CorrectionType: (val: string[]) => {
         if (!val || val.length === 0) {
             return 'At least one type must be selected';
         }
@@ -37,14 +38,14 @@ export default function CorrectionForm({
     baseApiUrl = "/api/hr/attendance/correction/add",
     redirectUrl = "/hr/attendance",
 }: CorrectionFormProps) {
-    const [formData, setFormData] = useState({
-        CorrectionTypes: [],
-    });
     const [errors, setErrors] = useState<Record<string, string>>({});
     const [isLoading, setIsLoading] = useState(true);
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [messageConfig, setMessageConfig] = useState<{ show: boolean; subject: string; message: string; action?: () => void; } | null>(null);
+    
     const searchParams = useSearchParams();
+    const pathname = usePathname()
+    const router = useRouter();
 
     useEffect(() => {
         const loadData = async () => {
@@ -70,7 +71,9 @@ export default function CorrectionForm({
                     });
                     return ;
                 }
-                console.log(response);
+
+                const data = await response.json();
+                console.log(data);
             } catch (err: any) {
                 setMessageConfig({
                     show: true,
@@ -87,6 +90,11 @@ export default function CorrectionForm({
 
         loadData();
     }, []);
+
+    const formData: FormSchema = {
+        Date: searchParams.get('date') ?? '',
+        CorrectionType: searchParams.get('type') ?? '',
+    }
 
     if (isLoading) return (
         <LoadingIcon />

@@ -11,7 +11,8 @@ import { Skeleton } from "../ui/skeleton";
 import { SingleDropdown } from "../Dropdown/Dropdown";
 import { Slider } from "../ui/slider";
 import { PrintTable } from "../Print/Table";
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState, useTransition } from "react";
+import { Switch } from "../Switch/Switch";
 
 //Paramters for the dropdown table
 interface DataTableProps<TData, TValue> {
@@ -21,6 +22,7 @@ interface DataTableProps<TData, TValue> {
     searchFilters?: string[],
     dropdownFilters?: string[],
     sliderFilters?: string[],
+    toggleFilters?: string[],
     isLoading?: boolean,
     columnClickHandlers?: Record<string, (cell: Cell<TData, TValue>, e?: React.MouseEvent) => void>;
     getRowClassName?: (row: TData) => string;
@@ -28,15 +30,18 @@ interface DataTableProps<TData, TValue> {
     pageSize?: number,
     showPrint?: boolean,
     showDownload?: boolean,
+    customActions?: React.ReactNode;
 }
 
 export function DataTable<TData, TValue> ({
-    title, columns, data, searchFilters, dropdownFilters, sliderFilters, isLoading, columnClickHandlers, error, pageSize = 20, showPrint=true, showDownload=true, getRowClassName,
+    title, columns, data, searchFilters, dropdownFilters, sliderFilters, toggleFilters, isLoading, columnClickHandlers, error, pageSize = 20, showPrint=true, showDownload=true, getRowClassName, customActions,
 }: DataTableProps<TData, TValue> ) {
     //Initialisations
     const [sorting, setSorting] = useState<SortingState>([]);
     const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
     const componentRef = useRef<HTMLDivElement>(null);
+
+    const [isFiltering, startTransition] = useTransition();
 
     const [isMounted, setIsMounted] = useState(false);
 
@@ -161,6 +166,8 @@ export function DataTable<TData, TValue> ({
     }, [table.getPageCount()]);
     
     const rowsToPrint = table.getSortedRowModel().rows;
+
+    const showSkeleton = isLoading || isFiltering;
     
     //The HTML element
     return (
@@ -175,7 +182,7 @@ export function DataTable<TData, TValue> ({
             )}
             
             {/*Table filters*/}
-            <div className="flex flex-nowrap items-center gap-2 w-full mb-4">
+            <div className="flex flex-wrap items-center gap-2 w-full mb-4">
                 
                 {/* Search a col */}
                 {searchFilters?.map((columnId) => (
@@ -183,8 +190,11 @@ export function DataTable<TData, TValue> ({
                         <input
                             placeholder={`Search ${getColumnHeaderFromId(columnId)}...`}
                             value={(table.getColumn(columnId)?.getFilterValue() as string) ?? ""}
-                            onChange={(event) => table.getColumn(columnId)?.setFilterValue(event.target.value)}
                             className={`${THEME.TextInput} input-sm md:input-md`}
+                            onChange={(event) => {
+                                const val = event.target.value;
+                                table.getColumn(columnId)?.setFilterValue(val);
+                            }}
                         />
                     </div>
                 ))}
@@ -211,12 +221,14 @@ export function DataTable<TData, TValue> ({
                                 widthClass="w-full"
                                 defaultValue={currentValue}
                                 onSelect={(data) => {
-                                    if (Array.isArray(data)) {
-                                        const values = data.map((opt) => opt.value);
-                                        column.setFilterValue(values.length > 0 ? values : undefined);
-                                    } else {
-                                        column.setFilterValue(data ? data.value : undefined);
-                                    }
+                                    startTransition(() => {
+                                        if (Array.isArray(data)) {
+                                            const values = data.map((opt) => opt.value);
+                                            column.setFilterValue(values.length > 0 ? values : undefined);
+                                        } else {
+                                            column.setFilterValue(data ? data.value : undefined);
+                                        }
+                                    });
                                 }}
                             />
                         </div>
@@ -252,8 +264,38 @@ export function DataTable<TData, TValue> ({
                     )
                 })}
 
-                {/* Print and download buttons */}
+                {/* Toggle Cols */}
+                {toggleFilters?.map((columnId) => {
+                    const column = table.getColumn(columnId);
+                    if (!column) return null;
+
+                    const currentValue = column.getFilterValue();
+                    const header = getColumnHeaderFromId(columnId);
+
+                    return (
+                        <div key={columnId} className="flex items-center gap-3 px-2 py-1 bg-muted/30 rounded-lg border border-border min-w-fit">
+                            <span className="text-xs font-medium text-muted-foreground whitespace-nowrap">
+                                {header}:
+                            </span>
+                            <div className="flex items-center">
+                                <Switch 
+                                    checked={!!currentValue}
+                                    onCheckedChange={(checked) => {
+                                        startTransition(() => {
+                                            column.setFilterValue(checked ? true : undefined);
+                                        });
+                                    }}
+                                    showLabels={false}
+                                />
+                            </div>
+                        </div>
+                    )
+                })}
+
+                {/* Actions & Print/Download buttons */}
                 <div className="flex items-center gap-2 ml-auto">
+                    {customActions}
+
                     {showDownload && (
                         <Button
                             className="btn-primary btn-sm md:btn-md gap-2 cursor-pointer"
@@ -306,8 +348,8 @@ export function DataTable<TData, TValue> ({
                         ))}
                     </TableHeader>
                     <TableBody>
-                        {isLoading ? (
-                            Array.from({ length: 1 }).map((_, i) => (
+                        {showSkeleton ? (
+                            Array.from({ length: 5 }).map((_, i) => (
                                 <TableRow key={i}>
                                     {columns.map((_, j) => (
                                         <TableCell key={j} className="p-4">

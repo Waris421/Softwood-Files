@@ -2,9 +2,11 @@ import { URLs } from "@/_components/constants/urls";
 import { NextRequest, NextResponse } from "next/server";
 
 const AUTH_COOKIE_NAME = 'authToken';
-const URL = `${URLs.HRServer}/hr/worker/add`;
 
-export async function GET(request: NextRequest) {
+export async function GET(request: NextRequest, { params }: { params: Promise<{ code: string }> }) {
+    const {code} = await params;
+    const URL = `${URLs.MMCServer}/mmc/inventory/${code}/update`;
+
     const authToken = request.cookies.get(AUTH_COOKIE_NAME);
     if (!authToken) {
         return NextResponse.json(
@@ -31,11 +33,11 @@ export async function GET(request: NextRequest) {
         );
     }
 
-    const format = await backendResponse.json();
-    return NextResponse.json(format);
+    const data = await backendResponse.json();
+    return NextResponse.json(data);
 }
 
-export async function POST(request: NextRequest) {
+export async function POST(request: NextRequest, { params }: { params: Promise<{ code: string }> }) {
     const authToken = request.cookies.get(AUTH_COOKIE_NAME);
     if (!authToken) {
         return NextResponse.json(
@@ -44,7 +46,10 @@ export async function POST(request: NextRequest) {
         );
     }
 
-    const requestBody = await request.json();    
+    const {code} = await params;
+    const URL = `${URLs.MMCServer}/mmc/inventory/${code}/update`;
+    const requestBody = await request.json();
+
     const backendResponse = await fetch(URL, {
         method: 'POST',
         headers: {
@@ -61,5 +66,5 @@ export async function POST(request: NextRequest) {
         return NextResponse.json(data, { status: status });
     }
 
-    return NextResponse.json(data, {status: 200})
+    return NextResponse.json(data, { status });
 }

@@ -3,4 +3,5 @@ export const URLs = {
     AMServer: 'http://206.42.124.10:8001',
     QualityServer: 'http://206.42.124.10:8001',
     HRServer: 'http://206.42.124.10:8001',
+    MMCServer: 'http://206.42.124.10:8001',
 }

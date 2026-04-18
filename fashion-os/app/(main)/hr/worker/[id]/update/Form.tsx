@@ -1,7 +1,7 @@
 'use client';
 
 import { THEME } from "@/_components/constants/ui";
-import DatePicker from "@/_components/Datepicker/Datepicker";
+import { DatePicker } from "@/_components/Datepicker/Datepicker";
 import { SingleDropdown } from "@/_components/Dropdown/Dropdown";
 import { FormField } from "@/_components/generic/FormItems";
 import MessageBox from "@/_components/generic/MessageBox";
@@ -194,12 +194,12 @@ export default function WorkerUpdateForm({ pk }: FormProps) {
 
                 <FormField label="Date of Birth" error={errors.DateOfBirth} required>
                     <DatePicker inputName='DateOfBirth' value={formData.DateOfBirth} required={true}
-                        disabledDates={(date) => date > calculateLegalAge()} onChange={(val) => handleInputChange('DateOfBirth', val)} />
+                        disabledDates={(date: any) => date > calculateLegalAge()} onChange={(val: any) => handleInputChange('DateOfBirth', val)} />
                 </FormField>
 
                 <FormField label="Date of Leaving">
                     <DatePicker inputName='DateOfLeaving' value={formData.DateOfLeaving} required={true}
-                        onChange={(val) => handleInputChange('DateOfLeaving', val)} />
+                        onChange={(val: any) => handleInputChange('DateOfLeaving', val)} />
                 </FormField>
 
                 <FormField label="Department" error={errors.Department} required>

@@ -19,7 +19,8 @@ export const THEME = {
         transition-all duration-150 active:scale-95 active:shadow-inner
     `,
 
-    TextInput: ' input w-full rounded-lg bg-gray-300 dark:bg-gray-800',
+    TextInput: 'input w-full rounded-lg bg-gray-300 dark:bg-gray-800',
+    TextInputReadOnly: 'input w-full rounded-lg bg-gray-400 dark:bg-gray-700',
     DropDown: 'w-full justify-between bg-gray-300 dark:bg-gray-800',
     Slider: 'flex-1 w-full min-w-30 rounded-lg bg-gray-300 dark:bg-gray-800',
     CheckBox: 'checkbox rounded-lg checkbox-lg bg-gray-300 dark:bg-gray-800',
