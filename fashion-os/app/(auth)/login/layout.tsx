@@ -25,7 +25,7 @@ export default function AuthLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en">
+    <html lang="en" suppressHydrationWarning>
       <body
         className={`${schibstedGrotesk.variable} ${martianMono.variable} bg-base-200 min-h-screen`}
       >

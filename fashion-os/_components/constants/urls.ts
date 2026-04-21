@@ -1,7 +1,7 @@
 export const URLs = {
-    AuthServer: 'http://206.42.124.10:8001',
-    AMServer: 'http://206.42.124.10:8001',
-    QualityServer: 'http://206.42.124.10:8001',
-    HRServer: 'http://206.42.124.10:8001',
-    MMCServer: 'http://206.42.124.10:8001',
+    AuthServer: 'http://127.0.0.1:8000',
+    AMServer: 'http://127.0.0.1:8000',
+    QualityServer: 'http://127.0.0.1:8000',
+    HRServer: 'http://127.0.0.1:8000',
+    MMCServer: 'http://127.0.0.1:8000',
 }
