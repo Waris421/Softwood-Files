@@ -1,0 +1,126 @@
+'use client';
+
+import { THEME } from "@/_components/constants/ui";
+import { DataTable } from "@/_components/table/Table";
+import { Cell, ColumnDef } from "@tanstack/react-table";
+import { Loader2, SquarePlus } from "lucide-react";
+import Link from "next/link";
+import { useRouter } from "next/navigation";
+import { useEffect, useState } from "react";
+
+type StyleCard = {
+    Code: string,
+    Name: string,
+    Category: string,
+    Customer: string,
+    Fabric: string,
+    Route: string
+}
+
+const reportColumns: ColumnDef<StyleCard>[] = [
+    {
+        accessorKey: 'Code',
+        header: 'Code',
+    },
+    {
+        accessorKey: 'Name',
+        header: 'Name',
+    },
+    {
+        accessorKey: 'Category',
+        header: 'Category',
+    },
+    {
+        accessorKey: 'Customer',
+        header: 'Customer',
+    },
+    {
+        accessorKey: 'Fabric',
+        header: 'Fabric',
+    },
+    {
+        accessorKey: 'Route',
+        header: 'Production Route',
+    },
+]
+
+export default function StyleCards() {
+    const [data, setData] = useState<StyleCard[]>([]);
+    const [loading, setLoading] = useState(true);
+    const [redirecting, setRedirecting] = useState(false);
+    const [error, setError] = useState(null);
+    const [isOpen, setIsOpen] = useState(false);
+    const [selectedCode, setSelectedCode] = useState<string | null>(null);
+    const [selectedName, setSelectedName] = useState<string | null>(null);
+    const [anchorRef, setAnchorRef] = useState<HTMLElement | null>(null);
+
+    const router = useRouter();
+
+    useEffect(() => {
+        const fetchStyleCards = async() => {
+            try {
+                setLoading(true);
+
+                const response = await fetch('/api/merchandising/style');
+                if (!response.ok) {
+                    const errorData = await response.json();
+                    throw new Error(errorData.details?.message || "Failed to fetch requests");
+                }
+
+                const styleCards = await response.json();
+
+                setData(styleCards);
+            } catch(err: any) {
+                setError(err.message);
+            } finally {
+                setLoading(false);
+            }
+        }
+
+        fetchStyleCards();
+    }, []);
+
+    const customHeaderButtons = () => {
+        return (
+            <>
+                <Link
+                    href="/merchandising/style/add"
+                    className={`${THEME.ButtonBasic} ${redirecting ? 'pointer-events-none opacity-50' : ''}`}
+                    onClick={() => setRedirecting(true)}
+                >
+                    <SquarePlus size={18}  />
+                    Add Card
+                </Link>
+            </>
+        )
+    }
+
+    const onCodeClickFunction = (cell: Cell<any, any>, e?: React.MouseEvent) => {
+        
+    }
+    
+    return (
+        <>
+            {redirecting && (
+                <div className="fixed inset-0 z-50 flex items-center justify-center bg-white/50">
+                    <Loader2 className="animate-spin text-primary" size={40} />
+                </div>
+            )}
+
+            <DataTable
+                columns={reportColumns}
+                data={data}
+                isLoading={loading}
+                error={error}
+                dropdownFilters={['Customer', 'Fabric',  'Category', 'Route']}
+                searchFilters={['Code', 'Name']}
+                showDownload={false}
+                showPrint={false}
+                customActions={customHeaderButtons()}
+                columnClickHandlers={{
+                    Code: onCodeClickFunction
+                }}
+            />
+        </>
+    )
+}
