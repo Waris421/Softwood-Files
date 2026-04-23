@@ -1,9 +1,10 @@
 'use client';
 
 import { THEME } from "@/_components/constants/ui";
+import ActionDialog from "@/_components/DialogBox/ActionDialog";
 import { DataTable } from "@/_components/table/Table";
 import { Cell, ColumnDef } from "@tanstack/react-table";
-import { Loader2, SquarePlus } from "lucide-react";
+import { Copy, Loader2, Pencil, SquarePlus, Trash2 } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
@@ -96,7 +97,34 @@ export default function StyleCards() {
     }
 
     const onCodeClickFunction = (cell: Cell<any, any>, e?: React.MouseEvent) => {
-        
+        const styleCode = cell.getValue();
+        const customer = cell.row.original.Customer;
+        setSelectedCode(styleCode);
+        setSelectedName(customer);
+
+        if (e) setAnchorRef(e.currentTarget as HTMLElement);
+        setIsOpen(true);
+    }
+
+    const dialogBoxActions = [
+        { label: 'Edit', icon: <Pencil size={16}/>, onClick: () => {editButtonClick()} },
+        { label: 'Copy', icon: <Copy size={16}/>, onClick: () => {copyButtonClick()} },
+        { label: 'Delete', icon: <Trash2 size={16}/>, onClick: () => {deleteButtonClick()} },
+    ]
+
+    const editButtonClick = () => {
+        setRedirecting(true);
+        router.push(`/merchandising/style/${selectedCode}/edit`);
+    }
+
+    const copyButtonClick = () => {
+        setRedirecting(true);
+        router.push(`/merchandising/style/${selectedCode}/copy`);
+    }
+
+    const deleteButtonClick = () => {
+        setRedirecting(true);
+        router.push(`/merchandising/style/${selectedCode}/delete`);
     }
     
     return (
@@ -121,6 +149,18 @@ export default function StyleCards() {
                     Code: onCodeClickFunction
                 }}
             />
+
+            {/* Dialogue box upon clicking an inventory */}
+            {isOpen && (
+                <ActionDialog 
+                    isOpen={isOpen}
+                    title="Choose an action"
+                    description={`select an option for ${selectedName}`}
+                    actions={dialogBoxActions}
+                    onClose={() => setIsOpen(false)}
+                    anchorRef={anchorRef ? { current: anchorRef } : undefined}
+                />
+            )}
         </>
     )
 }

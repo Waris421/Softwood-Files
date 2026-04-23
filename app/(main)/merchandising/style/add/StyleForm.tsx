@@ -4,7 +4,7 @@ import { useCallback, useEffect, useState } from "react";
 import { useFormRegistry } from "./FormContext";
 import { FormField } from "@/_components/generic/FormItems";
 import { THEME } from "@/_components/constants/ui";
-import { SingleDropdown } from "@/_components/Dropdown/Dropdown";
+import { SingleDropdown, SingleDropdownAsync } from "@/_components/Dropdown/Dropdown";
 
 //Schema of the form
 type FormSchema = {
@@ -27,12 +27,21 @@ const VALIDATION_SCHEMA: ValidationSchemaType= {
     Customer: (val) => (!val.trim() ? 'Customer is required' : null),
 }
 
-const API_URL = '/api/merchandising/style/add'
+const CUSTOMER_OPTIONS_URL = '/api/options/customers';
+
+const FORM_Name_WITH_PARENT = 'style';
+
+const CATEGORY_OPTIONS = [
+    {'value': 'Man', 'label': 'Man'},
+    {'value': 'Woman', 'label': 'Woman'},
+    {'value': 'Boy', 'label': 'Boy'},
+    {'value': 'Girl', 'label': 'Girl'},
+    {'value': 'Baby', 'label': 'Baby'},
+]
 
 export default function StyleForm({ children }: { children?: React.ReactNode }) {
-    const { setFormData, registerValidator, setLoading, setError } = useFormRegistry();
+    const { setFormData, registerValidator} = useFormRegistry();
     const [errors, setErrors] = useState<Record<string, string>>({});
-    const [options, setOptions] = useState({ categories: [], customers: [] });
 
     const [formData, setLocalFormData] = useState({
         Code: '', Name: '', Notes: '', Customer: '', Category: '',
@@ -40,35 +49,8 @@ export default function StyleForm({ children }: { children?: React.ReactNode }) 
 
     //Sync local state to Parent Registry whenever formData changes
     useEffect(() => {
-        setFormData('style', formData);
+        setFormData(FORM_Name_WITH_PARENT, formData);
     }, [formData, setFormData])
-
-    //Load the form data
-    useEffect(() => {
-        const loadInitialOptions = async() => {
-            try {
-                setLoading('style', true);
-
-                const response = await fetch(API_URL);
-                if (!response.ok) {
-                    const errorData = await response.json();
-                    throw new Error(`${errorData.details.message}`);
-                }
-
-                console.log('No error. Implement the rest of the code');
-            } catch(err: any) {
-                setError({
-                    subject: "Fetch Error",
-                    message: err.message,
-                    action: () => window.location.reload()
-                })
-            } finally {
-                setLoading('style', false);
-            }
-        }
-
-        loadInitialOptions();
-    }, []);
 
     //Helper function that triggers when user types something
     const handleInputChange = (field: keyof FormSchema, value: any) => {
@@ -100,7 +82,7 @@ export default function StyleForm({ children }: { children?: React.ReactNode }) 
 
     //Register validation function with the parent.
     useEffect(() => {
-        registerValidator('style', validateForm);
+        registerValidator(FORM_Name_WITH_PARENT, validateForm);
     }, [validateForm, registerValidator]);
     
     return (
@@ -114,18 +96,18 @@ export default function StyleForm({ children }: { children?: React.ReactNode }) 
                 onChange={(e) => handleInputChange('Name', e.target.value)}/>
             </FormField>
             <FormField label="Notes" error={errors.Notes}>
-                <input type="text" placeholder="If applicable" className={THEME.TextInput} value={formData.Notes}
+                <input type="text" placeholder="If needed" className={THEME.TextInput} value={formData.Notes}
                 onChange={(e) => handleInputChange('Notes', e.target.value)}/>
             </FormField>
             <FormField label="Customer" error={errors.Customer} required>
-                <SingleDropdown 
-                    inputName='Customer' placeholder="Select Customer" isStatic staticOptions={options.customers} 
+                <SingleDropdownAsync
+                    inputName='Customer' placeholder="Select Customer" apiUrl={CUSTOMER_OPTIONS_URL} 
                     widthClass="w-full" onSelect={(val: any) => handleInputChange('Customer', val?.value)} 
                 />
             </FormField>
             <FormField label="Category" error={errors.Category} required>
-                <SingleDropdown 
-                    inputName='Category' placeholder="Select an option" isStatic staticOptions={options.categories} 
+                <SingleDropdown
+                    inputName='Category' placeholder="Select an option" staticOptions={CATEGORY_OPTIONS} 
                     widthClass="w-full" onSelect={(val: any) => handleInputChange('Category', val?.value)} 
                 />
             </FormField>

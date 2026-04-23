@@ -2,7 +2,7 @@ import { URLs } from "@/_components/constants/urls";
 import { NextRequest, NextResponse } from "next/server";
 
 const AUTH_COOKIE_NAME = 'authToken';
-const URL = `${URLs.MMCServer}/mmc/inventory/add`;
+const URL = `${URLs.MerchServer}/merchandising/style/add`;
 
 export async function GET(request: NextRequest) {
     const authToken = request.cookies.get(AUTH_COOKIE_NAME);
@@ -12,6 +12,7 @@ export async function GET(request: NextRequest) {
             { status: 401 }
         );
     }
+
     const backendResponse = await fetch(`${URL}`,{
         headers: {
             'Authorization': `${authToken.value}`,

@@ -1,7 +1,8 @@
 'use client';
 
 import MessageBox from '@/_components/generic/MessageBox';
-import { createContext, useCallback, useContext, useMemo, useRef, useState } from 'react';
+import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react';
+import { DropdownOption } from 'react-day-picker';
 
 type ErrorConfig = {
     subject: string;
@@ -9,16 +10,26 @@ type ErrorConfig = {
     action?: () => void;
 } | null;
 
+type FormOptions = {
+    routes?: DropdownOption[];
+}
+
 const FormContext = createContext<{
   setFormData: (key: string, data: any) => void;
   getCombinedData: () => any;
+  setFormMetaData: (key: string, data: any) => void;
+  getCombinedMetaData: (key: string) => any;
   registerValidator: (key: string, fn: () => boolean) => void;
   validateAll: () => boolean;
   setLoading: (key: string, isLoading: boolean) => void;
   isAnyLoading: boolean;
   setError: (config: ErrorConfig) => void;
   error: ErrorConfig;
+  options: FormOptions;
 } | null>(null);
+
+export const API_URL = '/api/merchandising/style/add';
+export const REDIRECT_URL = '/merchandising/style';
 
 export const FormProvider = ({ children }: { children: React.ReactNode }) => {    
     //Form data management
@@ -27,6 +38,14 @@ export const FormProvider = ({ children }: { children: React.ReactNode }) => {
         formsData.current[key] = data; 
     }, []);
     const getCombinedData = () => formsData.current;
+
+    //Data that don't need to be sent to backend from forms
+    const formMetadata = useRef<Record<string, any>>({});
+    const setFormMetaData = useCallback((key: string, data: any) => {
+        formMetadata.current[key] = { ...formMetadata.current[key], ...data };
+    }, []);
+    const getCombinedMetaData = useCallback((key: string) => formMetadata.current[key] || {}, []);
+
 
     //Form validations
     const validators = useRef<Record<string, () => boolean>>({});
@@ -53,16 +72,51 @@ export const FormProvider = ({ children }: { children: React.ReactNode }) => {
         setErrorState(config);
     }, []);
 
+    //Get all the options for all the forms in one place
+    const [options, setOptions] = useState<FormOptions>({});
+    useEffect(() => {
+        const fetchOptions = async() => {
+            setLoading('globalOptions', true);
+            try {
+                const response = await fetch(API_URL);
+                if (!response.ok) {
+                    const errorData = await response.json();
+                    throw new Error(`${errorData.details.message}`);
+                }
+
+                const data = await response.json();
+                
+                const routeOptions = data.routes;
+                setOptions(prev => ({
+                    ...prev,
+                    routes: routeOptions
+                }));
+            } catch (err) {
+                setError({
+                    subject: "Fetch Error",
+                    message: "Failed to load form options."
+                });
+            } finally {
+                setLoading('globalOptions', false);
+            }
+        }
+
+        fetchOptions();
+    }, [setLoading, setError]);
+
     const contextValue = useMemo(() => ({
         setFormData, 
         getCombinedData,
+        setFormMetaData,
+        getCombinedMetaData,
         registerValidator, 
         validateAll,
         setLoading, 
         isAnyLoading,
         setError, 
-        error
-    }), [isAnyLoading, error, setLoading, setError]);
+        error,
+        options,
+    }), [isAnyLoading, error, options, setLoading, setError]);
 
     return (
         <FormContext.Provider
