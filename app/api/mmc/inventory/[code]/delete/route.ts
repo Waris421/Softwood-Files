@@ -18,7 +18,7 @@ export async function DELETE(request: NextRequest, { params }: { params: Promise
     const backendResponse = await fetch(URL, {
         method: 'DELETE',
         headers: {
-        'Authorization': `${authToken.value}`,
+        'Authorization': `Token ${authToken.value}`,
         'Content-Type': 'application/json',
         },
     });

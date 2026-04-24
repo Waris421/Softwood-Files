@@ -13,29 +13,19 @@ import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, 
 
 //If we need to do any validation on rows, do so here.
 const rowSchema = z.object({
-    Variant1: z.string(),
-    Variant2: z.string(),
+    Variant: z.string(),
 })
 
 //If we need to do any validation on cols, do so here.
 const formSchema = z.object({
     items: z.array(rowSchema).superRefine((items, ctx) => {
-        const hasVariant1 = items.some(item => item.Variant1.trim().length > 0);
-        const hasVariant2 = items.some(item => item.Variant2.trim().length > 0);
+        const hasVariant = items.some(item => item.Variant.trim().length > 0);
 
-        if (!hasVariant1) {
+        if (!hasVariant) {
             ctx.addIssue({
                 code: z.ZodIssueCode.custom,
-                message: "At least one Variant 1 is required",
+                message: "At least one Variant is required",
                 path: [0, "Variant1"], // Highlights the first row
-            });
-        }
-
-        if (!hasVariant2) {
-            ctx.addIssue({
-                code: z.ZodIssueCode.custom,
-                message: "At least one Variant 2 is required",
-                path: [0, "Variant2"], // Highlights the first row
             });
         }
     }),
@@ -48,11 +38,11 @@ type FormValues = z.infer<typeof formSchema>;
 export default function VariantForm() {
     const { setFormData, getCombinedData, registerValidator } = useFormRegistry();
     const {
-        register, control, getValues, trigger, formState: { errors }
+        register, control, getValues, trigger, reset, formState: { errors }
     } = useForm<FormValues>({
         resolver: zodResolver(formSchema),
         defaultValues: getCombinedData()[FORM_NAME_WITH_PARENT] || { 
-            items: [{ Variant1: '', Variant2: '' }] 
+            items: [{ Variant: '' }] 
         }
     });
     const [indexToDelete, setIndexToDelete] = useState<number | null>(null);
@@ -64,6 +54,15 @@ export default function VariantForm() {
         name: "items"
     });
 
+    //Pull default values at the start from parent
+    useEffect(() => {
+        const initialValues = getCombinedData()[FORM_NAME_WITH_PARENT];
+
+        if (initialValues && initialValues.items && initialValues.items.length > 0) {
+            reset(initialValues);
+        }
+    }, [getCombinedData, reset])
+    
     //Sync local Hook Form state to Parent Registry whenever anything changes
     useEffect(() => {
         setFormData(FORM_NAME_WITH_PARENT, watchedItems);
@@ -90,8 +89,7 @@ export default function VariantForm() {
 
     //Format for empty row
     const emptyRow = {
-        Variant1: '', 
-        Variant2: '',
+        Variant: '', 
     }
 
     //Adding empty row
@@ -127,8 +125,7 @@ export default function VariantForm() {
                     <table className="table w-full">
                         <thead>
                             <tr className="bg-base-200">
-                                <th className="p-1 border-b text-center w-100">Variant 1</th>
-                                <th className="p-1 border-b text-center w-100">Variant 2</th>
+                                <th className="p-1 border-b text-center w-100">Variant</th>
                                 <th className="p-1 border-b text-center w-40">Actions</th>
                             </tr>
                         </thead>
@@ -142,26 +139,14 @@ export default function VariantForm() {
                                 >
                                     <td className="p-1 w-100">
                                         <input 
-                                            {...register(`items.${index}.Variant1` as const)} 
-                                            className={THEME.TextInput}
+                                            {...register(`items.${index}.Variant` as const)} 
+                                            className={`${THEME.TextInput} text-center`}
                                             type="text"
-                                            placeholder="One entry for one unique variant..."
+                                            placeholder="Must be of the format V1-V2"
                                             maxLength={255}
                                         />
-                                        {errors.items?.[index]?.Variant1 && (
-                                            <p className="text-[10px] text-red-500 mt-1">{errors.items[index]?.Variant1?.message}</p>
-                                        )}
-                                    </td>
-                                    <td className="p-1 w-100">
-                                        <input 
-                                            {...register(`items.${index}.Variant2` as const)} 
-                                            className={THEME.TextInput}
-                                            type="text"
-                                            placeholder="One entry for one unique variant..."
-                                            maxLength={255}
-                                        />
-                                        {errors.items?.[index]?.Variant2 && (
-                                            <p className="text-[10px] text-red-500 mt-1">{errors.items[index]?.Variant2?.message}</p>
+                                        {errors.items?.[index]?.Variant && (
+                                            <p className="text-[10px] text-red-500 mt-1">{errors.items[index]?.Variant?.message}</p>
                                         )}
                                     </td>
                                     <td className="p-1 w-40">

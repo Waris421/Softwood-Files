@@ -1,4 +1,5 @@
 import { Metadata } from "next";
+import ParentContainer from "./Parent";
 
 export const metadata: Metadata = {
   title: 'Updating Style Card',
@@ -15,7 +16,11 @@ const page = async ({ params }: PageProps) => {
     const { code } = await params;
 
     return (
-        <div>{code}</div>
+        <div>
+            <ParentContainer 
+                code={code}
+            />
+        </div>
     )
 }
 

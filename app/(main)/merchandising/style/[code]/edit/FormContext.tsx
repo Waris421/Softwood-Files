@@ -3,6 +3,7 @@
 import MessageBox from '@/_components/generic/MessageBox';
 import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react';
 import { DropdownOption } from 'react-day-picker';
+import { convertAPIDataToFormData } from './ApiConversion';
 
 type ErrorConfig = {
     subject: string;
@@ -21,17 +22,20 @@ const FormContext = createContext<{
   getCombinedMetaData: (key: string) => any;
   registerValidator: (key: string, fn: () => boolean) => void;
   validateAll: () => boolean;
+  initialData: any;
   setLoading: (key: string, isLoading: boolean) => void;
   isAnyLoading: boolean;
   setError: (config: ErrorConfig) => void;
   error: ErrorConfig;
   options: FormOptions;
+  code: string;
 } | null>(null);
 
-export const API_URL = '/api/merchandising/style/add';
+export const GET_API_URL = (code: string) => `/api/merchandising/style/${code}/update`;
+
 export const REDIRECT_URL = '/merchandising/style';
 
-export const FormProvider = ({ children }: { children: React.ReactNode }) => {    
+export const FormProvider = ({ children, code }: { children: React.ReactNode, code: string }) => {    
     //Form data management
     const formsData = useRef<Record<string, any>>({});
     const setFormData = useCallback((key: string, data: any) => { 
@@ -57,6 +61,10 @@ export const FormProvider = ({ children }: { children: React.ReactNode }) => {
         return results.every(isValid => isValid === true);
     }
 
+    //This is only if we need to implement reset forms functionality.
+    // Don't use this to populate children at first login,as it'll result in bugs
+    const [initialData, setInitialData] = useState<any>(null);
+
     //Loading state management
     const [loadingMap, setLoadingMap] = useState<Record<string, boolean>>({})
     const setLoading = useCallback((key: string, isLoading: boolean) => {
@@ -72,13 +80,18 @@ export const FormProvider = ({ children }: { children: React.ReactNode }) => {
         setErrorState(config);
     }, []);
 
-    //Get all the options for all the forms in one place
+    //Get all the options and pre-set values for all the forms in one place
     const [options, setOptions] = useState<FormOptions>({});
     useEffect(() => {
         const fetchOptions = async() => {
             setLoading('globalOptions', true);
+
             try {
-                const response = await fetch(API_URL);
+                if (!code) {
+                    throw new Error('No style code provided');
+                }
+
+                const response = await fetch(GET_API_URL(code));
                 if (!response.ok) {
                     const errorData = await response.json();
                     throw new Error(`${errorData.details.message}`);
@@ -86,15 +99,17 @@ export const FormProvider = ({ children }: { children: React.ReactNode }) => {
 
                 const data = await response.json();
                 
-                const routeOptions = data.routes;
-                setOptions(prev => ({
-                    ...prev,
-                    routes: routeOptions
-                }));
-            } catch (err) {
+                setOptions(prev => ({ ...prev, routes: data.routes }));
+
+                const convertedData = convertAPIDataToFormData(data.formData)
+
+                formsData.current = convertedData;
+
+                //setInitialData(data.formData);
+            } catch (err: any) {
                 setError({
                     subject: "Fetch Error",
-                    message: `Failed to load form options. ${err}`,
+                    message: `${err}` ,
                     action: () => window.location.reload(),
                 });
             } finally {
@@ -103,7 +118,7 @@ export const FormProvider = ({ children }: { children: React.ReactNode }) => {
         }
 
         fetchOptions();
-    }, [setLoading, setError]);
+    }, [code, setLoading, setError]);
 
     const contextValue = useMemo(() => ({
         setFormData, 
@@ -112,12 +127,14 @@ export const FormProvider = ({ children }: { children: React.ReactNode }) => {
         getCombinedMetaData,
         registerValidator, 
         validateAll,
+        initialData,
+        code,
         setLoading, 
         isAnyLoading,
         setError, 
         error,
         options,
-    }), [isAnyLoading, error, options, setLoading, setError]);
+    }), [initialData, isAnyLoading, error, options, code, setLoading, setError]);
 
     return (
         <FormContext.Provider

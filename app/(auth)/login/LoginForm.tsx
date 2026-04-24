@@ -42,7 +42,7 @@ const LoginForm = () => {
       
       {/* Error Alert */}
       {state.message && (
-          <div role="alert" className={`${THEME.ErrorAlert}`}>
+          <div role="alert" className={`${THEME.ErrorText}`}>
             <AlertCircle className="w-5 h-5" />
             <span>{state.message}</span>
           </div>
