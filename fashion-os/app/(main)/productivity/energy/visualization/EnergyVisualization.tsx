@@ -78,7 +78,9 @@ export default function EnergyVisualization() {
             { label: '≤ 0.8 kW',               minutes: readings.filter(r => r.value_kw > 0.5 && r.value_kw <= 0.8).length },
             { label: '≤ 1 kW',                 minutes: readings.filter(r => r.value_kw > 0.8 && r.value_kw <= 1).length },
             { label: '≤ 2 kW',                 minutes: readings.filter(r => r.value_kw > 1 && r.value_kw <= 2).length },
-            { label: `> ${lastThreshold} kW`,  minutes: readings.filter(r => r.value_kw > lastThreshold).length },
+            { label: '> 2 kW',                 minutes: readings.filter(r => r.value_kw > 2).length },
+
+            //{ label: `> ${lastThreshold} kW`,  minutes: readings.filter(r => r.value_kw > lastThreshold).length },
         ]
     }
 
@@ -191,7 +193,11 @@ export default function EnergyVisualization() {
                         if (!m) return null
                         return (
                             <div className="mt-4 bg-base-100 rounded-xl p-4">
-                                <h2 className="text-lg font-semibold mb-3">{m.machine}</h2>
+                                <h2 className="text-lg font-semibold">{m.machine}</h2>
+                                <p className="text-sm opacity-60 mb-3">
+                                    {new Date(selectedRange.from!).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })} – {new Date(selectedRange.to!).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
+                                </p>
+
                                 <ReactECharts option={buildChartOption(computeBuckets(m.readings))} style={{ height: 400 }} />
                             </div>
                         )
