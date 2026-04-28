@@ -13,6 +13,11 @@ type ErrorConfig = {
 
 type FormOptions = {
     routes?: DropdownOption[];
+    units?: {
+        value: string,
+        label: string,
+        Group: string,
+    }[];
 }
 
 const FormContext = createContext<{
@@ -99,7 +104,7 @@ export const FormProvider = ({ children, code }: { children: React.ReactNode, co
 
                 const data = await response.json();
                 
-                setOptions(prev => ({ ...prev, routes: data.routes }));
+                setOptions(prev => ({ ...prev, routes: data.routes, units: data.units }));
 
                 const convertedData = convertAPIDataToFormData(data.formData)
 

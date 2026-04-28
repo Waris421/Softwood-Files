@@ -36,3 +36,34 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
     const data = await backendResponse.json();
     return NextResponse.json(data);
 }
+
+export async function POST(request: NextRequest, { params }: { params: Promise<{ code: string }> }) {
+    const authToken = request.cookies.get(AUTH_COOKIE_NAME);
+    if (!authToken) {
+        return NextResponse.json(
+            { error: 'Unauthorized' }, 
+            { status: 401 }
+        );
+    }
+
+    const {code} = await params;
+    const URL = `${URLs.MerchServer}/merchandising/style/${code}/update`;
+
+    const formData = await request.formData();
+
+    const backendResponse = await fetch(URL, {
+        method: 'POST',
+        headers: {
+            'Authorization': `Token ${authToken.value}`,
+        },
+        body: formData,
+    });
+
+    const data = await backendResponse.json();
+    const status = backendResponse.status;
+    if (!backendResponse.ok) {
+        return NextResponse.json(data, { status: status });
+    }
+
+    return NextResponse.json(data, {status: 200});
+}

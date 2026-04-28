@@ -13,6 +13,7 @@ import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, 
 
 //If we need to do any validation on rows, do so here.
 const rowSchema = z.object({
+    id: z.union([z.string(), z.number()]).optional(),
     Variant: z.string(),
 })
 
@@ -42,7 +43,7 @@ export default function VariantForm() {
     } = useForm<FormValues>({
         resolver: zodResolver(formSchema),
         defaultValues: getCombinedData()[FORM_NAME_WITH_PARENT] || { 
-            items: [{ Variant: '' }] 
+            items: [{ Variant: '', id: '' }] 
         }
     });
     const [indexToDelete, setIndexToDelete] = useState<number | null>(null);
@@ -89,7 +90,7 @@ export default function VariantForm() {
 
     //Format for empty row
     const emptyRow = {
-        Variant: '', 
+        Variant: '', id: '',
     }
 
     //Adding empty row

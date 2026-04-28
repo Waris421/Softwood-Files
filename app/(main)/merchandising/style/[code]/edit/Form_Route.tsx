@@ -58,6 +58,19 @@ export default function RouteForm() {
 
     const routeOptions = options.routes || [];
 
+    //Pull default values at the start from parent
+    useEffect(() => {
+        const initialValues = getCombinedData()[FORM_Name_WITH_PARENT];
+        if (initialValues) {
+            setLocalFormData((prev: any) => ({
+                ...prev,
+                ...initialValues
+            }));
+        }
+
+        fetchRouteDetails(initialValues?.RouteId || '');
+    }, [getCombinedData]);
+    
     //Sync local state to Parent Registry whenever formData changes
     useEffect(() => {
         setFormData(FORM_Name_WITH_PARENT, formData);
@@ -79,30 +92,34 @@ export default function RouteForm() {
         }
     }
 
-    const handleRouteChange = async (selectedRoute: DropdownOption|null) => {
-        if (!selectedRoute) {
-            handleInputChange('RouteId', '');
+    //Helper function to get the route details based on route id
+    const fetchRouteDetails = useCallback(async (routeId: number | string) => {
+        if (!routeId) {
             setRouteData([]);
-            return ;
+            return;
         }
-        const selectedRouteId =  selectedRoute.value;
-        handleInputChange('RouteId', selectedRouteId);
 
         try {
             setIsFetching(true);
-            const response = await fetch(`/api/merchandising/style/route-preset?routeId=${selectedRouteId}`);
+            setFetchError(null);
+            const response = await fetch(`/api/merchandising/style/route-preset?routeId=${routeId}`);
             if (!response.ok) {
                 const errorData = await response.json();
                 throw new Error(errorData.details?.message || "Failed to fetch requests");
             }
             const stages = await response.json();
-
             setRouteData(stages);
-        } catch(err: any) {
+        } catch (err: any) {
             setFetchError(err.message);
         } finally {
             setIsFetching(false);
         }
+    }, []);
+
+    const handleRouteChange = async (selectedRoute: DropdownOption|null) => {
+        const selectedRouteId = selectedRoute?.value || '';
+        handleInputChange('RouteId', selectedRouteId);
+        fetchRouteDetails(selectedRouteId);
     }
 
     //Check the form for errors. Return true if there is an error.

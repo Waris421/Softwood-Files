@@ -1,7 +1,7 @@
 'use client';
 
 import { FormProvider, useFormRegistry, GET_API_URL } from "./FormContext";
-import { Layers, Loader2, Paperclip, Route, Zap } from "lucide-react";
+import { Layers, Loader2, Paperclip, Route, Router, Zap } from "lucide-react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/_components/ui/tabs";
 import { THEME } from "@/_components/constants/ui";
 import LoadingIcon from "@/_components/generic/Loading";
@@ -34,14 +34,23 @@ function GlobalSubmitButton() {
         
         //Data is valid now
         const payload = getCombinedData();
+
+        const formData = new FormData();
+
+        formData.append("data", JSON.stringify(payload));
+
+        payload.attachment.items.forEach((item: any, index: number) => {
+            const newFile = item.NewFile;
+            if (newFile) {
+
+                formData.append(`attachRowIdx_${index}`, newFile);
+            }
+        });
         
         try {
             const response = await fetch(GET_API_URL(code), {
                 method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify(payload),
+                body: formData,
             });
 
             if (!response.ok) {
@@ -52,7 +61,8 @@ function GlobalSubmitButton() {
             setMessageConfig({
                 show: true,
                 subject: 'Success',
-                message: 'Added Successfully'
+                message: 'Saved Successfully',
+                action: () => (window.location.reload())
             });
         } catch (err: any) {
             setMessageConfig({
@@ -119,7 +129,7 @@ export default function ParentContainer({code}: FormProps) {
                 <LoadingContainer>
                     <div className="flex flex-col min-h-screen">
                         <Tabs defaultValue="consumption" className="w-full px-4 pb-2">
-                            <div className="sticky top-16 z-30 opacity-90 border-b border-base-200 px-4">
+                            <div className="sticky top-16 z-30 bg-gray-100 dark:bg-gray-600 opacity-90 border-b border-base-200 px-4">
                                 <header className="py-4">
                                     <StyleForm>
                                         <GlobalSubmitButton />

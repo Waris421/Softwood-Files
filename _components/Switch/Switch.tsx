@@ -16,6 +16,7 @@ interface SwitchProps {
   inputName?: string;
   value?: string;
   showLabels?: boolean;
+  className?: string;
 }
 
 export const Switch = ({
@@ -26,9 +27,13 @@ export const Switch = ({
     inputName,
     value = "on",
     showLabels = true,
+    className,
 }: SwitchProps) => {
     return (
-        <div className="flex h-12 w-full items-center px-3 rounded-lg bg-gray-300 dark:bg-gray-800">
+        <div className={cn(
+            "flex h-12 w-full items-center px-3 rounded-lg bg-gray-300 dark:bg-gray-900", 
+            className
+        )}>
             <SwitchPrimitives.Root
                 checked={checked}
                 onCheckedChange={onCheckedChange}
@@ -39,13 +44,13 @@ export const Switch = ({
                         "peer inline-flex h-7 w-20 shrink-0 cursor-pointer items-center rounded-lg border-2 border-transparent transition-colors",
                         "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2",
                         "disabled:cursor-not-allowed disabled:opacity-50",
-                        checked ? "bg-primary" : "bg-gray-400 dark:bg-gray-700"
+                        checked ? "bg-primary" : "bg-gray-400 dark:bg-gray-800"
                     )}
             >
                 <SwitchPrimitives.Thumb
                     className={cn(
                         "pointer-events-none block h-5 w-10 rounded-md shadow-lg ring-0 transition-transform",
-                        "bg-white dark:bg-gray-100",
+                        "bg-white dark:bg-gray-500",
                         "border border-transparent dark:border-gray-400/20",
                         checked ? "translate-x-8" : "translate-x-1"
                         )}

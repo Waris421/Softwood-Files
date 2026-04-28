@@ -29,7 +29,7 @@ const VALIDATION_SCHEMA: ValidationSchemaType= {
 
 const CUSTOMER_OPTIONS_URL = '/api/options/customers';
 
-const FORM_Name_WITH_PARENT = 'style';
+const FORM_NAME_WITH_PARENT = 'style';
 
 const CATEGORY_OPTIONS = [
     {'value': 'Man', 'label': 'Man'},
@@ -49,7 +49,7 @@ export default function StyleForm({ children }: { children?: React.ReactNode }) 
 
     //Pull default values at the start from parent
     useEffect(() => {
-        const initialValues = getCombinedData()[FORM_Name_WITH_PARENT];
+        const initialValues = getCombinedData()[FORM_NAME_WITH_PARENT];
         if (initialValues) {
             setLocalFormData(prev => ({
                 ...prev,
@@ -60,7 +60,7 @@ export default function StyleForm({ children }: { children?: React.ReactNode }) 
 
     //Sync local state to Parent Registry whenever formData changes
     useEffect(() => {
-        setFormData(FORM_Name_WITH_PARENT, formData);
+        setFormData(FORM_NAME_WITH_PARENT, formData);
     }, [formData, setFormData]);
 
     //Helper function that triggers when user types something
@@ -93,7 +93,7 @@ export default function StyleForm({ children }: { children?: React.ReactNode }) 
 
     //Register validation function with the parent.
     useEffect(() => {
-        registerValidator(FORM_Name_WITH_PARENT, validateForm);
+        registerValidator(FORM_NAME_WITH_PARENT, validateForm);
     }, [validateForm, registerValidator]);
     
     return (

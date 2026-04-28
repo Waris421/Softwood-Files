@@ -5,4 +5,5 @@ export const URLs = {
     HRServer: 'http://206.42.124.10:8001',
     MMCServer: 'http://206.42.124.10:8001',
     MerchServer: 'http://206.42.124.10:8001',
+    FTPServer: 'http://206.42.124.10:8001',
 }
