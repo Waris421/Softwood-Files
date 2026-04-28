@@ -190,7 +190,6 @@ export default function InventoryUpdateForm({
         //Form is valid now
         const apiURL = `${baseApiUrl}/${code}/update`;
         try {
-            console.log(formData);
             setIsSubmitting(true);
             const response = await fetch(apiURL, {
                 method: 'POST',

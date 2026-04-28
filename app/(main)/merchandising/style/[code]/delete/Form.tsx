@@ -1,4 +1,4 @@
-'use client';
+'use client'
 
 import { THEME } from "@/_components/constants/ui";
 import LoadingIcon from "@/_components/generic/Loading";
@@ -13,25 +13,21 @@ interface FormProps {
     redirectUrl?: string;
 }
 
-export default function InventoryDeleteForm(
-    {
-        code,
-        baseApiUrl = '/api/mmc/inventory',
-        redirectUrl = '/mmc/inventory'
-    }: FormProps
-) {
+export default function StyleDeleteForm({
+    code,
+    baseApiUrl = '/api/merchandising/style',
+    redirectUrl = '/merchandising/style'
+}: FormProps){
+
     const [isLoading, setIsLoading] = useState(true);
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [messageConfig, setMessageConfig] = useState<{ show: boolean; subject: string; message: string; action?: () => void; } | null>(null);
 
     const router = useRouter();
 
-    useEffect(() => {
-        setIsLoading(false)
-    }, [baseApiUrl]);
-
     const handleDelete = async (e: React.FormEvent) => {
         e.preventDefault();
+
         try {
             setIsSubmitting(true);
 
@@ -58,12 +54,16 @@ export default function InventoryDeleteForm(
             setMessageConfig({
                 show: true,
                 subject: "Error",
-                message: `Saving Failed: ${err}`
+                message: `Action Failed: ${err}`
             });
         } finally {
             setIsSubmitting(false);
         }
     }
+
+    useEffect(() => {
+        setIsLoading(false)
+    }, []);
 
     if (isLoading) return (
         <LoadingIcon />
@@ -79,7 +79,7 @@ export default function InventoryDeleteForm(
                 <h2 className="card-title text-2xl font-bold">Are you sure?</h2>
 
                 <p className="text-base-content/70">
-                    You are about to delete <span className="font-semibold text-base-content">"{code || 'this entry'}"</span>.
+                    You are about to delete style: <span className="font-semibold text-base-content">"{code}"</span>.
                     This action cannot be undone.
                 </p>
 

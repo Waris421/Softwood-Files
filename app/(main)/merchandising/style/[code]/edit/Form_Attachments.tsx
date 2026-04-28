@@ -18,7 +18,7 @@ import InputWithURL from "@/_components/generic/InputWithUrl";
 //If we need to do any validation on rows, do so here.
 const rowSchema = z.object({
     AttachmentId: z.union([z.string(), z.number()]).optional(),
-    Description: z.string().min(1, 'Required'),
+    Description: z.string().optional().nullable(),
     FileUrl: z.string().optional().nullable(),
     FileName: z.string().optional().nullable(),
     CanEdit: z.boolean().optional().default(true),
@@ -41,7 +41,7 @@ export default function AttachmentForm() {
     } = useForm<FormValues>({
         resolver: zodResolver(formSchema),
         defaultValues: getCombinedData()[FORM_NAME_WITH_PARENT] || { 
-            items: [{ AttachmentId: '', Description: '', CanEdit: true}] 
+            items: [{ AttachmentId: '', Description: null, CanEdit: true}] 
         }
     });
     const [indexToDelete, setIndexToDelete] = useState<number | null>(null);

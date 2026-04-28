@@ -1,9 +1,9 @@
 import { Metadata } from "next";
-import StyleDuplicateForm from "./Form";
+import StyleDeleteForm from "./Form";
 
 export const metadata: Metadata = {
-  title: 'Copying Style Card',
-  description: 'Copying Style Card',
+  title: 'Deleting Style Card',
+  description: 'Deleting Style Card',
 }
 
 interface PageProps {
@@ -16,7 +16,7 @@ const page = async ({ params }: PageProps) => {
     const { code } = await params;
 
     return (
-        <StyleDuplicateForm 
+        <StyleDeleteForm
             code={code}
         />
     )
