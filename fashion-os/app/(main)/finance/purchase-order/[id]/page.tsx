@@ -9,6 +9,7 @@ type Allocation = {
     WorkOrder: number
     Style: string
     Quantity: number
+    Amount: number
 }
 
 type POItem = {
@@ -17,6 +18,7 @@ type POItem = {
     Quantity: number
     Price: number
     Amount: number
+    AmountDifference: number
     allocations: Allocation[]
 }
 
@@ -87,6 +89,7 @@ export default function PODetailPage() {
                             <th className="p-3 text-right">Quantity</th>
                             <th className="p-3 text-right">Price</th>
                             <th className="p-3 text-right">Amount</th>
+                            <th className="p-3 text-right">Difference</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -96,6 +99,7 @@ export default function PODetailPage() {
                             <td className="p-3 text-right">{item.Quantity}</td>
                             <td className="p-3 text-right">{po.Currency} {item.Price}</td>
                             <td className="p-3 text-right">{po.Currency} {item.Amount}</td>
+                            <td className="p-3 text-right">{po.Currency} {item.AmountDifference}</td>
                         </tr>
                     </tbody>
                 </table>
@@ -106,6 +110,7 @@ export default function PODetailPage() {
                             <th className="p-2 text-left">Work Order</th>
                             <th className="p-2 text-left">Variant</th>
                             <th className="p-2 text-right">Quantity</th>
+                            <th className="p-2 text-right">Amount</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -114,6 +119,7 @@ export default function PODetailPage() {
                                 <td className="p-2">{a.WorkOrder}</td>
                                 <td className="p-2">{item.Variant}</td>
                                 <td className="p-2 text-right">{a.Quantity}</td>
+                                <td className="p-2 text-right">{po.Currency} {a.Amount}</td>
                             </tr>
                         ))}
                     </tbody>

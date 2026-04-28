@@ -30,6 +30,7 @@ type Allocation = {
     WorkOrder: number
     Style: string
     Quantity: number
+    Amount: number
 }
 
 type POItem = {
@@ -38,6 +39,7 @@ type POItem = {
     Quantity: number
     Price: number
     Amount: number
+    AmountDifference: number
     allocations: Allocation[]
 }
 
@@ -139,13 +141,13 @@ export default function PurchaseOrders() {
         poDetail.items.forEach(item => {
             autoTable(doc, {
                 startY: currentY,
-                head: [['Inventory', 'Variant', 'Quantity', 'Price', 'Amount']],
-                body: [[item.Inventory, item.Variant, item.Quantity, `${poDetail.Currency} ${item.Price}`, `${poDetail.Currency} ${item.Amount}`]],
+                head: [['Inventory', 'Variant', 'Quantity', 'Price', 'Amount', 'Difference']],
+                body: [[item.Inventory, item.Variant, item.Quantity, `${poDetail.Currency} ${item.Price}`, `${poDetail.Currency} ${item.Amount}`, `${poDetail.Currency} ${item.AmountDifference}`]],
             })
             autoTable(doc, {
                 startY: (doc as any).lastAutoTable.finalY + 2,
-                head: [['Work Order', 'Variant', 'Quantity']],
-                body: item.allocations.map(a => [a.WorkOrder, item.Variant, a.Quantity]),
+                head: [['Work Order', 'Variant', 'Quantity', 'Amount']],
+                body: item.allocations.map(a => [a.WorkOrder, item.Variant, a.Quantity, `${poDetail.Currency} ${a.Amount}`]),
             })
             currentY = (doc as any).lastAutoTable.finalY + 10
         })
@@ -164,12 +166,12 @@ export default function PurchaseOrders() {
     const downloadCSV = () => {
         if (!poDetail) return
         const sections = poDetail.items.map(item => {
-            const itemRow = [item.Inventory, item.Variant, item.Quantity, item.Price, item.Amount].join(',')
-            const allocHeader = 'Work Order,Variant,Quantity'
+            const itemRow = [item.Inventory, item.Variant, item.Quantity, item.Price, item.Amount, item.AmountDifference].join(',')
+            const allocHeader = 'Work Order,Variant,Quantity,Amount'
             const allocRows = item.allocations.map(a =>
-                [a.WorkOrder, item.Variant, a.Quantity].join(',')
+                [a.WorkOrder, item.Variant, a.Quantity, a.Amount].join(',')
             ).join('\n')
-            return `Inventory,Variant,Quantity,Price,Amount\n${itemRow}\n${allocHeader}\n${allocRows}`
+            return `Inventory,Variant,Quantity,Price,Amount,AmountDifference\n${itemRow}\n${allocHeader}\n${allocRows}`
         })
         const csv = sections.join('\n\n')
         const blob = new Blob([csv], { type: 'text/csv' })
