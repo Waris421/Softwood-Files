@@ -17,7 +17,7 @@ const mapConsumptionData = (consumption = []) => ({
     items: consumption.map((c:any) => ({
         id: c.id || "",
         Inventory: c.InventoryCode || "",
-        InventoryName: `${c.InventoryName || ""} - ${c.InventoryCode || ""}`,
+        InventoryName: c.InventoryName || "",
         InvBaseUnit: c.InventoryUnit,
         Consumption: c.Consumption || 1,
         Unit: c.Unit || "",

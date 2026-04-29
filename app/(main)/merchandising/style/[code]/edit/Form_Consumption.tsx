@@ -174,19 +174,20 @@ export default function ConsumptionForm() {
                                                 control={control}
                                                 name={`items.${index}.InventoryName` as const}
                                                 render={({field}) => {
+                                                    const type = watchedItems?.items?.[index]?.Type;
                                                     return (
                                                         <SearchPicker 
-                                                            apiUrl="/api/options/inventories"
+                                                            id={`search-picker-inv-${index}`}
+                                                            apiUrl={`/api/options/inventories?type=${type}`}
                                                             displayColumn="label"
                                                             columnMapping={[
                                                                 {header: 'Code', key: 'value'},
                                                                 {header: 'Name', key: 'label'},
                                                                 {header: 'Name', key: 'label'},
-                                                                {header: 'Unit', key: 'unit'},
+                                                                {header: 'Unit', key: 'Unit'},
                                                             ]}
                                                             customClasses={{
                                                                 trigger: "w-100",
-                                                                dialog: "max-w-none w-[1000px] lg:w-[80vw]"
                                                             }}
                                                             value={field.value}
                                                             onSelect={(value) => {
