@@ -9,6 +9,7 @@ interface Action {
     label: string;
     subLabel?: string;
     icon?: React.ReactNode;
+    closeOnClick?: boolean;
     onClick: () => void;
 }
 
@@ -97,8 +98,9 @@ const ActionDialog: React.FC<ActionDialogProps> = ({
                                 key={index}
                                 onClick={() => {
                                     action.onClick();
-                                    onClose();
+                                    if (action.closeOnClick !== false) onClose();
                                 }}
+
                                 className="flex items-center gap-3 w-full p-3 rounded-md hover:bg-accent hover:text-accent-foreground transition-colors text-left"
                             >
                                 {action.icon && (

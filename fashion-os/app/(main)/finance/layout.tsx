@@ -1,5 +1,4 @@
 import type { Metadata } from "next";
-import "@/app/globals.css";
 import NavBar from "@/_components/Navbar/NavBar";
 
 export const metadata: Metadata = {
@@ -7,16 +6,10 @@ export const metadata: Metadata = {
   description: "By Softwood Private Limited",
 };
 
-export default function RootLayout({
-  children,
-}: Readonly<{
-  children: React.ReactNode;
-}>) {
+export default function FinanceLayout({ children }: { children: React.ReactNode }) {
   return (
     <div>
-      <NavBar
-      pageName="finance"
-      />
+      <NavBar pageName="finance" />
       <main className="w-full p-4">
         {children}
       </main>

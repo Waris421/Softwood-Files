@@ -13,6 +13,7 @@ import autoTable from 'jspdf-autotable'
 
 // Options for the Dialogue box on  clicking PO
 import ActionDialog from "@/_components/DialogBox/ActionDialog"
+import { Loader2 } from 'lucide-react'
 
 // Labels for all the data taken
 
@@ -67,8 +68,9 @@ export default function PurchaseOrders() {
     const [isOpen, setIsOpen] = useState(false)
     const [selectedOrder, setSelectedOrder] = useState<PurchaseOrder | null>(null)
     const [anchorRef, setAnchorRef] = useState<HTMLElement | null>(null)
-    const [poDetail, setPODetail] = useState<PODetail | null>(null)
-    const [detailLoading, setDetailLoading] = useState(false)
+    const [pdfLoading, setPdfLoading] = useState(false)
+    const [csvLoading, setCsvLoading] = useState(false)
+
 
 
     // Step 1: Define table columns — accessorKey maps to top-level fields,
@@ -114,73 +116,85 @@ export default function PurchaseOrders() {
         setSelectedOrder(cell.row.original)
         if (e) setAnchorRef(e.currentTarget as HTMLElement)
         setIsOpen(true)
-        setPODetail(null)
-        setDetailLoading(true)
-        fetch(`/api/finance/purchase-order/${cell.row.original.PONumber}`)
-            .then(res => res.json())
-            .then(data => setPODetail(data))
-            .finally(() => setDetailLoading(false))
     }
 
+
     // Download PDF Function
-    const downloadPDF = () => {
-        if (!poDetail) return
-        const doc = new jsPDF()
-        const pageWidth = doc.internal.pageSize.width
-        doc.setFontSize(20)
-        doc.setFont('helvetica', 'bold')
-        doc.text('Softwood Pvt', pageWidth / 2, 20, { align: 'center' })
-        doc.setFontSize(14)
-        doc.setFont('helvetica', 'normal')
-        doc.text(`Purchase Order #${poDetail.PONumber}`, pageWidth / 2, 30, { align: 'center' })
-        doc.setFontSize(10)
-        doc.text(`Order Date: ${poDetail.OrderDate}`, 14, 44)
-        doc.text(`Supplier: ${poDetail.Supplier}`, 14, 51)
-        doc.text(`Tax Rate: ${poDetail.Tax}%`, 14, 58)
-        let currentY = 70
-        poDetail.items.forEach(item => {
-            autoTable(doc, {
-                startY: currentY,
-                head: [['Inventory', 'Variant', 'Quantity', 'Price', 'Amount', 'Difference']],
-                body: [[item.Inventory, item.Variant, item.Quantity, `${poDetail.Currency} ${item.Price}`, `${poDetail.Currency} ${item.Amount}`, `${poDetail.Currency} ${item.AmountDifference}`]],
+    const downloadPDF = async () => {
+        if (!selectedOrder) return
+        setPdfLoading(true)
+        try {
+            const res = await fetch(`/api/finance/purchase-order/${selectedOrder.PONumber}`)  // <-- Fetches PO details on clicking the download button only
+            const poDetail = await res.json()
+            const doc = new jsPDF()
+            const pageWidth = doc.internal.pageSize.width
+            doc.setFontSize(20)
+            doc.setFont('helvetica', 'bold')
+            doc.text('Softwood Pvt', pageWidth / 2, 20, { align: 'center' })
+            doc.setFontSize(14)
+            doc.setFont('helvetica', 'normal')
+            doc.text(`Purchase Order #${poDetail.PONumber}`, pageWidth / 2, 30, { align: 'center' })
+            doc.setFontSize(10)
+            doc.text(`Order Date: ${poDetail.OrderDate}`, 14, 44)
+            doc.text(`Supplier: ${poDetail.Supplier}`, 14, 51)
+            doc.text(`Tax Rate: ${poDetail.Tax}%`, 14, 58)
+            let currentY = 70
+            poDetail.items.forEach((item: POItem) => {
+                autoTable(doc, {
+                    startY: currentY,
+                    head: [['Inventory', 'Variant', 'Quantity', 'Price', 'Amount', 'Difference']],
+                    body: [[item.Inventory, item.Variant, item.Quantity, `${poDetail.Currency} ${item.Price}`, `${poDetail.Currency} ${item.Amount}`, `${poDetail.Currency} ${item.AmountDifference}`]],
+                })
+                autoTable(doc, {
+                    startY: (doc as any).lastAutoTable.finalY + 2,
+                    head: [['Work Order', 'Variant', 'Quantity', 'Amount']],
+                    body: item.allocations.map((a: Allocation) => [a.WorkOrder, item.Variant, a.Quantity, `${poDetail.Currency} ${a.Amount}`]),
+                })
+                currentY = (doc as any).lastAutoTable.finalY + 10
             })
-            autoTable(doc, {
-                startY: (doc as any).lastAutoTable.finalY + 2,
-                head: [['Work Order', 'Variant', 'Quantity', 'Amount']],
-                body: item.allocations.map(a => [a.WorkOrder, item.Variant, a.Quantity, `${poDetail.Currency} ${a.Amount}`]),
-            })
-            currentY = (doc as any).lastAutoTable.finalY + 10
-        })
-        const afterAllocations = currentY
-        doc.setFontSize(10)
-        doc.setFont('helvetica', 'normal')
-        doc.text(`Net Amount: ${poDetail.Currency} ${poDetail.NetAmount}`, pageWidth - 14, afterAllocations, { align: 'right' })
-        doc.text(`Tax Amount: ${poDetail.Currency} ${poDetail.TaxAmount}`, pageWidth - 14, afterAllocations + 7, { align: 'right' })
-        doc.setFont('helvetica', 'bold')
-        doc.setFontSize(12)
-        doc.text(`Grand Total: ${poDetail.Currency} ${poDetail.GrandTotal}`, pageWidth - 14, afterAllocations + 16, { align: 'right' })
-        doc.save(`PO-${poDetail.PONumber}.pdf`)
+            const afterAllocations = currentY
+            doc.setFontSize(10)
+            doc.setFont('helvetica', 'normal')
+            doc.text(`Net Amount: ${poDetail.Currency} ${poDetail.NetAmount}`, pageWidth - 14, afterAllocations, { align: 'right' })
+            doc.text(`Tax Amount: ${poDetail.Currency} ${poDetail.TaxAmount}`, pageWidth - 14, afterAllocations + 7, { align: 'right' })
+            doc.setFont('helvetica', 'bold')
+            doc.setFontSize(12)
+            doc.text(`Grand Total: ${poDetail.Currency} ${poDetail.GrandTotal}`, pageWidth - 14, afterAllocations + 16, { align: 'right' })
+            doc.save(`PO-${poDetail.PONumber}.pdf`)
+        } finally {
+            setPdfLoading(false)
+            setIsOpen(false)
+        }
+
     }
 
     // Download CSV Function
-    const downloadCSV = () => {
-        if (!poDetail) return
-        const sections = poDetail.items.map(item => {
-            const itemRow = [item.Inventory, item.Variant, item.Quantity, item.Price, item.Amount, item.AmountDifference].join(',')
-            const allocHeader = 'Work Order,Variant,Quantity,Amount'
-            const allocRows = item.allocations.map(a =>
-                [a.WorkOrder, item.Variant, a.Quantity, a.Amount].join(',')
-            ).join('\n')
-            return `Inventory,Variant,Quantity,Price,Amount,AmountDifference\n${itemRow}\n${allocHeader}\n${allocRows}`
-        })
-        const csv = sections.join('\n\n')
-        const blob = new Blob([csv], { type: 'text/csv' })
-        const url = URL.createObjectURL(blob)
-        const a = document.createElement('a')
-        a.href = url
-        a.download = `PO-${poDetail.PONumber}.csv`
-        a.click()
-        URL.revokeObjectURL(url)
+    const downloadCSV = async () => {
+        if (!selectedOrder) return
+        setCsvLoading(true)
+        try {
+            const res = await fetch(`/api/finance/purchase-order/${selectedOrder.PONumber}`)  // <-- Fetches PO details on clicking the download button only
+            const poDetail = await res.json()
+            const sections = poDetail.items.map((item: POItem) => {
+                const itemRow = [item.Inventory, item.Variant, item.Quantity, item.Price, item.Amount, item.AmountDifference].join(',')
+                const allocHeader = 'Work Order,Variant,Quantity,Amount'
+                const allocRows = item.allocations.map((a: Allocation) =>
+                    [a.WorkOrder, item.Variant, a.Quantity, a.Amount].join(',')
+                ).join('\n')
+                return `Inventory,Variant,Quantity,Price,Amount,AmountDifference\n${itemRow}\n${allocHeader}\n${allocRows}`
+            })
+            const csv = sections.join('\n\n')
+            const blob = new Blob([csv], { type: 'text/csv' })
+            const url = URL.createObjectURL(blob)
+            const a = document.createElement('a')
+            a.href = url
+            a.download = `PO-${poDetail.PONumber}.csv`
+            a.click()
+            URL.revokeObjectURL(url)
+        } finally {
+            setCsvLoading(false)
+            setIsOpen(false)
+        }
     }
 
     // UI of the page
@@ -207,12 +221,9 @@ return (
                 title={`PO #${selectedOrder.PONumber}`}
                 description={`${selectedOrder.Supplier} — ${selectedOrder.OrderDate}`}
                 actions={[
-                    { label: selectedOrder.ItemName, subLabel: 'Item Name', onClick: () => {} },
-                    { label: selectedOrder.ItemCode, subLabel: 'Item Code', onClick: () => {} },
-                    { label: selectedOrder.Supplier, subLabel: 'Supplier', onClick: () => {} },
-                    { label: 'View Full PO', subLabel: 'Opens detail page', onClick: () => router.push(`/finance/purchase-order/${selectedOrder.PONumber}`) },
-                    { label: detailLoading ? 'Loading...' : 'Download PDF', subLabel: 'Download as PDF', onClick: downloadPDF },
-                    { label: detailLoading ? 'Loading...' : 'Download CSV', subLabel: 'Download as CSV', onClick: downloadCSV },
+                    //{ label: 'View Full PO', subLabel: 'Opens detail page', onClick: () => router.push(`/finance/purchase-order/${selectedOrder.PONumber}`) },
+                    { label: pdfLoading ? 'Downloading...' : 'Download PDF', subLabel: 'Download as PDF', icon: pdfLoading ? <Loader2 size={16} className="animate-spin" /> : undefined, closeOnClick: false, onClick: downloadPDF },
+                    { label: csvLoading ? 'Downloading...' : 'Download CSV', subLabel: 'Download as CSV', icon: csvLoading ? <Loader2 size={16} className="animate-spin" /> : undefined, closeOnClick: false, onClick: downloadCSV },
                 ]}
 
                 anchorRef={anchorRef ? { current: anchorRef } : undefined}
