@@ -12,6 +12,7 @@ import { Button } from "@/_components/ui/button";
 import { Minus, Plus } from "lucide-react";
 import { cn } from "@/_components/generic/utils";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/_components/ui/alert-dialog";
+import { SearchPicker } from "@/_components/DialogBox/SearchPicker";
 
 //If we need to do any validation on rows, do so here.
 const rowSchema = z.object({
@@ -169,12 +170,31 @@ export default function ConsumptionForm() {
                                         )}
                                     >
                                         <td className="p-1 w-100">
-                                            <input 
-                                                {...register(`items.${index}.InventoryName` as const)} 
-                                                className={`${THEME.TextInput} text-center`}
-                                                type="text"
-                                                placeholder="Choose from Inventory"
-                                                maxLength={255}
+                                            <Controller 
+                                                control={control}
+                                                name={`items.${index}.InventoryName` as const}
+                                                render={({field}) => {
+                                                    return (
+                                                        <SearchPicker 
+                                                            apiUrl="/api/options/inventories"
+                                                            displayColumn="label"
+                                                            columnMapping={[
+                                                                {header: 'Code', key: 'value'},
+                                                                {header: 'Name', key: 'label'},
+                                                                {header: 'Name', key: 'label'},
+                                                                {header: 'Unit', key: 'unit'},
+                                                            ]}
+                                                            customClasses={{
+                                                                trigger: "w-100",
+                                                                dialog: "max-w-none w-[1000px] lg:w-[80vw]"
+                                                            }}
+                                                            value={field.value}
+                                                            onSelect={(value) => {
+                                                                field.onChange(value)
+                                                            }}
+                                                        />
+                                                    )
+                                                }}  
                                             />
                                             {errors.items?.[index]?.InventoryName && (
                                                 <p className="text-[10px] text-red-500 mt-1">{errors.items[index]?.InventoryName?.message}</p>
