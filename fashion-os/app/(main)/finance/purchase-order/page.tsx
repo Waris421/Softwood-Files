@@ -147,7 +147,7 @@ export default function PurchaseOrders() {
                 })
                 autoTable(doc, {
                     startY: (doc as any).lastAutoTable.finalY + 2,
-                    margin: { left: 25 },
+                    margin: { left: 25 }, // <-- Indent the table
                     head: [['Work Order', 'Style', 'Quantity', 'Amount']],
                     body: item.allocations.map((a: Allocation) => [a.WorkOrder, a.Style, a.Quantity, `${poDetail.Currency} ${a.Amount}`]),
                 })

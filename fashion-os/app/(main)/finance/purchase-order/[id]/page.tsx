@@ -104,7 +104,7 @@ export default function PODetailPage() {
                     </tbody>
                 </table>
 
-                <table className="w-full border rounded-lg text-sm ml-8 border-l-4 border-l-muted-foreground/30">
+                <table className="w-full border rounded-lg text-sm ml-4">
                     <thead className="bg-muted/30">
                         <tr>
                             <th className="p-2 text-left">Work Order</th>
