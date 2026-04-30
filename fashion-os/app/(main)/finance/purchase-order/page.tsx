@@ -147,8 +147,9 @@ export default function PurchaseOrders() {
                 })
                 autoTable(doc, {
                     startY: (doc as any).lastAutoTable.finalY + 2,
-                    head: [['Work Order', 'Variant', 'Quantity', 'Amount']],
-                    body: item.allocations.map((a: Allocation) => [a.WorkOrder, item.Variant, a.Quantity, `${poDetail.Currency} ${a.Amount}`]),
+                    margin: { left: 25 },
+                    head: [['Work Order', 'Style', 'Quantity', 'Amount']],
+                    body: item.allocations.map((a: Allocation) => [a.WorkOrder, a.Style, a.Quantity, `${poDetail.Currency} ${a.Amount}`]),
                 })
                 currentY = (doc as any).lastAutoTable.finalY + 10
             })
@@ -177,9 +178,9 @@ export default function PurchaseOrders() {
             const poDetail = await res.json()
             const sections = poDetail.items.map((item: POItem) => {
                 const itemRow = [item.Inventory, item.Variant, item.Quantity, item.Price, item.Amount, item.AmountDifference].join(',')
-                const allocHeader = 'Work Order,Variant,Quantity,Amount'
+                const allocHeader = 'Work Order,Style,Quantity,Amount'
                 const allocRows = item.allocations.map((a: Allocation) =>
-                    [a.WorkOrder, item.Variant, a.Quantity, a.Amount].join(',')
+                    [a.WorkOrder, a.Style, a.Quantity, a.Amount].join(',')
                 ).join('\n')
                 return `Inventory,Variant,Quantity,Price,Amount,AmountDifference\n${itemRow}\n${allocHeader}\n${allocRows}`
             })

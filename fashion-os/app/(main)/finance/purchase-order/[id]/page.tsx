@@ -104,11 +104,11 @@ export default function PODetailPage() {
                     </tbody>
                 </table>
 
-                <table className="w-full border rounded-lg text-sm ml-4">
+                <table className="w-full border rounded-lg text-sm ml-8 border-l-4 border-l-muted-foreground/30">
                     <thead className="bg-muted/30">
                         <tr>
                             <th className="p-2 text-left">Work Order</th>
-                            <th className="p-2 text-left">Variant</th>
+                            <th className="p-2 text-left">Style</th>
                             <th className="p-2 text-right">Quantity</th>
                             <th className="p-2 text-right">Amount</th>
                         </tr>
@@ -117,7 +117,7 @@ export default function PODetailPage() {
                         {item.allocations.map((a, j) => (
                             <tr key={j} className="border-t">
                                 <td className="p-2">{a.WorkOrder}</td>
-                                <td className="p-2">{item.Variant}</td>
+                                <td className="p-2">{a.Style}</td>
                                 <td className="p-2 text-right">{a.Quantity}</td>
                                 <td className="p-2 text-right">{po.Currency} {a.Amount}</td>
                             </tr>
