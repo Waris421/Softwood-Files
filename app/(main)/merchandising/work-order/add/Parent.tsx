@@ -1,16 +1,15 @@
 'use client';
 
-import StyleForm from "./Form_Style";
-import VariantForm from "./Form_Variant";
-import RouteForm from "./Form_Route";
-import { API_URL, REDIRECT_URL, FormProvider, useFormRegistry } from "./FormContext";
-import { Layers, Loader2, Route } from "lucide-react";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/_components/ui/tabs";
-import { THEME } from "@/_components/constants/ui";
 import LoadingIcon from "@/_components/generic/Loading";
-import { useState } from "react";
-import MessageBox from "@/_components/generic/MessageBox";
+import { API_URL, REDIRECT_URL, FormProvider, useFormRegistry } from "./FormContext";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/_components/ui/tabs";
+import { Layers, Loader2, Save } from "lucide-react";
 import { useRouter } from "next/navigation";
+import { useState } from "react";
+import OrderForm from "./Form_Order";
+import MessageBox from "@/_components/generic/MessageBox";
+import { THEME } from "@/_components/constants/ui";
+import VariantForm from "./Form_Variant";
 
 function GlobalSubmitButton() {
     const { getCombinedData, validateAll } = useFormRegistry();
@@ -28,24 +27,41 @@ function GlobalSubmitButton() {
         
         //Data is valid now
         const payload = getCombinedData();
+
+        const formData = new FormData();
+
+        formData.append("data", JSON.stringify(payload));
+
+        payload.attachment?.items.forEach((item: any, index: number) => {
+            const newFile = item.NewFile;
+            if (newFile) {
+
+                formData.append(`attachRowIdx_${index}`, newFile);
+            }
+        });
         
         try {
             const response = await fetch(API_URL, {
                 method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify(payload),
+                body: formData,
             });
-            const styleCode = payload.style.Code
-            const redirectURL = `${REDIRECT_URL}/${styleCode}/edit`;
 
             if (!response.ok) {
                 const error = await response.json();
                 throw new Error(error.message || error);
             }
 
-            router.push(redirectURL);
+            const orderNumber = payload.order.OrderNumber;
+            const redirectUrl = `${REDIRECT_URL}/${orderNumber}/edit`;
+
+            setMessageConfig({
+                show: true,
+                subject: "Success",
+                message: `Saved Successfully`,
+                action: () => {
+                    router.push(redirectUrl)
+                }
+            });
         } catch (err: any) {
             setMessageConfig({
                 show: true,
@@ -83,12 +99,14 @@ function GlobalSubmitButton() {
                         Saving...
                     </>
                 ) : (
-                    "Save"
+                    <>
+                        <Save className="h-4 w-4" />
+                        Save
+                    </>
                 )}
             </button>
         </>
     )
-
 }
 
 function LoadingContainer({ children }: { children: React.ReactNode }) {
@@ -104,7 +122,7 @@ function LoadingContainer({ children }: { children: React.ReactNode }) {
     );
 }
 
-export default function ParentContainer() {    
+export default function ParentContainer() {
     return (
         <>
             <FormProvider>
@@ -113,21 +131,16 @@ export default function ParentContainer() {
                         <Tabs defaultValue="variant" className="w-full px-4 pb-2">
                             <div className="sticky top-16 z-30 bg-gray-100 dark:bg-gray-600 opacity-90 border-b border-base-200 px-4">
                                 <header className="py-4">
-                                    <StyleForm>
+                                    <OrderForm>
                                         <GlobalSubmitButton />
-                                    </StyleForm>
+                                    </OrderForm>
                                 </header>
 
-                                <TabsList className="grid w-full grid-cols-2 h-12" variant="line">
+                                <TabsList className="grid w-full grid-cols-1 h-12" variant="line">
                                     <TabsTrigger value="variant" className="gap-2">
                                         <Layers size={18} />
                                         <span className="hidden sm:inline">Variant Details</span>
                                         <span className="sm:hidden">Variant</span>
-                                    </TabsTrigger>
-                                    <TabsTrigger value="route" className="gap-2">
-                                        <Route size={18} />
-                                        <span className="hidden sm:inline">Route Details</span>
-                                        <span className="sm:hidden">Route</span>
                                     </TabsTrigger>
                                 </TabsList>
                             </div>
@@ -135,9 +148,6 @@ export default function ParentContainer() {
                             <div className="mt-4 px-4">
                                 <TabsContent value="variant" forceMount className="data-[state=inactive]:hidden">
                                     <VariantForm />
-                                </TabsContent>
-                                <TabsContent value="route" forceMount className="data-[state=inactive]:hidden">
-                                    <RouteForm />
                                 </TabsContent>
                             </div>
                         </Tabs>

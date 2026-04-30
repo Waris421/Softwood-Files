@@ -13,13 +13,16 @@ export const THEME = {
     `,
 
     ButtonSecondary: `
-        btn rounded-lg border-none bg-indigo-50 text-indigo-900 hover:bg-indigo-100
-        dark:bg-slate-800 dark:text-indigo-200 dark:hover:bg-slate-700
+        btn rounded-lg border-none text-white shadow-md
+        bg-linear-to-b from-emerald-500 to-teal-700
+        hover:from-emerald-600 hover:to-teal-800
+        dark:from-teal-600 dark:to-slate-800 dark:hover:from-teal-500 dark:hover:to-teal-900
         transition-all duration-150 active:scale-95 active:shadow-inner
     `,
     ButtonSecondarySelected: `
-        btn btn-sm rounded-lg border-none bg-indigo-200 text-indigo-950 scale-95 shadow-inner
-        dark:bg-indigo-900 dark:text-indigo-50
+        btn btn-sm rounded-lg border-none text-white shadow-inner scale-95
+        bg-linear-to-b from-teal-700 to-emerald-900
+        dark:from-teal-800 dark:to-black
     `,
 
     ButtonOutLine: `
@@ -33,7 +36,7 @@ export const THEME = {
         dark:border-slate-400 dark:text-white dark:bg-slate-700
     `,
 
-    TextInput: 'input w-full rounded-lg bg-gray-300 dark:bg-gray-800',
+    TextInput: 'input w-full rounded-lg bg-gray-300 dark:bg-gray-800 hover:ring-2 hover:shadow-md transition-shadow',
     TextInputReadOnly: 'input w-full rounded-lg bg-gray-400 dark:bg-gray-700',
     DropDown: 'w-full justify-between bg-gray-300 dark:bg-gray-800',
     Slider: 'flex-1 w-full min-w-30 rounded-lg bg-gray-300 dark:bg-gray-800',

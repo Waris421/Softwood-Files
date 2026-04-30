@@ -26,6 +26,9 @@ const FormContext = createContext<{
   setError: (config: ErrorConfig) => void;
   error: ErrorConfig;
   options: FormOptions;
+
+  registerCustomAction: (key: string, fn: (...args: any[]) => void) => void;
+  customAction: (key: string, ...args: any[]) => void;
 } | null>(null);
 
 export const API_URL = '/api/merchandising/style/add';
@@ -105,6 +108,21 @@ export const FormProvider = ({ children }: { children: React.ReactNode }) => {
         fetchOptions();
     }, [setLoading, setError]);
 
+    const actions = useRef<Record<string, (...args: any[]) => void>>({});
+
+    const registerCustomAction = useCallback((key: string, fn: (...args: any[]) => void) => {
+        actions.current[key] = fn;
+    }, []);
+
+    const customAction = useCallback((key: string, ...args: any[]) => {
+        const action = actions.current[key];
+        if (action) {
+            action(...args); // Pass the parameters here
+        } else {
+            console.warn(`Action "${key}" not found.`);
+        }
+    }, []);
+
     const contextValue = useMemo(() => ({
         setFormData, 
         getCombinedData,
@@ -117,6 +135,9 @@ export const FormProvider = ({ children }: { children: React.ReactNode }) => {
         setError, 
         error,
         options,
+
+        registerCustomAction,
+        customAction,
     }), [isAnyLoading, error, options, setLoading, setError]);
 
     return (

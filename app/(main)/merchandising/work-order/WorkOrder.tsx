@@ -10,7 +10,7 @@ import { useEffect, useState } from "react";
 
 type StyleCard = {
     OrderNumber: number,
-    Style: string,
+    StyleCode: string,
     Customer: string,
     Quantity: number,
     DeliveryDate: string,
@@ -23,7 +23,7 @@ const reportColumns: ColumnDef<StyleCard>[] = [
         header: 'Work Order',
     },
     {
-        accessorKey: 'Style',
+        accessorKey: 'StyleCode',
         header: 'Style',
     },
     {
@@ -111,6 +111,8 @@ export default function WorkOrders(){
                 isLoading={loading}
                 error={error}
                 customActions={customHeaderButtons()}
+                searchFilters={['OrderNumber', 'StyleCode']}
+                dropdownFilters={['Customer', 'Merchandiser']}
             />
         </>
     )

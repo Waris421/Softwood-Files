@@ -60,6 +60,7 @@ type PODetail = {
 export default function PurchaseOrders() {
     const [orders, setOrders] = useState<PurchaseOrder[]>([]);
     const [loading, setLoading] = useState(true);
+    const [detailLoading, setDetailLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
     const [startDate, setStartDate] = useState(`${new Date().getFullYear()}-01-01`);
     const [isOpen, setIsOpen] = useState(false);
@@ -93,12 +94,17 @@ export default function PurchaseOrders() {
             <DatePicker value={startDate} onChange={setStartDate} inputName="startDate" placeholder="Select date" />
         </div>
     )
-    // Click Dialogue Function
+    
     const onPOClick = (cell: Cell<PurchaseOrder, any>, e?: React.MouseEvent) => {
-        setSelectedOrder(cell.row.original);
-        if (e) setAnchorRef(e.currentTarget as HTMLElement);
-        setIsOpen(true);
-        setPODetail(null);
+        setSelectedOrder(cell.row.original)
+        if (e) setAnchorRef(e.currentTarget as HTMLElement)
+        setIsOpen(true)
+        setPODetail(null)
+        setDetailLoading(true)
+        fetch(`/api/finance/purchase-order/${cell.row.original.PONumber}`)
+            .then(res => res.json())
+            .then(data => setPODetail(data))
+            .finally(() => setDetailLoading(false))
     }
 
     // Download PDF Function

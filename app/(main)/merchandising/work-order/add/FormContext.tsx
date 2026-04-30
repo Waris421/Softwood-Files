@@ -3,7 +3,6 @@
 import MessageBox from '@/_components/generic/MessageBox';
 import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react';
 import { DropdownOption } from 'react-day-picker';
-import { convertAPIDataToFormData } from './ApiConversion';
 
 type ErrorConfig = {
     subject: string;
@@ -12,12 +11,7 @@ type ErrorConfig = {
 } | null;
 
 type FormOptions = {
-    routes?: DropdownOption[];
-    units?: {
-        value: string,
-        label: string,
-        Group: string,
-    }[];
+    currencies?: DropdownOption[];
 }
 
 const FormContext = createContext<{
@@ -27,23 +21,20 @@ const FormContext = createContext<{
   getCombinedMetaData: (key: string) => any;
   registerValidator: (key: string, fn: () => boolean) => void;
   validateAll: () => boolean;
-  initialData: any;
   setLoading: (key: string, isLoading: boolean) => void;
   isAnyLoading: boolean;
   setError: (config: ErrorConfig) => void;
   error: ErrorConfig;
   options: FormOptions;
-  code: string;
 
   registerCustomAction: (key: string, fn: (...args: any[]) => void) => void;
   customAction: (key: string, ...args: any[]) => void;
 } | null>(null);
 
-export const GET_API_URL = (code: string) => `/api/merchandising/style/${code}/update`;
+export const API_URL = '/api/merchandising/work-order/add';
+export const REDIRECT_URL = '/merchandising/work-order';
 
-export const REDIRECT_URL = '/merchandising/style';
-
-export const FormProvider = ({ children, code }: { children: React.ReactNode, code: string }) => {    
+export const FormProvider = ({ children }: { children: React.ReactNode }) => {    
     //Form data management
     const formsData = useRef<Record<string, any>>({});
     const setFormData = useCallback((key: string, data: any) => { 
@@ -69,10 +60,6 @@ export const FormProvider = ({ children, code }: { children: React.ReactNode, co
         return results.every(isValid => isValid === true);
     }
 
-    //This is only if we need to implement reset forms functionality.
-    // Don't use this to populate children at first login,as it'll result in bugs
-    const [initialData, setInitialData] = useState<any>(null);
-
     //Loading state management
     const [loadingMap, setLoadingMap] = useState<Record<string, boolean>>({})
     const setLoading = useCallback((key: string, isLoading: boolean) => {
@@ -88,18 +75,13 @@ export const FormProvider = ({ children, code }: { children: React.ReactNode, co
         setErrorState(config);
     }, []);
 
-    //Get all the options and pre-set values for all the forms in one place
+    //Get all the options for all the forms in one place
     const [options, setOptions] = useState<FormOptions>({});
     useEffect(() => {
         const fetchOptions = async() => {
             setLoading('globalOptions', true);
-
             try {
-                if (!code) {
-                    throw new Error('No style code provided');
-                }
-
-                const response = await fetch(GET_API_URL(code));
+                const response = await fetch(API_URL);
                 if (!response.ok) {
                     const errorData = await response.json();
                     throw new Error(`${errorData.details.message}`);
@@ -107,17 +89,15 @@ export const FormProvider = ({ children, code }: { children: React.ReactNode, co
 
                 const data = await response.json();
                 
-                setOptions(prev => ({ ...prev, routes: data.routes, units: data.units }));
-
-                const convertedData = convertAPIDataToFormData(data.formData)
-
-                formsData.current = convertedData;
-
-                //setInitialData(data.formData);
-            } catch (err: any) {
+                const currencyOptions = data.currencies;
+                setOptions(prev => ({
+                    ...prev,
+                    currencies: currencyOptions
+                }));
+            } catch (err) {
                 setError({
                     subject: "Fetch Error",
-                    message: `${err}` ,
+                    message: `Failed to load form options. ${err}`,
                     action: () => window.location.reload(),
                 });
             } finally {
@@ -126,7 +106,7 @@ export const FormProvider = ({ children, code }: { children: React.ReactNode, co
         }
 
         fetchOptions();
-    }, [code, setLoading, setError]);
+    }, [setLoading, setError]);
 
     const actions = useRef<Record<string, (...args: any[]) => void>>({});
 
@@ -150,8 +130,6 @@ export const FormProvider = ({ children, code }: { children: React.ReactNode, co
         getCombinedMetaData,
         registerValidator, 
         validateAll,
-        initialData,
-        code,
         setLoading, 
         isAnyLoading,
         setError, 
@@ -160,7 +138,7 @@ export const FormProvider = ({ children, code }: { children: React.ReactNode, co
 
         registerCustomAction,
         customAction,
-    }), [initialData, isAnyLoading, error, options, code, setLoading, setError]);
+    }), [isAnyLoading, error, options, setLoading, setError]);
 
     return (
         <FormContext.Provider
