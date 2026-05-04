@@ -107,25 +107,10 @@ export default function StyleCards() {
     }
 
     const dialogBoxActions = [
-        { label: 'Edit', icon: <Pencil size={16}/>, onClick: () => {editButtonClick()} },
-        { label: 'Copy', icon: <Copy size={16}/>, onClick: () => {copyButtonClick()} },
-        { label: 'Delete', icon: <Trash2 size={16}/>, onClick: () => {deleteButtonClick()} },
+        { label: 'Edit', icon: <Pencil size={16}/>, href: `/merchandising/style/${selectedCode}/edit`},
+        { label: 'Copy', icon: <Copy size={16}/>, href: `/merchandising/style/${selectedCode}/copy`},
+        { label: 'Delete', icon: <Trash2 size={16}/>, href: `/merchandising/style/${selectedCode}/delete`},
     ]
-
-    const editButtonClick = () => {
-        setRedirecting(true);
-        router.push(`/merchandising/style/${selectedCode}/edit`);
-    }
-
-    const copyButtonClick = () => {
-        setRedirecting(true);
-        router.push(`/merchandising/style/${selectedCode}/copy`);
-    }
-
-    const deleteButtonClick = () => {
-        setRedirecting(true);
-        router.push(`/merchandising/style/${selectedCode}/delete`);
-    }
     
     return (
         <>

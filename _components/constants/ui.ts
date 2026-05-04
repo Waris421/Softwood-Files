@@ -38,7 +38,7 @@ export const THEME = {
 
     TextInput: 'input w-full rounded-lg bg-gray-300 dark:bg-gray-800 hover:ring-2 hover:shadow-md transition-shadow',
     TextInputReadOnly: 'input w-full rounded-lg bg-gray-400 dark:bg-gray-700',
-    DropDown: 'w-full justify-between bg-gray-300 dark:bg-gray-800',
+    DropDown: 'w-full h-10 rounded-lg justify-between bg-gray-300 dark:bg-gray-800',
     Slider: 'flex-1 w-full min-w-30 rounded-lg bg-gray-300 dark:bg-gray-800',
     CheckBox: 'checkbox rounded-lg checkbox-lg bg-gray-300 dark:bg-gray-800',
     
@@ -49,6 +49,12 @@ export const THEME = {
         Wrapper: "w-full space-y-4 [--base-200:theme(colors.slate.100)] [--base-300:theme(colors.slate.200)] dark:[--base-200:theme(colors.slate.800)] dark:[--base-300:theme(colors.slate.700)]",
         HeaderRow: "bg-[var(--base-200)]",
         TableContainer: "overflow-x-auto rounded-lg border border-[var(--base-300)]",
-        RowHover: "hover:bg-slate-500/10 dark:hover:bg-slate-400/10" 
+        RowHover: "hover:bg-slate-500/10 dark:hover:bg-slate-400/10" ,
     },
+
+    Text: {
+        RedText: 'text-red-600',
+        BlueText: 'text-blue-600',
+        GrayText: 'text-gray-400 dark:text-gray-600',
+    }
 }

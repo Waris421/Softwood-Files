@@ -102,25 +102,10 @@ export default function InventoryCards() {
     }
 
     const dialogBoxActions = [
-        { label: 'Edit', icon: <Pencil size={16}/>, onClick: () => {editButtonClick()} },
-        { label: 'Copy', icon: <Copy size={16}/>, onClick: () => {copyButtonClick()} },
-        { label: 'Delete', icon: <Trash2 size={16}/>, onClick: () => {deleteButtonClick()} },
+        { label: 'Edit', icon: <Pencil size={16}/>, href: `/mmc/inventory/${selectedCode}/edit`},
+        { label: 'Copy', icon: <Copy size={16}/>, href: `/mmc/inventory/${selectedCode}/copy`},
+        { label: 'Delete', icon: <Trash2 size={16}/>, href: `/mmc/inventory/${selectedCode}/delete`},
     ]
-
-    const editButtonClick = () => {
-        setRedirecting(true);
-        router.push(`/mmc/inventory/${selectedCode}/edit`);
-    }
-
-    const copyButtonClick = () => {
-        setRedirecting(true);
-        router.push(`/mmc/inventory/${selectedCode}/copy`);
-    }
-
-    const deleteButtonClick = () => {
-        setRedirecting(true);
-        router.push(`/mmc/inventory/${selectedCode}/delete`);
-    }
     
     return (
         <>

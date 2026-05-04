@@ -1,14 +1,15 @@
 'use client';
 
 import { THEME } from "@/_components/constants/ui";
+import ActionDialog from "@/_components/DialogBox/ActionDialog";
 import { DataTable } from "@/_components/table/Table";
-import { ColumnDef } from "@tanstack/react-table";
-import { Loader2, SquarePlus } from "lucide-react";
+import { Cell, ColumnDef } from "@tanstack/react-table";
+import { Copy, Loader2, Pencil, SquarePlus, Trash2 } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 
-type StyleCard = {
+type WorkOrder = {
     OrderNumber: number,
     StyleCode: string,
     Customer: string,
@@ -17,7 +18,7 @@ type StyleCard = {
     Merchandiser: string,
 }
 
-const reportColumns: ColumnDef<StyleCard>[] = [
+const reportColumns: ColumnDef<WorkOrder>[] = [
     {
         accessorKey: 'OrderNumber',
         header: 'Work Order',
@@ -45,13 +46,13 @@ const reportColumns: ColumnDef<StyleCard>[] = [
 ]
 
 export default function WorkOrders(){
-    const [data, setData] = useState<StyleCard[]>([]);
+    const [data, setData] = useState<WorkOrder[]>([]);
     const [loading, setLoading] = useState(true);
     const [redirecting, setRedirecting] = useState(false);
     const [error, setError] = useState(null);
     const [isOpen, setIsOpen] = useState(false);
-    const [selectedCode, setSelectedCode] = useState<string | null>(null);
-    const [selectedName, setSelectedName] = useState<string | null>(null);
+    const [selectedOrder, setSelectedOrder] = useState<number | null>(null);
+    const [selectedStyle, setSelectedStyle] = useState<string | null>(null);
     const [anchorRef, setAnchorRef] = useState<HTMLElement | null>(null);
 
     const router = useRouter();
@@ -94,6 +95,26 @@ export default function WorkOrders(){
             </>
         )
     }
+
+    const onOrderClickFunction = (cell: Cell<any, any>, e?: React.MouseEvent) => {
+        const order = cell.getValue();
+        const style = cell.row.original.StyleCode;
+
+        setSelectedOrder(order);
+        setSelectedStyle(style);
+
+        if (e) {
+            setAnchorRef(e.currentTarget as HTMLElement);
+            (e.currentTarget as HTMLElement).blur();
+        };
+        setIsOpen(true);
+    }
+
+    const dialogBoxActions = [
+        { label: 'Edit', icon: <Pencil size={16}/>, href: `/merchandising/work-order/${selectedOrder}/edit` },
+        { label: 'Copy', icon: <Copy size={16}/>, href: `/merchandising/work-order/${selectedOrder}/copy` },
+        { label: 'Delete', icon: <Trash2 size={16}/>, href: `/merchandising/work-order/${selectedOrder}/delete` },
+    ]
     
     return (
         <>
@@ -113,7 +134,22 @@ export default function WorkOrders(){
                 customActions={customHeaderButtons()}
                 searchFilters={['OrderNumber', 'StyleCode']}
                 dropdownFilters={['Customer', 'Merchandiser']}
+                columnClickHandlers={{
+                    OrderNumber: onOrderClickFunction
+                }}
             />
+
+            {/* Dialogue box upon clicking an inventory */}
+            {isOpen && (
+                <ActionDialog 
+                    isOpen={isOpen}
+                    title="Choose an action"
+                    description={`select an option for ${selectedStyle}`}
+                    actions={dialogBoxActions}
+                    onClose={() => setIsOpen(false)}
+                    anchorRef={anchorRef ? { current: anchorRef } : undefined}
+                />
+            )}
         </>
     )
 }

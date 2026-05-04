@@ -3,12 +3,14 @@
 import React, { useEffect, useState } from 'react';
 import { X } from 'lucide-react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '../ui/dialog';
+import Link from 'next/link';
 
 interface Action {
     label: string;
     subLabel?: string;
     icon?: React.ReactNode;
-    onClick: () => void;
+    onClick?: () => void;
+    href?: string;
 }
 
 interface ActionDialogProps {
@@ -76,7 +78,11 @@ const ActionDialog: React.FC<ActionDialogProps> = ({
     if (!isOpen) return null;
 
     return (
-        <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
+        <Dialog
+            open={isOpen}
+            onOpenChange={(open) => !open && onClose()}
+            modal={true}
+        >
             <DialogContent
                 style={style}
                 className="fixed z-50 w-80 gap-0 p-0 outline-none sm:max-w-[320px] translate-x-0 translate-y-0 duration-200"
@@ -91,15 +97,15 @@ const ActionDialog: React.FC<ActionDialogProps> = ({
                 </DialogHeader>
                 <div className="grid grid-cols-1 p-2">
                     {actions.map((action, index) => {
-                        return (
-                            <button 
-                                key={index}
-                                onClick={() => {
-                                    action.onClick();
-                                    onClose();
-                                }}
-                                className="flex items-center gap-3 w-full p-3 rounded-md hover:bg-accent hover:text-accent-foreground transition-colors text-left"
-                            >
+                        const commonClassName = "flex items-center gap-3 w-full p-3 rounded-md hover:bg-accent hover:text-accent-foreground transition-colors text-left cursor-pointer";
+
+                        const handleClick = () => {
+                            if (action.onClick) action.onClick();
+                            onClose();
+                        };
+
+                        const content = (
+                            <>
                                 {action.icon && (
                                     <div className="p-2 rounded bg-muted group-hover:bg-background transition-colors">
                                         {action.icon}
@@ -113,6 +119,29 @@ const ActionDialog: React.FC<ActionDialogProps> = ({
                                         </p>
                                     )}
                                 </div>
+                            </>
+                        );
+
+                        if (action.href) {
+                            return (
+                                <Link 
+                                    key={index} 
+                                    href={action.href} 
+                                    className={commonClassName}
+                                    onClick={handleClick}
+                                >
+                                    {content}
+                                </Link>
+                            );
+                        }
+                        return (
+                            <button
+                                key={index}
+                                onClick={handleClick}
+                                className={commonClassName}
+                                type="button"
+                            >
+                                {content}
                             </button>
                         );
                     })}

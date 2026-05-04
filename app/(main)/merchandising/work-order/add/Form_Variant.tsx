@@ -128,7 +128,7 @@ export default function VariantForm(){
         insert(index + 1, emptyRow);
     }
 
-    //Change the value of total quantity when on changes in the table.
+    //Change the value of total quantity when one changes in the table.
     useEffect(() => {
         if (watchedItems?.items) {
             const totalQuantity = watchedItems.items.reduce((acc: number, item: any) => {

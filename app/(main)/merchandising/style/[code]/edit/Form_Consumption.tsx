@@ -50,11 +50,10 @@ export default function ConsumptionForm() {
         register, control, getValues, trigger, reset, formState: { errors }
     } = useForm<FormValues>({
         resolver: zodResolver(formSchema),
-        defaultValues: getCombinedData()[FORM_NAME_WITH_PARENT] || { 
-            items: [{ Inventory: '', Consumption: 1, Unit: '',Type: '', 
-                HasVariant: false, SizeDetails: '', id: "", InventoryName:"",
-            }]
-        }
+        defaultValues: {items: [{ 
+            Inventory: '', Consumption: 1, Unit: '',Type: '', 
+            HasVariant: false, SizeDetails: '', id: "", InventoryName:"",
+        }]}
     });
     const [indexToDelete, setIndexToDelete] = useState<number | null>(null);
     const watchedItems = useWatch({
@@ -114,9 +113,23 @@ export default function ConsumptionForm() {
     //Code for the remove click button
     const handleRemoveClick = (index: number) => {
         const currentRow = getValues(`items.${index}`);
-        const hasData = Object.values(currentRow).some(val => val !== '');
+        
+        const isModified = Object.keys(emptyRow).some((key) => {
+            const currentVal = currentRow[key as keyof typeof emptyRow];
+            const defaultVal = emptyRow[key as keyof typeof emptyRow];
 
-        if (hasData) {
+            if (typeof defaultVal === 'number') {
+                return Number(currentVal) !== defaultVal;
+            }
+
+            if (typeof defaultVal === 'boolean') {
+                return Boolean(currentVal) !== defaultVal;
+            }
+            
+            return (currentVal ?? '') !== (defaultVal ?? '');
+        });
+
+        if (isModified) {
             setIndexToDelete(index);
         } else {
             executeDelete(index);
