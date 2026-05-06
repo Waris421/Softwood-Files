@@ -2,81 +2,71 @@
 
 import { useState } from "react"
 import { useRouter } from "next/navigation"
-import { CheckCircle } from "lucide-react"
-import { FileUpload } from "@/_components/generic/FileUpload"
+import { SingleDropdown } from "@/_components/Dropdown/Dropdown"
+
+const months = [
+    { value: '1', label: 'January' }, { value: '2', label: 'February' },
+    { value: '3', label: 'March' }, { value: '4', label: 'April' },
+    { value: '5', label: 'May' }, { value: '6', label: 'June' },
+    { value: '7', label: 'July' }, { value: '8', label: 'August' },
+    { value: '9', label: 'September' }, { value: '10', label: 'October' },
+    { value: '11', label: 'November' }, { value: '12', label: 'December' },
+]
+const years = [2022, 2023, 2024, 2025, 2026].map(y => ({ value: String(y), label: String(y) }))
 
 export default function UploadCustomer() {
     const router = useRouter()
-    const [file, setFile] = useState<File | null>(null)
-    const [state, setState] = useState<'idle' | 'loading' | 'success' | 'error'>('idle')
-    const [message, setMessage] = useState<string | null>(null)
-    const handleUpload = async () => {
-        // Processing the uploaded data file
-        if (!file) return
+    const [showSummaryMenu, setShowSummaryMenu] = useState(false)
+    const [summaryMonth, setSummaryMonth] = useState<string | null>(null)
+    const [summaryYear, setSummaryYear] = useState<string | null>(null)
+    const [importerMonth, setImporterMonth] = useState<string | null>(null)
+    const [importerYear, setImporterYear] = useState<string | null>(null)
+    const [activePicker, setActivePicker] = useState<'summary' | 'importer' | null>(null)
 
-        setState('loading')
-        setMessage(null)
-
-        const formData = new FormData()
-        formData.append('file', file)
-
-        try {
-            const response = await fetch('/api/marketing/customers/upload', {
-                method: 'POST',
-                body: formData,
-            })
-
-            const data = await response.json().catch(() => ({}))
-
-            if (!response.ok) throw new Error(data.message || 'Upload failed.')
-
-            setState('success')
-            setMessage('File uploaded successfully!')
-            setFile(null)
-        } catch (err: any) {
-            setState('error')
-            setMessage(err.message)
-        }
-    }
     return (
         <div className="max-w-2xl py-6">
-            <p className="text-sm opacity-60 mb-6">Upload a CSV or XLSX file containing customer data.</p>
+            <div className="flex gap-3">
+                <button
+                    onClick={() => { setShowSummaryMenu(!showSummaryMenu); setActivePicker(null) }}
+                    className="btn btn-secondary"
+                >
+                    Summary ▼
+                </button>
+            </div>
 
-            <FileUpload
-                file={file}
-                onFileChange={setFile}
-                accept=".csv, application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
-                subText="CSV and XLSX files only"
-                maxSizeMB={10}
-            />
-
-            {message && (
-                <div className={`mt-4 flex items-center gap-2 text-sm p-3 rounded-lg
-                    ${state === 'success' ? 'bg-success/20 text-success' : 'bg-error/20 text-error'}`}>
-                    {state === 'success' && <CheckCircle size={16} />}
-                    {message}
+            {showSummaryMenu && (
+                <div className="mt-2 w-fit bg-base-200 rounded-lg p-2 flex flex-col gap-1">
+                    <button onClick={() => { setShowSummaryMenu(false); setActivePicker('summary') }} className="text-left px-3 py-2 rounded hover:bg-base-300 text-sm">Exporter Data</button>
+                    <button onClick={() => { setShowSummaryMenu(false); setActivePicker('importer') }} className="text-left px-3 py-2 rounded hover:bg-base-300 text-sm">Importer Data</button>
+                    <button disabled className="text-left px-3 py-2 rounded text-sm opacity-40 cursor-not-allowed">Monthly Sales — Coming Soon</button>
+                    <button disabled className="text-left px-3 py-2 rounded text-sm opacity-40 cursor-not-allowed">Yearly Sales — Coming Soon</button>
                 </div>
             )}
 
-            <button
-                onClick={handleUpload}
-                disabled={!file || state === 'loading'}
-                className="mt-6 btn btn-primary disabled:opacity-50"
-            >
-                {state === 'loading' ? (
-                    <span className="flex items-center gap-2">
-                        <span className="h-4 w-4 animate-spin rounded-full border-2 border-white border-t-transparent" />
-                        Uploading...
-                    </span>
-                ) : 'Upload File'}
-            </button>
-            {state === 'success' && (
-                <button
-                    onClick={() => router.push('/marketing/garment-shipments')}
-                    className="mt-3 btn btn-success w-fit"
-                >
-                    Visualize Data
-                </button>
+            {activePicker === 'summary' && (
+                <div className="mt-4 flex flex-col gap-3">
+                    <p className="text-sm font-semibold">Select a month and year for Exporter Summary</p>
+                    <div className="flex gap-3">
+                        <SingleDropdown inputName="summaryMonth" isStatic staticOptions={months} placeholder="Month" widthClass="w-48" onSelect={(o) => setSummaryMonth(o?.value ?? null)} />
+                        <SingleDropdown inputName="summaryYear" isStatic staticOptions={years} placeholder="Year" widthClass="w-36" onSelect={(o) => setSummaryYear(o?.value ?? null)} />
+                    </div>
+                    {summaryMonth && summaryYear && (
+                        <button onClick={() => router.push(`/marketing/shipments/summary?month=${summaryMonth}&year=${summaryYear}`)} className="btn btn-secondary w-fit">View Summary</button>
+                    )}
+                </div>
+            )}
+
+            {activePicker === 'importer' && (
+                <div className="mt-4 flex flex-col gap-3">
+                    <p className="text-sm font-semibold">Select a month and year for Importer Summary</p>
+                    <div className="flex gap-3">
+                        <SingleDropdown inputName="importerMonth" isStatic staticOptions={months} placeholder="Month" widthClass="w-48" onSelect={(o) => setImporterMonth(o?.value ?? null)} />
+                        <SingleDropdown inputName="importerYear" isStatic staticOptions={years} placeholder="Year" widthClass="w-36" onSelect={(o) => setImporterYear(o?.value ?? null)} />
+                    </div>
+                    {importerMonth && importerYear && (
+                        <button onClick={() => router.push(`/marketing/shipments/importer-summary?month=${importerMonth}&year=${importerYear}`)} className="btn btn-secondary w-fit">View Summary</button>
+                    )}
+                </div>
             )}
         </div>
     )

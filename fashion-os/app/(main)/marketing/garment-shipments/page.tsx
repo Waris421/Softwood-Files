@@ -4,6 +4,7 @@
 import { useEffect, useState } from "react"
 import { ColumnDef } from "@tanstack/react-table"
 import { DataTable } from "@/_components/table/Table"
+import { useSearchParams } from 'next/navigation'
 
 // Step 1: define the shape of one shipment record — matches the Django API response fields exactly
 type Shipment = {
@@ -19,6 +20,10 @@ type Shipment = {
 }
 
 export default function GarmentShipments() {
+    // Filters for the data
+    const searchParams = useSearchParams()
+    const month = searchParams.get('month')
+    const year = searchParams.get('year')
 
     // Step 2: stores the full list of shipments returned by Django
     const [shipments, setShipments] = useState<Shipment[]>([])
@@ -47,7 +52,10 @@ export default function GarmentShipments() {
     useEffect(() => {
         const fetchShipments = async () => {
             try {
-                const res = await fetch('/api/marketing/garment-shipments')
+                const params = new URLSearchParams()
+                if (month) params.set('month', month)
+                if (year) params.set('year', year)
+                const res = await fetch(`/api/marketing/garment-shipments?${params.toString()}`)
                 if (!res.ok) throw new Error('Failed to load shipments')
                 const data = await res.json()
                 setShipments(Array.isArray(data) ? data : data.results ?? []) // handles both plain array and paginated Django responses
@@ -58,7 +66,7 @@ export default function GarmentShipments() {
             }
         }
         fetchShipments()
-    }, [])
+    }, [month, year])
 
     return (
         <div className="w-full px-8 py-10">

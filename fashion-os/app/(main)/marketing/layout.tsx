@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import "@/app/globals.css";
+import type { ReactNode } from "react";
 import NavBar from "@/_components/Navbar/NavBar";
 
 export const metadata: Metadata = {
@@ -7,7 +7,7 @@ export const metadata: Metadata = {
   description: "By Softwood Private Limited",
 };
 
-export default function MarketingLayout({ children }: { children: React.ReactNode }) {
+export default function MarketingLayout({ children }: { children: ReactNode }) {
   return (
     <div>
       <NavBar pageName="marketing" />

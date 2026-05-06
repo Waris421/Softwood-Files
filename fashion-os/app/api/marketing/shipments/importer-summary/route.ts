@@ -1,34 +1,29 @@
 import { URLs } from "@/_components/constants/urls";
 import { NextRequest, NextResponse } from "next/server";
 
-// fetches garment shipment records from Django
-const SHIPMENTS_URL = `${URLs.HRServer}/marketing/garment-shipments`;
+const SUMMARY_URL = `${URLs.HRServer}/marketing/shipments/summary`;
 const AUTH_COOKIE_NAME = 'authToken';
 
 export async function GET(req: NextRequest) {
-
-    // block if not logged in
     const authToken = req.cookies.get(AUTH_COOKIE_NAME);
     if (!authToken) {
         return NextResponse.json({ message: 'Unauthorized' }, { status: 401 });
     }
 
+    const { searchParams } = new URL(req.url);
+    const month = searchParams.get('month');
+    const year = searchParams.get('year');
+
     let backendResponse: Response;
     try {
-        const { searchParams } = new URL(req.url)
-        const month = searchParams.get('month')
-        const year = searchParams.get('year')
-        const query = new URLSearchParams()
-        if (month) query.set('month', month)
-        if (year) query.set('year', year)
-        backendResponse = await fetch(`${SHIPMENTS_URL}?${query.toString()}`, {
+        backendResponse = await fetch(`${SUMMARY_URL}?month=${month}&year=${year}&group_by=Importer`, {
             method: 'GET',
             headers: {
                 'Authorization': `${authToken.value}`,
                 'Accept': 'application/json',
             },
         });
-    } catch (error) {
+    } catch {
         return NextResponse.json({ message: 'Could not reach the server.' }, { status: 503 });
     }
 
@@ -39,5 +34,4 @@ export async function GET(req: NextRequest) {
     } catch {
         return NextResponse.json({ message: 'Invalid response from Django', raw: text.slice(0, 500) }, { status: 502 });
     }
-
 }
