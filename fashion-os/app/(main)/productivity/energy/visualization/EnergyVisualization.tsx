@@ -3,6 +3,17 @@ import { useState, useEffect } from 'react'
 import { DateRangePicker } from '@/_components/Datepicker/Datepicker'
 import LoadingIcon from '@/_components/generic/Loading'
 import ReactECharts from 'echarts-for-react'
+import { SingleDropdown } from '@/_components/Dropdown/Dropdown'
+
+// X axis descriptions
+const machineLegends: Record<string, { label: string, description: string }[]> = {
+    'yilmak': [
+        { label: '0 kW',                description: 'Rest' },
+        { label: '≤ 0.5 kW – ≤ 1 kW ',  description: 'Water intake / Tilting' },
+        { label: '≤ 2 kW',              description: 'Spinning' },
+        { label: '> 2 kW',              description: 'Machine full / Max output' },
+    ],
+}
 
 
 export default function EnergyVisualization() {
@@ -55,6 +66,7 @@ export default function EnergyVisualization() {
         setChartLoading(true)
         setChartError(null)
         setMachineReadings(null)
+        setSelectedMachine(null)
         try {
             const res = await fetch(`/api/energy/readings?from=${selectedRange.from}&to=${selectedRange.to}`)
             if (!res.ok) throw new Error('Failed to load readings')
@@ -161,24 +173,14 @@ export default function EnergyVisualization() {
                     {machineReadings && (
                         <div className="max-w-md flex flex-col gap-2">
                             <label className="text-sm font-semibold">Select a machine</label>
-                            <div className="dropdown w-full">
-                                <div tabIndex={0} role="button" className="btn btn-outline w-full justify-between font-normal">
-                                    {selectedMachine ?? 'Choose a machine...'}
-                                </div>
-                                <ul tabIndex={0} className="dropdown-content menu bg-black rounded-box z-50 w-full p-2 shadow-lg max-h-60 overflow-y-auto flex-nowrap">
-                                    {machineReadings.map(m => (
-                                        <li key={m.machine}>
-                                            <button onClick={() => {
-                                                setSelectedMachine(m.machine)
-                                                ;(document.activeElement as HTMLElement)?.blur()
-                                            }}>
-                                                {m.machine}
-                                            </button>
-
-                                        </li>
-                                    ))}
-                                </ul>
-                            </div>
+                            <SingleDropdown
+                                inputName="machine"
+                                isStatic
+                                staticOptions={machineReadings.map(m => ({ value: m.machine, label: m.machine }))}
+                                placeholder="Choose a machine..."
+                                widthClass="w-full"
+                                onSelect={(option) => setSelectedMachine(option?.value ?? null)}
+                            />
                         </div>
                     )}
 
@@ -198,7 +200,27 @@ export default function EnergyVisualization() {
                                     {new Date(selectedRange.from!).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })} – {new Date(selectedRange.to!).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
                                 </p>
 
+                                {(() => {
+                                    const key = Object.keys(machineLegends).find(k =>
+                                        m.machine.toLowerCase().includes(k)
+                                    )
+                                    if (!key) return null
+                                    return (
+                                        <div className="mb-4 w-fit p-4 rounded-lg bg-base-200 text-sm">
+                                            <p className="font-semibold mb-3">Energy Level Guide</p>
+                                            <div className="flex flex-col gap-2">
+                                                {machineLegends[key].map((entry, i) => (
+                                                    <div key={i} className="flex items-center gap-3">
+                                                        <span className="w-44 shrink-0 whitespace-nowrap font-mono text-xs opacity-60">{entry.label}</span>
+                                                        <span>{entry.description}</span>
+                                                    </div>
+                                                ))}
+                                            </div>
+                                        </div>
+                                    )
+                                })()}
                                 <ReactECharts option={buildChartOption(computeBuckets(m.readings))} style={{ height: 400 }} />
+
                             </div>
                         )
                     })()}
