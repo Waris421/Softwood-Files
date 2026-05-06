@@ -21,7 +21,7 @@ export async function GET(request: NextRequest) {
     
     const backendResponse = await fetch(`${SEARCH_URL}?search=${query}`,{
         headers: {
-            'Authorization': `${authToken.value}`,
+            'Authorization': `Token ${authToken.value}`,
             'Content-Type': 'application/json',
         }
     });

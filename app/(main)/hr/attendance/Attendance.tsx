@@ -279,7 +279,6 @@ export default function Attendance() {
 
     const [data, setData] = useState<Attendance[]>([]);
     const [loading, setLoading] = useState(false);
-    const [redirecting, setRedirecting] = useState(false);
     const [error, setError] = useState(null);
     const [errors, setErrors] = useState<Record<string, string>>({});
     const [previewLocation, setPreviewLocation] = useState<Location | null>(null);
@@ -306,7 +305,8 @@ export default function Attendance() {
             const response = await fetch(url);
             
             if (!response.ok) {
-                throw new Error('Failed to fetch attendance data');
+                const errorData = await response.json();
+                throw new Error(errorData.details?.message || "Failed to fetch attendance data");
             }
 
             const result = await response.json();

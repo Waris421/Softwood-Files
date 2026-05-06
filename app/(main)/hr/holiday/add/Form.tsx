@@ -1,7 +1,7 @@
 'use client'
 
 import { THEME } from "@/_components/constants/ui";
-import DatePicker from "@/_components/Datepicker/Datepicker";
+import { DatePicker } from "@/_components/Datepicker/Datepicker";
 import { MultiDropdown } from "@/_components/Dropdown/Dropdown";
 import { DropdownOption } from "@/_components/Dropdown/types";
 import { FormField } from "@/_components/generic/FormItems";
@@ -185,7 +185,14 @@ export default function HolidayForm() {
                         onChange={(val) => handleInputChange('EndDate', val)}
                         disabledDates={(date) => {
                             if (!formData.StartDate) return false;
-                            return new Date(date) < new Date(formData.StartDate);
+
+                            const start = new Date(formData.StartDate);
+                            start.setHours(0, 0, 0, 0);
+
+                            const current = new Date(date);
+                            current.setHours(0, 0, 0, 0);
+
+                            return current < start;
                         }}/>
                 </FormField>
 

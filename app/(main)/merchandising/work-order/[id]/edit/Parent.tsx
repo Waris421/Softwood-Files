@@ -11,7 +11,7 @@ import MessageBox from "@/_components/generic/MessageBox";
 import { THEME } from "@/_components/constants/ui";
 import VariantForm from "./Form_Variant";
 import RequirementForm from "./Form_Requirement";
-import AttachmentForm from "./Form_Attachment";
+import AttachmentForm from "./Form_Attachments";
 
 type FormProps = {
     id: number
@@ -91,7 +91,7 @@ function GlobalSubmitButton() {
             <button
                 onClick={handleSubmit}
                 disabled={isSubmitting}
-                className={`${THEME.ButtonBasic} flex-1 h-15 mt-2`}
+                className={`${THEME.ButtonBasic} flex-1 mt-2`}
             >
                 {isSubmitting ? (
                     <>
@@ -137,7 +137,7 @@ function PrintWorkOrder() {
             <button
                 onClick={handlePrint}
                 disabled={isAnyLoading}
-                className={`${THEME.ButtonSecondary} flex-1 h-15 mt-2`}
+                className={`${THEME.ButtonSecondary} flex-1 mt-2`}
             >
                 {isAnyLoading ? (
                     <>
@@ -219,7 +219,6 @@ export default function ParentContainer({id}: FormProps) {
                     </div>
                 </LoadingContainer>
             </FormProvider>
-            {id}
         </>
     )
 }

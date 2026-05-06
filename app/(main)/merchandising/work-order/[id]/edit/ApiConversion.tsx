@@ -42,12 +42,12 @@ const mapAttachmentsData = (attachments = []) => ({
             ? `/api/attachment?url=${encodeURIComponent(relativePath)}` 
             : "";
 
-        return {
+            return {
             AttachmentId: a.id || "",
             Description: a.Description || "",
             FileUrl: proxiedUrl,
             FileName: a.FileName || "",
-            CanEdit: a.CanEdit || true,
+            CanEdit: a.CanEdit ?? true,
         }
     })
 });

@@ -55,8 +55,6 @@ export default function WorkOrders(){
     const [selectedStyle, setSelectedStyle] = useState<string | null>(null);
     const [anchorRef, setAnchorRef] = useState<HTMLElement | null>(null);
 
-    const router = useRouter();
-
     useEffect(() => {
         const fetchWorkOrders = async() => {
             try {

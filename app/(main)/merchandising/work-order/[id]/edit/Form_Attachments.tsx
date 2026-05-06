@@ -1,17 +1,17 @@
 'use client';
 
-import { THEME } from "@/_components/constants/ui";
 import * as z from "zod";
+import { zodResolver } from "@hookform/resolvers/zod";
 import { useFormRegistry } from "./FormContext";
 import { Controller, useFieldArray, useForm, useWatch } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
 import { useCallback, useEffect, useState } from "react";
+import { THEME } from "@/_components/constants/ui";
+import { cn } from "@/_components/generic/utils";
+import InputWithURL from "@/_components/generic/InputWithUrl";
+import { FileUploadCompact } from "@/_components/generic/FileUpload";
 import { Button } from "@/_components/ui/button";
 import { Minus, Plus } from "lucide-react";
-import { cn } from "@/_components/generic/utils";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/_components/ui/alert-dialog";
-import { FileUploadCompact } from "@/_components/generic/FileUpload";
-import InputWithURL from "@/_components/generic/InputWithUrl";
 
 //If we need to do any validation on rows, do so here.
 const rowSchema = z.object({

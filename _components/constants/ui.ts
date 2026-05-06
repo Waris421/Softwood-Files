@@ -55,6 +55,6 @@ export const THEME = {
     Text: {
         RedText: 'text-red-600',
         BlueText: 'text-blue-600',
-        GrayText: 'text-gray-400 dark:text-gray-600',
+        GrayText: 'text-gray-900 dark:text-gray-100',
     }
 }

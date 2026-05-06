@@ -23,7 +23,7 @@ export async function GET(request: NextRequest) {
 
     const backendResponse = await fetch(`${backendURL}`,{
         headers: {
-            'Authorization': `${authToken.value}`,
+            'Authorization': `Token ${authToken.value}`,
             'Content-Type': 'application/json',
         }
     });

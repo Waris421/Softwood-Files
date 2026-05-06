@@ -10,6 +10,8 @@ interface InputWIthUrlProps extends React.InputHTMLAttributes<HTMLInputElement> 
 }
 
 const InputWithURL = ({ url, error, value, ...props }: InputWIthUrlProps) => {
+    const inputTheme = props.disabled ? THEME.TextInputReadOnly : THEME.TextInput;
+
     const handleOpenLink = (e: React.MouseEvent) => {
         e.preventDefault();
         e.stopPropagation();
@@ -32,7 +34,7 @@ const InputWithURL = ({ url, error, value, ...props }: InputWIthUrlProps) => {
                 <input
                     type="url"
                     value={value ?? ''}
-                    className={`${THEME.TextInput} w-full pr-10 ${error ? 'input-error' : ''}`}
+                    className={`${inputTheme} w-full pr-10 ${error ? 'input-error' : ''}`}
                     placeholder="Provide a value"
                     {...props}
                 />

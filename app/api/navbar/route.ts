@@ -18,7 +18,7 @@ export async function GET(request: NextRequest) {
 
     const backendResponse = await fetch(`${NAVBAR_URL}?pageName=${query}`,{
         headers: {
-            'Authorization': `${authToken.value}`,
+            'Authorization': `Token ${authToken.value}`,
             'Content-Type': 'application/json',
         }
     });

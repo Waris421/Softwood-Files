@@ -181,7 +181,7 @@ export default function VariantForm() {
 
                                         <td className="p-1 w-40">
                                             <input 
-                                                {...register(`items.${index}.Quantity` as const)} 
+                                                {...register(`items.${index}.Quantity` as const, { valueAsNumber: true })} 
                                                 className={`${THEME.TextInput} text-center`}
                                                 type="number"
                                                 placeholder="Must match the style card variants"

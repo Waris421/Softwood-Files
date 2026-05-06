@@ -1,7 +1,6 @@
 import { URLs } from "@/_components/constants/urls";
 import { NextRequest, NextResponse } from "next/server";
 
-const URL = `${URLs.AMServer}/consumption/thread`;
 const AUTH_COOKIE_NAME = 'authToken';
 
 export async function GET(request: NextRequest) {
@@ -13,12 +12,25 @@ export async function GET(request: NextRequest) {
         );
     }
 
-    const backendResponse = await fetch(`${URL}`,{
+    const { searchParams } = new URL(request.url);
+    const workOrder = searchParams.get('workOrder');
+    const reqId = searchParams.get('id')
+
+    let backendURL = `${URLs.MMCServer}/merchandising/work-order/requirement/get`;
+    if (workOrder) {
+        backendURL += `?orderNumber=${workOrder}`;
+    }
+    if (reqId) {
+        backendURL += `&id=${reqId}`
+    }
+
+    const backendResponse = await fetch(`${backendURL}`,{
         headers: {
             'Authorization': `Token ${authToken.value}`,
             'Content-Type': 'application/json',
         }
     });
+
     if (!backendResponse.ok) {
         const errorData = await backendResponse.json().catch(() => ({}));
         return NextResponse.json(
@@ -30,7 +42,7 @@ export async function GET(request: NextRequest) {
         );
     }
 
-    const consumptionHistory = await backendResponse.json();
+    const history = await backendResponse.json();
+    return NextResponse.json(history);
 
-    return NextResponse.json(consumptionHistory);
 }
