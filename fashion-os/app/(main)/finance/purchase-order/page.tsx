@@ -230,6 +230,7 @@ return (
                 anchorRef={anchorRef ? { current: anchorRef } : undefined}
             />
         )}
+        <p className="text-xs text-white opacity-40 mt-8 text-center tracking-widest">... . . / -.-- --- ..- / - --- -- --- .-. .-. --- .--</p>
     </div>
 )}
 
