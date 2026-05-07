@@ -11,6 +11,7 @@ export default function MasterListPage() {
             <UploadCustomer />
             <ShipmentFilters />
             <ShipmentDetails />
+            <p className="text-xs opacity-40 mt-12 text-center tracking-widest">.. / -. . . -.. / - .-. ..- . / . -- --- - .. --- -. ...</p>
         </div>
     )
 }
