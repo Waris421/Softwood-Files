@@ -6,9 +6,10 @@ import { FormField } from "@/_components/generic/FormItems";
 import { THEME } from "@/_components/constants/ui";
 import { SingleDropdown, SingleDropdownAsync } from "@/_components/Dropdown/Dropdown";
 import { DatePicker } from "@/_components/Datepicker/Datepicker";
-import { ExternalLink, Info, Loader2 } from "lucide-react";
+import { CalculatorIcon, ExternalLink, Info, Loader2 } from "lucide-react";
 import { usePathname, useRouter } from "next/navigation";
 import { cn } from "@/_components/generic/utils";
+import MessageBox from "@/_components/generic/MessageBox";
 
 //Schema of the form
 type FormSchema = {
@@ -51,9 +52,10 @@ const TYPE_OPTIONS = [
 ]
 
 export default function OrderForm({ children }: { children?: React.ReactNode }) {
-    const { setFormData, options, registerValidator, getCombinedData, registerCustomAction, setLoading} = useFormRegistry();
+    const { setFormData, options, registerValidator, getCombinedData, registerCustomAction, setLoading, isAnyLoading} = useFormRegistry();
     const [errors, setErrors] = useState<Record<string, string>>({});
     const [poQuantity, setPOQuantity] = useState<number>(0);
+    const [messageConfig, setMessageConfig] = useState<{ show: boolean; subject: string; message: string; action?: () => void; } | null>(null);
 
     const [formData, setLocalFormData] = useState({
         OrderNumber: 0, Style: '', Customer: '', DeliveryDate: '', Type: '',
@@ -138,131 +140,217 @@ export default function OrderForm({ children }: { children?: React.ReactNode }) 
         }     
     }
 
+    //Update quantity with parent upon changing the excess cut
     const handleQtyChange = (quantity: number) => {
         setPOQuantity(quantity);
     }
 
+    //Calculate the cut quantity
     const cutQuantity = Math.ceil(
         poQuantity + (poQuantity * (Number(formData.ExcessCut) / 100))
     );
+
+    const reCalculateRequirement = async(e: React.MouseEvent<HTMLButtonElement>) => {
+        e.preventDefault();
+
+        const orderNumber = formData.OrderNumber;
+        const style = formData.Style;
+
+        if (!orderNumber || !style) {
+            setMessageConfig({
+                show: true,
+                subject: "Error",
+                message: `Incomplete data`
+            });
+
+            return ;
+        };
+
+        setLoading('Order', true);
+        const backendURL = `/api/merchandising/work-order/requirement/calculate`;
+
+        try {
+            const response = await fetch(backendURL, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    orderNumber: orderNumber,
+                    style: style
+                })
+            });
+
+            if (!response.ok) {
+                const error = await response.json();
+                throw new Error(error.message || error);
+            }
+
+            window.location.reload();
+        } catch (err: any) {
+            setMessageConfig({
+                show: true,
+                subject: "Error",
+                message: `Saving Failed: ${err}`
+            });
+        } finally {
+            setLoading('Order', false);
+        }
+    }
     
     return (
-        <form className="lg:col-span-2 grid grid-cols-1 md:grid-cols-5 gap-2">
-            <FormField label="Order Number" error={errors.OrderNumber} required>
-                <input placeholder="Order Number" type="number"
-                    className={THEME.TextInput} value={formData.OrderNumber}
-                    onChange={(e) => handleOrderNumberChange(e.target.value)}
-                    onKeyDown={(e) => {
-                        if (e.key === 'Enter') {
-                            e.preventDefault();
-                            handleOrderNumberChange(e.currentTarget.value, true);
-                        }
-                    }}
-                    onBlur={(e) => handleOrderNumberChange(e.target.value, true)}
-                />
-            </FormField>   
+        <>
+            <form className="lg:col-span-2 grid grid-cols-1 md:grid-cols-5 gap-2">
+                <FormField label="Order Number" error={errors.OrderNumber} required>
+                    <input placeholder="Order Number" type="number"
+                        className={THEME.TextInput} value={formData.OrderNumber}
+                        onChange={(e) => handleOrderNumberChange(e.target.value)}
+                        onKeyDown={(e) => {
+                            if (e.key === 'Enter') {
+                                e.preventDefault();
+                                handleOrderNumberChange(e.currentTarget.value, true);
+                            }
+                        }}
+                        onBlur={(e) => handleOrderNumberChange(e.target.value, true)}
+                    />
+                </FormField>   
 
-            <div className="grid col-span-2">
-                <FormField label="Style" error={errors.Style} required>
+                <div className="grid col-span-2">
+                    <FormField label="Style" error={errors.Style} required>
+                        <div className="flex items-center w-full">
+                            <div className="flex-1 min-w-0">
+                                <SingleDropdownAsync
+                                    inputName='Style' placeholder="Select Style" apiUrl={STYLE_OPTIONS_URL} 
+                                    widthClass="w-full" onSelect={(val: any) => handleInputChange('Style', val?.value)}  
+                                    defaultValue={formData.Style}
+                                />
+                        
+                            </div>
+                            <button
+                                type="button"
+                                className={cn(
+                                    "btn btn-ghost rounded-md w-fit px-3 flex-none h-12",
+                                )}
+                                disabled={!formData.Style}
+                                onClick={() => {
+                                    if (formData.Style) {
+                                        window.open(`/merchandising/style/${formData.Style}/edit`, '_blank');
+                                    }
+                                }}
+                                title="View Style"
+                            >
+                                <ExternalLink size={18} />
+                            </button>
+                        </div>
+                    </FormField>  
+                </div>   
+
+                <FormField label="Customer" error={errors.Customer} required>
+                    <SingleDropdownAsync
+                        inputName='Customer' placeholder="Select Customer" apiUrl={CUSTOMER_OPTIONS_URL} 
+                        widthClass="w-full" onSelect={(val: any) => handleInputChange('Customer', val?.value)} 
+                        defaultValue={formData.Customer}
+                    />
+                </FormField>
+
+                <FormField label="Delivery Date" error={errors.DeliveryDate} required>
+                    <DatePicker inputName='EndDate' value={formData.DeliveryDate} required={true}
+                        placeholder="Pick a date"
+                        showClear
+                        onChange={(val) => handleInputChange('DeliveryDate', val)}
+                    />
+                </FormField>
+
+                <FormField label="Order Type" error={errors.Type} required>
+                    <SingleDropdown
+                        inputName='Type' placeholder="Select an option" staticOptions={TYPE_OPTIONS} 
+                        widthClass="w-full" onSelect={(val: any) => handleInputChange('Type', val?.value)} 
+                        defaultValue={formData.Type}
+                    />
+                </FormField>
+
+                <FormField label="Price" error={errors.Price || errors.Currency} required>
                     <div className="flex items-center w-full">
-                        <div className="flex-1 min-w-0">
-                            <SingleDropdownAsync
-                                inputName='Style' placeholder="Select Style" apiUrl={STYLE_OPTIONS_URL} 
-                                widthClass="w-full" onSelect={(val: any) => handleInputChange('Style', val?.value)}  
-                                defaultValue={formData.Style}
-                            />
-                    
-                        </div>
-                        <button
-                            type="button"
-                            className={cn(
-                                "btn btn-ghost rounded-md w-fit px-3 flex-none h-12",
-                            )}
-                            disabled={!formData.Style}
-                            onClick={() => {
-                                if (formData.Style) {
-                                    window.open(`/merchandising/style/${formData.Style}/edit`, '_blank');
-                                }
-                            }}
-                            title="View Style"
-                        >
-                            <ExternalLink size={18} />
-                        </button>
-                    </div>
-                </FormField>  
-            </div>   
-
-            <FormField label="Customer" error={errors.Customer} required>
-                <SingleDropdownAsync
-                    inputName='Customer' placeholder="Select Customer" apiUrl={CUSTOMER_OPTIONS_URL} 
-                    widthClass="w-full" onSelect={(val: any) => handleInputChange('Customer', val?.value)} 
-                    defaultValue={formData.Customer}
-                />
-            </FormField>
-
-            <FormField label="Delivery Date" error={errors.DeliveryDate} required>
-                <DatePicker inputName='EndDate' value={formData.DeliveryDate} required={true}
-                    placeholder="Pick a date"
-                    showClear
-                    onChange={(val) => handleInputChange('DeliveryDate', val)}
-                />
-            </FormField>
-
-            <FormField label="Order Type" error={errors.Type} required>
-                <SingleDropdown
-                    inputName='Type' placeholder="Select an option" staticOptions={TYPE_OPTIONS} 
-                    widthClass="w-full" onSelect={(val: any) => handleInputChange('Type', val?.value)} 
-                    defaultValue={formData.Type}
-                />
-            </FormField>
-
-            <FormField label="Price" error={errors.Price || errors.Currency} required>
-                <div className="flex items-center w-full">
-                    <input type="number" placeholder="Price" 
-                        className={cn(THEME.TextInput, "w-1/3 flex-none")}
-                        value={formData.Price}
-                        onChange={(e) => handleInputChange('Price', e.target.value)}
-                    />
-
-                    <div className="flex-1">
-                        <SingleDropdown 
-                            inputName="Currency" staticOptions={currencyOptions}
-                            widthClass="w-full" onSelect={(val: any) => handleInputChange('Currency', val?.value)}
-                            defaultValue={formData.Currency}
+                        <input type="number" placeholder="Price" 
+                            className={cn(THEME.TextInput, "w-1/3 flex-none")}
+                            value={formData.Price}
+                            onChange={(e) => handleInputChange('Price', e.target.value)}
                         />
-                    </div>
-                </div>
-            </FormField>
 
-            <FormField label="Wastage (%)" error={errors.ExcessCut} required>
-                <div className="flex items-center gap-1.5">
-                    {/* Wastage Input */}
-                    <input 
-                        type="number" 
-                        placeholder="%" 
-                        className={cn(THEME.TextInput, "w-24 flex-none")}
-                        value={formData.ExcessCut}
-                        onChange={(e) => handleInputChange('ExcessCut', e.target.value)}
+                        <div className="flex-1">
+                            <SingleDropdown 
+                                inputName="Currency" staticOptions={currencyOptions}
+                                widthClass="w-full" onSelect={(val: any) => handleInputChange('Currency', val?.value)}
+                                defaultValue={formData.Currency}
+                            />
+                        </div>
+                    </div>
+                </FormField>
+
+                <FormField label="Wastage (%)" error={errors.ExcessCut} required>
+                    <div className="flex items-center gap-1.5">
+                        {/* Wastage Input */}
+                        <input 
+                            type="number" 
+                            placeholder="%" 
+                            className={cn(THEME.TextInput, "w-24 flex-none")}
+                            value={formData.ExcessCut}
+                            onChange={(e) => handleInputChange('ExcessCut', e.target.value)}
+                        />
+
+                        {/* Quantities display */}
+                        <div className={cn(THEME.TextInputReadOnly, "flex-1 flex justify-center")}>
+                            <div className="text-center">
+                                <span className="text-[9px] opacity-60 block leading-tight uppercase font-semibold">PO</span>
+                                <span className="font-bold text-xs leading-none">{poQuantity.toLocaleString()}</span>
+                            </div>
+                            <div className="h-6 border-l border-base-content/20 mx-1" />
+                            <div className="text-center">
+                                <span className="text-[9px] opacity-60 block leading-tight uppercase font-semibold">Cut</span>
+                                <span className="font-bold text-xs leading-none">{cutQuantity.toLocaleString()}</span>
+                            </div>
+                        </div>
+                    </div>
+                </FormField>
+
+                <div className="md:col-span-5 lg:col-span-1 flex items-end gap-2 pb-1">
+                    {children}
+                </div>
+
+                <div className="md:col-span-5 lg:col-span-1 flex items-end gap-2 pb-1">
+                    <button
+                        onClick={reCalculateRequirement}
+                        disabled={isAnyLoading}
+                        className={`${THEME.ButtonSecondary} flex-1 mt-2`}
+                    >
+                        {isAnyLoading ? (
+                            <>
+                                <Loader2 className="h-4 w-4 animate-spin" />
+                                Loading...
+                            </>
+                        ) : (
+                            <>
+                                <CalculatorIcon size={18}/>
+                                Re-calculate
+                            </>
+                        )}
+                    </button>
+                </div>
+            </form>
+
+            {messageConfig?.show && (
+                <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4">
+                    <MessageBox 
+                        subject={messageConfig.subject}
+                        message={messageConfig.message}
+                        confirmText="Close"
+                        onConfirm={() => {
+                            if (messageConfig.action) messageConfig.action();
+                            setMessageConfig(null);
+                        }}  
                     />
-
-                    {/* Quantities display */}
-                    <div className={cn(THEME.TextInputReadOnly, "flex-1 flex justify-center")}>
-                        <div className="text-center">
-                            <span className="text-[9px] opacity-60 block leading-tight uppercase font-semibold">PO</span>
-                            <span className="font-bold text-xs leading-none">{poQuantity.toLocaleString()}</span>
-                        </div>
-                        <div className="h-6 border-l border-base-content/20 mx-1" />
-                        <div className="text-center">
-                            <span className="text-[9px] opacity-60 block leading-tight uppercase font-semibold">Cut</span>
-                            <span className="font-bold text-xs leading-none">{cutQuantity.toLocaleString()}</span>
-                        </div>
-                    </div>
                 </div>
-            </FormField>
-
-            <div className="md:col-span-5 lg:col-span-1 flex items-end gap-2 pb-1">
-                {children}
-            </div>
-        </form>
+            )}
+        </>
     )
 }

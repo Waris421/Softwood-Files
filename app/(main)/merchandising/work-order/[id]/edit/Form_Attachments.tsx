@@ -182,6 +182,7 @@ export default function AttachmentForm() {
                                                                 file={value ? value : null}
                                                                 onFileChange={onChange}
                                                                 disabled={!field.CanEdit}
+                                                                accept=""
                                                             />
                                                         )}
 

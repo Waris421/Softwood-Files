@@ -237,7 +237,7 @@ export default function ConsumptionForm() {
                                                         <SingleDropdown 
                                                             inputName={field.name}
                                                             defaultValue={field.value}
-                                                            placeholder="If different from default..."
+                                                            placeholder={`If dif frm ${rowBaseUnitValue}`}
                                                             widthClass="w-40"
                                                             staticOptions={filteredUnits}
                                                             onSelect={(option: { value: string; label: string; } | null) => {
@@ -294,7 +294,7 @@ export default function ConsumptionForm() {
                                                 {...register(`items.${index}.SizeDetails` as const)} 
                                                 className={`${THEME.TextInput} text-center`}
                                                 type="text"
-                                                placeholder="Relevant Variants, separated by comma"
+                                                placeholder="Variants, separated by comma"
                                                 maxLength={255}
                                             />
                                             {errors.items?.[index]?.SizeDetails && (

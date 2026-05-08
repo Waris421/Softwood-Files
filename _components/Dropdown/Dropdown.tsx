@@ -116,7 +116,7 @@ function SingleDropdown({
                     >
                         <span className={cn(
                             "truncate",
-                            !selectedValue ? "text-muted-foreground" : ""
+                            !selectedValue ? "text-muted-foreground text-[9px]" : "",
                         )}>
                             {(selectedValue as DropdownOption)?.label || placeholder}
                         </span>
@@ -278,7 +278,7 @@ function SingleDropdownAsync({
                     >
                         <span className={cn(
                             "truncate",
-                            !selectedValue ? "text-muted-foreground" : ""
+                            !selectedValue ? "text-muted-foreground text-[9px]" : ""
                         )}>
                             {(selectedValue as DropdownOption)?.label || placeholder}
                         </span>
@@ -431,7 +431,7 @@ function MultiDropdown({
                     <Button variant="outline" className={cn(THEME.DropDown, "w-full justify-between")}>
                         <span className={cn(
                             "truncate",
-                            selected.length === 0 ? "text-muted-foreground" : "" // Add this line
+                            selected.length === 0 ? "text-muted-foreground text-[9px]" : ""
                         )}>
                             {selected.length > 0 ? `${selected.length} Selected` : placeholder}
                         </span>
@@ -463,6 +463,7 @@ function MultiDropdown({
                                 placeholder="Search..." 
                                 onValueChange={setSearch}
                                 className="border-none focus:ring-0" 
+                                autoFocus
                             />
                         </div>
                         <CommandList>
@@ -528,7 +529,12 @@ function MultiDropdownAsync({
             const res = await fetch(`${apiUrl}${connector}search=${encodeURIComponent(query)}`);
             if (!res.ok) throw new Error("Failed to fetch");
             const data: ApiOption[] = await res.json();
-            setOptions(data.map(opt => ({ value: String(opt.value), label: opt.label })));
+
+            const formatted = data.map(opt => ({ value: String(opt.value), label: opt.label }));
+
+            setOptions(formatted);
+
+            return formatted;
         } catch (err: any) {
             setError(err.message);
             setOptions([]);
@@ -537,14 +543,55 @@ function MultiDropdownAsync({
         }
     }
 
+    // Initial load for default values
+    useEffect(() => {
+        const init = async () => {
+            const initialOptions = await fetchOptions('');
+
+            if (defaultValues.length > 0 && initialOptions) {
+                const defaults = defaultValues.map(String);
+                const matches = initialOptions.filter(opt => defaults.includes(opt.value));
+                setSelected(matches);
+            }
+        }
+
+        init ();
+    }, [apiUrl]);
+
     const debouncedSearch = useDebouncedCallback(fetchOptions, 500);
 
-    const toggleOptions = (opt: DropdownOption) => {
+    const toggleOption = (opt: DropdownOption) => {
         const isSelected = selected.some(s => s.value === opt.value);
 
         const next = isSelected ? selected.filter(s => s.value !== opt.value) : [...selected, opt];
         setSelected(next);
         onSelect?.(next);
+    }
+
+    const handleClear = (e: React.MouseEvent | React.PointerEvent) => {
+        e.preventDefault();
+        e.stopPropagation();
+
+        setSelected([]);
+        onSelect?.([]);
+    }
+
+    const isAllVisibleSelected = options.length > 0 && options.every(opt => 
+        selected.some(s => s.value === opt.value)
+    );
+
+    const handleSelectAll = () => {
+        if (isAllVisibleSelected) {
+            const visibleValues = options.map(o => o.value);
+            const next = selected.filter(s => !visibleValues.includes(s.value));
+            setSelected(next);
+            onSelect?.(next);
+        } else {
+            const toAdd = options.filter(opt => !selected.some(s => s.value === opt.value));
+            const next = [...selected, ...toAdd];
+            setSelected(next);
+            onSelect?.(next);
+        }
     }
 
     if (!mounted) {
@@ -560,7 +607,75 @@ function MultiDropdownAsync({
 
     return (
         <div className={cn("relative", widthClass)}>
-            
+            <Popover open={open} onOpenChange={setOpen}>
+                <PopoverTrigger asChild>
+                    <Button variant="outline" className={cn(THEME.DropDown, "w-full justify-between")}>
+                        <span className={cn("truncate", selected.length === 0 ? "text-muted-foreground text-[9px]" : "")}>
+                            {selected.length > 0 ? `${selected.length} Selected` : placeholder}
+                        </span>
+                        <div className="flex items-center ml-2 border-l pl-2 gap-1">
+                            <ChevronsUpDown className="h-4 w-4 opacity-50" />
+                            {selected.length > 0 && (
+                                <span
+                                    role="button"
+                                    onPointerDown={handleClear}
+                                    className="p-0.5 hover:bg-secondary rounded-sm transition-colors cursor-pointer"
+                                >
+                                    <X className="h-3.5 w-3.5 text-muted-foreground hover:text-foreground" />
+                                </span>
+                            )}
+                        </div>
+                    </Button>
+                </PopoverTrigger>
+
+                <PopoverContent className="p-0 w-(--radix-popover-trigger-width) min-w-max">
+                    <Command shouldFilter={false}>
+                        <div className="flex items-center border-b px-3">
+                            <Checkbox 
+                                checked={isAllVisibleSelected} 
+                                onCheckedChange={handleSelectAll}
+                                className="h-4 w-4"
+                                disabled={options.length === 0 || isLoading}
+                            />
+                            <CommandInput 
+                                placeholder="Search..." 
+                                onValueChange={debouncedSearch}
+                                className="border-none focus:ring-0" 
+                                autoFocus
+                            />
+                        </div>
+
+                        <CommandList>
+                            {isLoading && <div className="p-4 text-center"><Loader2 className="animate-spin h-4 w-4 inline" /></div>}
+                            {error && <div className="p-2 text-red-500 text-xs">{error}</div>}
+                            {!isLoading && !error && options.length === 0 && <CommandEmpty>No results found.</CommandEmpty>}
+                            
+                            <CommandGroup>
+                                {options.map((opt) => (
+                                    <CommandItem
+                                        key={opt.value}
+                                        value={`${opt.label} ${opt.value}`.toLowerCase()}
+                                        onSelect={() => toggleOption(opt)}
+                                        className="cursor-pointer"
+                                    >
+                                        <Checkbox
+                                            checked={selected.some((s) => s.value === opt.value)}
+                                            className="h-4 w-4 mr-2"
+                                        />
+                                        {opt.label} {showValue ? `(${opt.value})` : ""}
+                                    </CommandItem>
+                                ))}
+                            </CommandGroup>
+                        </CommandList>
+                    </Command>
+                </PopoverContent>
+            </Popover>
+            <input 
+                type="hidden" 
+                name={inputName} 
+                required={isRequired && selected.length === 0} 
+                value={JSON.stringify(selected.map(s => s.value))} 
+            />
         </div>
     )
 }

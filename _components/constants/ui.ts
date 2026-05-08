@@ -36,7 +36,7 @@ export const THEME = {
         dark:border-slate-400 dark:text-white dark:bg-slate-700
     `,
 
-    TextInput: 'input w-full rounded-lg bg-gray-300 dark:bg-gray-800 hover:ring-2 hover:shadow-md transition-shadow',
+    TextInput: 'input w-full rounded-lg bg-gray-300 dark:bg-gray-800 hover:ring-2 hover:shadow-md transition-shadow placeholder:text-[10px]',
     TextInputReadOnly: 'input w-full rounded-lg bg-gray-400 dark:bg-gray-700',
     DropDown: 'w-full h-10 rounded-lg justify-between bg-gray-300 dark:bg-gray-800',
     Slider: 'flex-1 w-full min-w-30 rounded-lg bg-gray-300 dark:bg-gray-800',

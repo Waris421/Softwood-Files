@@ -4,9 +4,8 @@ import { THEME } from "@/_components/constants/ui";
 import ActionDialog from "@/_components/DialogBox/ActionDialog";
 import { DataTable } from "@/_components/table/Table";
 import { Cell, ColumnDef } from "@tanstack/react-table";
-import { Copy, Loader2, Pencil, SquarePlus, Trash2 } from "lucide-react";
+import { Loader2, Pencil, SquarePlus, Trash2 } from "lucide-react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 
 type WorkOrder = {
@@ -110,7 +109,6 @@ export default function WorkOrders(){
 
     const dialogBoxActions = [
         { label: 'Edit', icon: <Pencil size={16}/>, href: `/merchandising/work-order/${selectedOrder}/edit` },
-        { label: 'Copy', icon: <Copy size={16}/>, href: `/merchandising/work-order/${selectedOrder}/copy` },
         { label: 'Delete', icon: <Trash2 size={16}/>, href: `/merchandising/work-order/${selectedOrder}/delete` },
     ]
     
