@@ -1,6 +1,6 @@
 import Image from "next/image";
 import Link from "next/link";
-import {BarChart3, CalendarDays, Factory, ShieldCheck, ShoppingCart, Wallet, BriefcaseBusiness} from "lucide-react";
+import {BarChart3, CalendarDays, Factory, ShieldCheck, ShoppingCart, Wallet, BriefcaseBusiness, Shirt} from "lucide-react";
 import Marketing from "@/public/Marketing.png";
 import Planning from "@/public/Planning.png";
 import Procurement from "@/public/Procurement.png";
@@ -8,6 +8,7 @@ import Production from "@/public/Production.png";
 import QualityControl from "@/public/Quality Control.png";
 import Finance from "@/public/Finance.png";
 import HumanResource from "@/public/Human Resource.png";
+import Merchandising from "@/public/Merchandising.png";
 
 const modules = [
   { id: 3, src: Procurement, href: '/mmc', title: 'Procurement', icon: ShoppingCart, color: "text-blue-500", size: "col-span-1" },
@@ -17,6 +18,7 @@ const modules = [
   { id: 1, src: Marketing, href: '/marketing', title: 'Marketing', icon: BarChart3, color: "text-pink-500", size: "col-span-1" },
   { id: 6, src: Finance, href: '/finance', title: 'Finance', icon: Wallet, color: "text-emerald-500", size: "col-span-1" }, 
   { id: 7, src: HumanResource, href: '/hr', title: 'Human Resource', icon: BriefcaseBusiness, color: "text-pink-400", size: "col-span-1" }, 
+  { id: 8, src: Merchandising, href: '/merchandising', title: 'Merchandising', icon: Shirt, color: "text-violet-500", size: "col-span-1" },
 ]
 
 const Page = () => {

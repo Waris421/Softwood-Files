@@ -217,11 +217,11 @@ function SingleDropdown({
                             )}
 
                             <CommandGroup>
-                                {options.map((option) => {
+                                {options.map((option, idx) => {
                                     const isSelected = selectedValue?.value === option.value;
                                     return(
                                         <CommandItem
-                                            key={option.value}
+                                            key={`${idx}-${option.value}`}
                                             value={`${option.label} ${option.value}`.toLowerCase()}
                                             onSelect={() => handleSelect(option)}
                                             className={cn(
@@ -481,9 +481,9 @@ function MultiDropdown({
 
                             {/* Only render this ONCE */}
                             <CommandGroup>
-                                {options.map((opt) => (
+                                {options.map((opt, idx) => (
                                     <CommandItem
-                                        key={opt.value}
+                                        key={`${idx}-${opt.value}`}
                                         value={`${opt.label} ${opt.value}`.toLowerCase()}
                                         onSelect={() => toggleOption(opt)}
                                         className="cursor-pointer"
@@ -511,7 +511,171 @@ function MultiDropdown({
     );
 }
 
+function SingleDropdownAsync({
+    apiUrl,
+    widthClass = "w-75",
+    placeholder = "Type to search...",
+    inputName,
+    onSelect,
+    defaultValue = '',
+    isRequired = false,
+    showValue = false,
+}: DropDownProps) {
+    const [mounted, setMounted] = useState(false);
+    const [open, setOpen] = useState(false);
+    const [error, setError] = useState<string | null>(null);
+    const [options, setOptions] = useState<DropdownOption[]>([]);
+    const [isLoading, setIsLoading] = useState(false);
+    const [selectedValue, setSelectedValue] = useState<DropdownOption | null>(null);
+
+    useEffect(() => { setMounted(true); }, []);
+
+    const fetchOptions = async(searchQuery: string) => {
+        setIsLoading(true);
+        setError(null);
+        try {
+            if (!apiUrl) throw new Error('A search url is required');
+            const connector = apiUrl.includes("?") ? "&" : "?";
+            const response = await fetch(`${apiUrl}${connector}search=${encodeURIComponent(searchQuery)}`);
+            if (!response.ok) throw new Error("Failed to fetch data");
+            const data: ApiOption[] = await response.json();
+            const formattedOptions = data.map(opt => ({
+                value: String(opt.value),
+                label: opt.label
+            }));
+            setOptions(formattedOptions);
+            return formattedOptions;
+        } catch (err: any) {
+            setError(err.message);
+            setOptions([]);
+            return [];
+        } finally {
+            setIsLoading(false);
+        }
+    }
+
+    useEffect(() => {
+        const initialise = async () => {
+            setMounted(true);
+            if (!defaultValue) return;
+            const currentOptions = await fetchOptions(defaultValue);
+            const match = currentOptions.find(opt => opt.value === String(defaultValue));
+            if (match) {
+                setSelectedValue(match);
+                if (onSelect) onSelect(match);
+            }
+        }
+        initialise();
+    }, [apiUrl, defaultValue]);
+
+    useEffect(() => {
+        if (open && options.length === 0 && !isLoading) {
+            fetchOptions('');
+        }
+    }, [open]);
+
+    const debouncedSearch = useDebouncedCallback((val) => fetchOptions(val), 500);
+
+    const handleSelect = (option: DropdownOption) => {
+        const newValue = selectedValue?.value === option.value ? null : option;
+        setSelectedValue(newValue);
+        if (onSelect) onSelect(newValue);
+        setOpen(false);
+    };
+
+    const handleClear = (e: MouseEvent | React.PointerEvent) => {
+        e.preventDefault();
+        e.stopPropagation();
+        setSelectedValue(null);
+        if (onSelect) onSelect(null);
+    }
+
+    if (!mounted) {
+        return (
+            <div className={cn("w-40", widthClass)}>
+                <Button variant="outline" className="w-full justify-between opacity-50 cursor-not-allowed">
+                    <span className="truncate">{placeholder}</span>
+                    <ChevronsUpDown className="opacity-50" />
+                </Button>
+            </div>
+        );
+    }
+
+    return (
+        <div className={cn("w-40", widthClass)}>
+            <Popover open={open} onOpenChange={setOpen}>
+                <PopoverTrigger asChild>
+                    <Button
+                        variant="outline"
+                        role="combobox"
+                        className={THEME.DropDown}
+                    >
+                        <span className={cn(
+                            "truncate",
+                            !selectedValue ? "text-muted-foreground" : ""
+                        )}>
+                            {(selectedValue as DropdownOption)?.label || placeholder}
+                        </span>
+                        <div className="flex items-center ml-2 border-l pl-2 gap-1">
+                            <ChevronsUpDown className="h-4 w-4 opacity-50 shrink-0" />
+                            {selectedValue && (
+                                <span
+                                    role="button"
+                                    onPointerDown={handleClear}
+                                    className="p-0.5 hover:bg-secondary rounded-sm transition-colors cursor-pointer"
+                                >
+                                    <X className="h-3.5 w-3.5 text-muted-foreground hover:text-foreground" />
+                                </span>
+                            )}
+                        </div>
+                    </Button>
+                </PopoverTrigger>
+                <PopoverContent className="p-0 w-(--radix-popover-trigger-width) min-w-max">
+                    <Command shouldFilter={false}>
+                        <CommandInput placeholder="Type to search..." onValueChange={debouncedSearch} />
+                        <CommandList>
+                            {isLoading && <div className="p-4 text-center"><Loader2 className="animate-spin h-4 w-4 inline" /></div>}
+                            {error && <div className="p-2 text-red-500 text-xs">{error}</div>}
+                            {!isLoading && !error && options.length === 0 && <CommandEmpty>No results found.</CommandEmpty>}
+                            <CommandGroup>
+                                {options.map((option, idx) => {
+                                    const isSelected = selectedValue?.value === option.value;
+                                    return (
+                                        <CommandItem
+                                            key={`${idx}-${option.value}`}
+                                            value={`${option.label} ${option.value}`.toLowerCase()}
+                                            onSelect={() => handleSelect(option)}
+                                            className={cn(
+                                                "flex items-center justify-between py-2 px-3 cursor-pointer",
+                                                isSelected ? "bg-accent text-accent-foreground" : ""
+                                            )}
+                                        >
+                                            <span className="truncate flex-1">
+                                                {option.label} {showValue ? `(${option.value})` : ''}
+                                            </span>
+                                            {isSelected && (
+                                                <Check className="ml-2 h-4 w-4 shrink-0"/>
+                                            )}
+                                        </CommandItem>
+                                    )
+                                })}
+                            </CommandGroup>
+                        </CommandList>
+                    </Command>
+                </PopoverContent>
+            </Popover>
+            <input
+                type="hidden"
+                name={inputName}
+                required={isRequired}
+                value={selectedValue?.value ?? ""}
+            />
+        </div>
+    )
+}
+
 export {
     SingleDropdown,
+    SingleDropdownAsync,
     MultiDropdown
 }

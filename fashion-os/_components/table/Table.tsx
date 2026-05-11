@@ -30,11 +30,12 @@ interface DataTableProps<TData, TValue> {
     pageSize?: number,
     showPrint?: boolean,
     showDownload?: boolean,
+    showPagination?: boolean,
     customActions?: React.ReactNode;
 }
 
 export function DataTable<TData, TValue> ({
-    title, columns, data, searchFilters, dropdownFilters, sliderFilters, toggleFilters, isLoading, columnClickHandlers, error, pageSize = 20, showPrint=true, showDownload=true, getRowClassName, customActions,
+    title, columns, data, searchFilters, dropdownFilters, sliderFilters, toggleFilters, isLoading, columnClickHandlers, error, pageSize = 20, showPrint=true, showDownload=true, showPagination=true, getRowClassName, customActions,
 }: DataTableProps<TData, TValue> ) {
     //Initialisations
     const [sorting, setSorting] = useState<SortingState>([]);
@@ -413,7 +414,7 @@ export function DataTable<TData, TValue> ({
             </div>
             
             {/*Table Pagination*/}
-            {!error && !isLoading && (
+            {showPagination && !error && !isLoading && (
                 <div className="flex items-center justify-center px-2">
                     <div className="flex items-center space-x-1">
                         {/* First Page */}

@@ -27,4 +27,11 @@ export const THEME = {
     
     HyperLink: 'label-text-alt link link-hover',
     ErrorText: 'label-text-alt flex items-center gap-1 text-red-500',
+
+    Table: {
+        Wrapper: 'w-full space-y-4',
+        TableContainer: 'overflow-x-auto rounded-lg border border-base-300',
+        HeaderRow: 'bg-base-200',
+        RowHover: 'hover:bg-base-100',
+    }
 }

@@ -4,4 +4,5 @@ export const URLs = {
     QualityServer: 'http://127.0.0.1:8000',
     HRServer: 'http://127.0.0.1:8000',
     MMCServer: 'http://127.0.0.1:8000',
+    MerchServer: 'http://127.0.0.1:8000',
 }
