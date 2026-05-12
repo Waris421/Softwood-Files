@@ -4,7 +4,7 @@ import { THEME } from "@/_components/constants/ui";
 import { MultiDropdown, MultiDropdownAsync, SingleDropdown, SingleDropdownAsync } from "@/_components/Dropdown/Dropdown";
 import { DropdownOption } from "@/_components/Dropdown/types";
 import { FormField } from "@/_components/generic/FormItems";
-import { RefreshCw } from "lucide-react";
+import { PackageCheck, RefreshCw } from "lucide-react";
 import { useState } from "react";
 
 type FormSchema = {
@@ -32,6 +32,8 @@ interface FiltersOptions {
 
 interface FiltersProps {
     onFilterSubmit: (data: FormSchema) => void;
+    onDataChange: (data: FormSchema) => void;
+    onTableSubmit: () => void;
     isLoading: boolean;
     options: FiltersOptions;
 }
@@ -39,7 +41,9 @@ interface FiltersProps {
 const ORDER_OPTIONS_URL = '/api/options/work-orders?limit=15';
 const CUSTOMER_OPTIONS_URL = '/api/options/customers';
 
-export default function Filters({onFilterSubmit, isLoading, options}: FiltersProps) {
+export default function Filters({
+    onFilterSubmit, onDataChange, onTableSubmit, isLoading, options
+}: FiltersProps) {
     const [formData, setFormData] = useState({
         StartingOrder: '', EndingOrder: '', Customers: [], Inventories: [], Type: ''
     });
@@ -48,12 +52,10 @@ export default function Filters({onFilterSubmit, isLoading, options}: FiltersPro
 
     //Helper function that triggers when user types something
     const handleInputChange = (field: keyof FormSchema, value: any) => {
-        //Update the data in the form object
-        setFormData(prev => {
-            const newData = { ...prev, [field]: value };
+        const newData = { ...formData, [field]: value };
 
-            return newData;
-        });
+        setFormData(newData);
+        onDataChange(newData);
 
         //Clear the error on the field if there was one previously
         if (errors[field]) {
@@ -155,13 +157,22 @@ export default function Filters({onFilterSubmit, isLoading, options}: FiltersPro
                         />
                 </FormField>            
 
-                <div className="pb-1">
+                <div className="flex flex-row gap-2 pb-1">
                     <button
                         type="submit"
-                        className={`${THEME.ButtonBasic} w-full h-15 mt-2 flex items-center justify-center gap-2 ${isLoading ? `opacity-70 cursor-not-allowed` : ''}`}
+                        className={`${THEME.ButtonBasic} flex-1 h-12 mt-2 flex items-center justify-center gap-2 ${isLoading ? `opacity-70 cursor-not-allowed` : ''}`}
                     >
                         <RefreshCw className={`h-4 w-4 ${isLoading ? 'animate-spin' : ''}`} />
                         {isLoading ? 'Searching...' : 'Search'}
+                    </button>
+
+                    <button
+                        type="button"
+                        className={`${THEME.ButtonSecondary} flex-1 h-12 mt-2 flex items-center justify-center gap-2 ${isLoading ? `opacity-70 cursor-not-allowed` : ''}`}
+                        onClick={onTableSubmit}
+                    >
+                        <PackageCheck className={`h-4 w-4`} />
+                        Order Selected
                     </button>
                 </div>
             </form>

@@ -3,14 +3,16 @@
 import { THEME } from "@/_components/constants/ui";
 import LoadingIcon from "@/_components/generic/Loading";
 import { cn } from "@/_components/generic/utils";
+import { Checkbox } from "@/_components/ui/checkbox";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useEffect } from "react";
-import { useFieldArray, useForm } from "react-hook-form";
+import { Controller, useFieldArray, useForm, useWatch } from "react-hook-form";
 import * as z from "zod";
 
 interface TableProps {
   initialData: FormValues['items'];
   isLoading: boolean;
+  onDataChange: (data: any[]) => void;
 }
 
 const rowSchema = z.object({
@@ -22,7 +24,8 @@ const rowSchema = z.object({
     Required: z.number().min(0),
     Ordered: z.number().min(0),
     ToOrder: z.number().min(0),
-    Type: z.string().optional()
+    Type: z.string().optional(),
+    selected: z.boolean().default(false),
 })
 
 const formSchema = z.object({
@@ -31,27 +34,53 @@ const formSchema = z.object({
 
 type FormValues = z.input<typeof formSchema>;
 
-export default function Table({ initialData, isLoading }: TableProps) {
+export default function Table({ initialData, onDataChange, isLoading }: TableProps) {
     const { 
-        register, control, handleSubmit, reset, formState: { errors, isSubmitting } 
-    } = useForm<FormValues>({
-        resolver: zodResolver(formSchema),
-        defaultValues: {
-            items: initialData || []
-        }
+            register, control, reset, setValue, formState: { errors } 
+        } = useForm<FormValues>({
+            resolver: zodResolver(formSchema),
+            defaultValues: {
+                items: initialData?.map(item => ({ ...item, selected: false })) || []
+            }
     });
 
-    const { fields } = useFieldArray({
+    const { fields } = useFieldArray({ control, name: "items" });
+
+    const watchedItems = useWatch({
         control,
         name: "items",
     });
 
-    useEffect(() => {
-        reset({ items: initialData });
-    }, [initialData, reset]);
+    const isAllSelected = watchedItems.length > 0 && watchedItems.every((item) => item.selected);
+    const isSomeSelected = watchedItems.some((item) => item.selected) && !isAllSelected;
 
-    const onSubmit = async(data: FormValues) => {
-        console.log(data);
+    useEffect(() => {
+        if (watchedItems) {
+            const selectedInventories = watchedItems
+                .filter(item => item?.selected)
+                .map(item => ({
+                    Inventory: item.InventoryCode,
+                    Variant: item.Variant,
+                    WorkOrder: item.OrderNumber,
+                    Quantity: item.ToOrder,
+                }));
+            
+            onDataChange(selectedInventories);
+        }
+    }, [watchedItems, onDataChange]);
+
+    useEffect(() => {
+        if (!isLoading && initialData) {
+            reset({ 
+                items: initialData.map(item => ({ ...item, selected: false })) 
+            });
+        }
+    }, [isLoading, initialData, reset]);
+
+    const handleSelectAll = (checked: boolean) => {
+        watchedItems.forEach((_, index) => {
+            setValue(`items.${index}.selected`, checked);
+        });
     }
 
     if (isLoading) return (
@@ -64,6 +93,15 @@ export default function Table({ initialData, isLoading }: TableProps) {
                 <table className="table w-full">
                     <thead className={THEME.Table.HeaderRow}>
                         <tr className="bg-base-200">
+                            <th className="p-1 border-b text-center w-20">
+                                <div className="flex justify-center">
+                                    <Checkbox
+                                        className="size-8"
+                                        checked={isAllSelected || (isSomeSelected ? "indeterminate" : false)}
+                                        onCheckedChange={(checked) => handleSelectAll(!!checked)}
+                                    />
+                                </div>
+                            </th>
                             <th className="p-1 border-b text-center w-40">Order No.</th>
                             <th className="p-1 border-b text-center w-100">Style</th>
                             <th className="p-1 border-b text-center w-40">Code</th>
@@ -84,6 +122,21 @@ export default function Table({ initialData, isLoading }: TableProps) {
                                         THEME.Table.RowHover,
                                     )}
                                 >
+                                    <td className="p-1 w-20 text-center">
+                                        <div className="flex justify-center">
+                                            <Controller
+                                                control={control}
+                                                name={`items.${index}.selected`}
+                                                render={({ field: { onChange, value } }) => (
+                                                    <Checkbox 
+                                                        className="size-6"
+                                                        checked={value} 
+                                                        onCheckedChange={onChange} 
+                                                    />
+                                                )}
+                                            />
+                                        </div>
+                                    </td>
                                     <td className="p-1 w-40 text-center">
                                         <div className={THEME.TextInputReadOnly}>{field.OrderNumber}</div>
                                     </td>

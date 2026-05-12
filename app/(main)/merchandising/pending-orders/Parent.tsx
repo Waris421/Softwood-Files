@@ -1,15 +1,24 @@
 'use client';
 
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import Filters from "./Filters";
 import Table from "./Table";
 import { DropdownOption } from "@/_components/Dropdown/types";
 import MessageBox from "@/_components/generic/MessageBox";
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/_components/ui/dialog";
+import { SingleDropdownAsync } from "@/_components/Dropdown/Dropdown";
+import { THEME } from "@/_components/constants/ui";
+import { cn } from "@/_components/generic/utils";
 
 //The Threadhold above which no data would be shown user. Optimise as per user experience
 const ROW_THRESHOLD = 100;
 
+const API_URL = "/api/merchandising/pending-orders"
+const SUPPLIER_OPTIONS_URL = '/api/options/suppliers'
+
 export default function Parent() {
+    const [formData, setFormData] = useState<any>({ Inventories: [], Supplier: '' });
+    const [showSupplierSelection, setShowSupplierSelection] = useState(false);
     const [majorFilters, setMajorFilters] = useState<any>({});
     const [minorFilters, setMinorFilters] = useState<any>({});
     const [refreshTrigger, setRefreshTrigger] = useState(0);
@@ -61,7 +70,7 @@ export default function Parent() {
                     }
                 });
                 
-                const apiURL = `/api/merchandising/pending-orders?${searchParams.toString()}`;
+                const apiURL = `${API_URL}?${searchParams.toString()}`;
 
                 const response = await fetch(apiURL);
                 if (!response.ok) {
@@ -144,15 +153,144 @@ export default function Parent() {
         setIsLoading(false);
     };
 
+    const handleTableDataChange = useCallback((selectedItems: any[]) => {
+        setFormData((prev: any) => {
+            if (JSON.stringify(prev.Inventories) === JSON.stringify(selectedItems)) {
+                return prev;
+            }
+
+            return {
+                ...prev,
+                Inventories: selectedItems,
+            };
+        });
+    }, []);
+
+    const handlePreSubmit = () => {
+        if (formData.Inventories.length === 0) {
+            setMessageConfig({
+                show: true,
+                subject: "Missing Information",
+                message: "At least one inventory is required.",
+            });
+            return;
+        }
+
+        formData.Supplier = '';
+        setShowSupplierSelection(true);
+    }
+
+    const handleFinalSubmit = async () => {
+        const isSupplierEmpty = !formData.Supplier?.trim();
+
+        if (isSupplierEmpty) {
+            setMessageConfig({
+                show: true,
+                subject: "Missing Information",
+                message: 'Please select a supplier',
+            });
+
+            return ;
+        }
+
+        setShowSupplierSelection(false);
+        setIsLoading(true);
+
+        try {
+            const response = await fetch(API_URL, {
+                method: "POST",
+                headers: {
+                    "content-type": "application/json",
+                },
+                body: JSON.stringify(formData, (key, value) => 
+                    value === undefined ? null : value
+                ),
+            })
+
+            if (!response.ok) {
+                const error = await response.json();
+                throw new Error(error.message || error);
+            }
+
+            const resData = await response.json();
+            const poNumber = resData.poNumber;
+
+            setMessageConfig({
+                show: true,
+                subject: 'Success',
+                message: `Saved Successfully. PO Number: ${poNumber}`,
+                action: () => {
+                    window.location.reload();
+                }
+            });
+        } catch (err: any) {
+            setMessageConfig({
+                show: true,
+                subject: "Fetch Error",
+                message: err.message,
+            });
+        } finally {
+            setIsLoading(false);
+        }
+    }
+
     return (
         <>
             <Filters
                 onFilterSubmit={handleFilterSubmit}
+                onDataChange={(data) => setFormData((prev: any) => ({ ...prev, ...data }))}
+                onTableSubmit={handlePreSubmit}
                 isLoading={isLoading}
                 options={{ invFilterOptions: inventoryFilterOptions, typeFilterOptions: typeFilterOptions }}
             />
 
-            <Table initialData={tableData} isLoading={isLoading}/>
+            <Table
+                initialData={tableData}
+                isLoading={isLoading}
+                onDataChange={handleTableDataChange}
+            />
+
+            <Dialog open={showSupplierSelection} onOpenChange={setShowSupplierSelection}>
+                <DialogContent className="sm:max-w-md">
+                    <DialogHeader>
+                        <DialogTitle>Select Supplier</DialogTitle>
+                        <DialogDescription>
+                            Please choose a supplier for the {formData.Inventories.length} selected items.
+                        </DialogDescription>
+                    </DialogHeader>
+
+                    <div className="py-4">
+                        <label className="label">
+                            <span className="label-text font-bold">Supplier Name</span>
+                        </label>
+
+                        <SingleDropdownAsync 
+                            inputName="Supplier"
+                            placeholder="click to search"
+                            apiUrl={SUPPLIER_OPTIONS_URL}
+                            widthClass="w-full"
+                            onSelect={(val: any) => setFormData({...formData, Supplier: val?.value})} 
+                        />
+                    </div>
+
+                    <DialogFooter>
+                        <button
+                            className={THEME.ButtonOutLine}
+                            onClick={() => setShowSupplierSelection(false)}
+                        >
+                            Cancel
+                        </button>
+
+                        <button
+                            className={formData.Supplier ? `${THEME.ButtonBasic}` : `${THEME.ButtonOutLine}`}
+                            onClick={handleFinalSubmit}
+                            disabled={!formData.Supplier}
+                        >
+                            Confirm & Submit
+                        </button>
+                    </DialogFooter>
+                </DialogContent>
+            </Dialog>
 
             {messageConfig?.show && (
                 <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4">

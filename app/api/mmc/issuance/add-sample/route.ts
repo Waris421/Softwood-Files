@@ -2,8 +2,7 @@ import { URLs } from "@/_components/constants/urls";
 import { NextRequest, NextResponse } from "next/server";
 
 const AUTH_COOKIE_NAME = 'authToken';
-
-const backendURL = new URL(`${URLs.MerchServer}/mmc/inventory-orders/pending`);
+const URL = `${URLs.MMCServer}/mmc/issuance/add-sampling`;
 
 export async function GET(request: NextRequest) {
     const authToken = request.cookies.get(AUTH_COOKIE_NAME);
@@ -14,10 +13,7 @@ export async function GET(request: NextRequest) {
         );
     }
 
-    const { searchParams } = new URL(request.url);
-
-    backendURL.search = searchParams.toString();
-    const backendResponse = await fetch(`${backendURL}`,{
+    const backendResponse = await fetch(`${URL}`,{
         headers: {
             'Authorization': `Token ${authToken.value}`,
             'Content-Type': 'application/json',
@@ -35,8 +31,8 @@ export async function GET(request: NextRequest) {
         );
     }
 
-    const inventories = await backendResponse.json();
-    return NextResponse.json(inventories);
+    const formData = await backendResponse.json();
+    return NextResponse.json(formData);
 }
 
 export async function POST(request: NextRequest) {
@@ -49,8 +45,7 @@ export async function POST(request: NextRequest) {
     }
 
     const requestBody = await request.json();
-
-    const backendResponse = await fetch(backendURL, {
+    const backendResponse = await fetch(URL, {
         method: 'POST',
         headers: {
         'Authorization': `Token ${authToken.value}`,
