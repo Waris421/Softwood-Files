@@ -47,6 +47,7 @@ export default function EnergyVisualization() {
         const fetchDateRange = async () => {
             try {
                 const response = await fetch('/api/energy/date-range')
+                if (response.status === 404) throw new Error('No energy data has been uploaded yet.')
                 if (!response.ok) throw new Error('Failed to load date range')
                 const data = await response.json()
                 setAvailableRange({ from: data.min_date, to: data.max_date })
@@ -219,8 +220,11 @@ export default function EnergyVisualization() {
                                         </div>
                                     )
                                 })()}
-                                <ReactECharts option={buildChartOption(computeBuckets(m.readings))} style={{ height: 400 }} />
-
+                                <ReactECharts 
+                                    key={`${selectedMachine}-${selectedRange.from}-${selectedRange.to}`}
+                                    option={buildChartOption(computeBuckets(m.readings))} 
+                                    style={{ height: 400 }} 
+                                />
                             </div>
                         )
                     })()}

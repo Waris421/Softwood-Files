@@ -97,7 +97,7 @@ export const FormProvider = ({ children, id }: { children: React.ReactNode, id: 
                 const response = await fetch(GET_API_URL(id));
                 if (!response.ok) {
                     const errorData = await response.json();
-                    throw new Error(`${errorData.details.message}`);
+                    throw new Error(errorData.details?.message || errorData.message || errorData.error || 'Something went wrong');
                 }
 
                 const data = await response.json();
