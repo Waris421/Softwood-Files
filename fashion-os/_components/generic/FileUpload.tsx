@@ -12,6 +12,13 @@ interface FileUploadProps {
     helperText?: string;
 }
 
+interface FileUploadCompactProps {
+    file: File | null;
+    onFileChange: (file: File | null) => void;
+    accept?: string;
+    disabled?: boolean;
+}
+
 export const FileUpload = ({
     file,
     onFileChange,
@@ -99,4 +106,34 @@ export const FileUpload = ({
             </label>
         </div>
     )
+}
+
+export const FileUploadCompact = ({
+    file,
+    onFileChange,
+    accept,
+    disabled = false,
+}: FileUploadCompactProps) => {
+
+    if (file) {
+        return (
+            <div className="flex items-center gap-2 text-xs">
+                <FileText className="w-4 h-4 text-primary shrink-0" />
+                <span className="truncate max-w-[120px] opacity-70">{file.name}</span>
+                {!disabled && (
+                    <button type="button" onClick={() => onFileChange(null)} className="text-error hover:opacity-70 shrink-0">
+                        <X size={14} />
+                    </button>
+                )}
+            </div>
+        );
+    }
+
+    return (
+        <label className={`inline-flex items-center gap-1 text-xs px-2 py-1 rounded border border-dashed border-base-300 cursor-pointer hover:border-primary hover:text-primary transition-colors ${disabled ? 'opacity-40 pointer-events-none' : ''}`}>
+            <FileUp className="w-3 h-3" />
+            <span>Choose file</span>
+            <input type="file" className="hidden" accept={accept} disabled={disabled} onChange={(e) => onFileChange(e.target.files?.[0] || null)} />
+        </label>
+    );
 }

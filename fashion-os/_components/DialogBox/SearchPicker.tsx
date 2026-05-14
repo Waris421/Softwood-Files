@@ -18,7 +18,7 @@ interface SearchPickerProps {
     placeholder?: string;
     displayColumn: string;
     columnMapping: ColumnConfig[];
-    onSelect: (value: any) => void;
+    onSelect: (value: any, label?: string) => void;
     value: any;
     customClasses?: {
         trigger?: string;
@@ -83,7 +83,7 @@ export function SearchPicker({
 
     const handleRowClick = (row: any) => {
         const val = Object.values(row)[0];
-        onSelect(val);
+        onSelect(val, row[displayColumn]);    // ← passes code AND the display name
         setSelectedLabel(row[displayColumn]);
         modalRef.current?.close();
     }

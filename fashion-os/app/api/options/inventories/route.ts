@@ -21,7 +21,7 @@ export async function GET(req: NextRequest) {
             .filter((item: { Code: string; InUse: boolean }) => item.Code && item.InUse)
             .map((item: { Code: string; Name: string; Unit: string; Group: string }) => ({
                 value: item.Code,
-                label: item.Name,
+                label: `${item.Name} - ${item.Code}`,
                 Unit: item.Unit,
                 Group: item.Group,
             }))

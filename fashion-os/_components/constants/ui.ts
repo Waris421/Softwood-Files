@@ -33,5 +33,12 @@ export const THEME = {
         TableContainer: 'overflow-x-auto rounded-lg border border-base-300',
         HeaderRow: 'bg-base-200',
         RowHover: 'hover:bg-base-100',
+    },
+
+    Text: {
+        RedText:  'text-red-500',
+        GrayText: 'text-slate-400',
+        BlueText: 'text-blue-500',
     }
+
 }

@@ -5,7 +5,7 @@ const AUTH_COOKIE_NAME = 'authToken';
 
 export async function GET(request: NextRequest, { params }: { params: Promise<{ id: number }> }) {
     const {id} = await params;
-    const URL = `${URLs.MerchServer}/merchandising/work-order/${id}/update`;
+    const URL = `${URLs.MerchServer}/api/workorder/${id}/update`;
 
     const authToken = request.cookies.get(AUTH_COOKIE_NAME);
     if (!authToken) {
@@ -47,7 +47,7 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
     }
 
     const {id} = await params;
-    const URL = `${URLs.MerchServer}/merchandising/work-order/${id}/update`;
+    const URL = `${URLs.MerchServer}/api/workorder/${id}/update`;
 
     const formData = await request.formData();
 
