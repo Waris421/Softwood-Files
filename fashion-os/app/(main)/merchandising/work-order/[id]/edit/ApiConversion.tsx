@@ -26,7 +26,7 @@ const mapRequirementData = (requirement = []) => ({
         InventoryName: r.InventoryName || "",
         Variant: r.Variant || "",
         Type: r.Type || "",
-        Required: r.Required || 0,
+        Required: r.Quantity || 0,
         Ordered: r.Ordered || 0,
         Received: r.Received || 0,
         Issued: r.Issued || 0,

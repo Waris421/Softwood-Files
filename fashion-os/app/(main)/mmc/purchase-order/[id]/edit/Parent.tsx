@@ -25,7 +25,7 @@ function GlobalSubmitButton() {
         const data = getCombinedData();
         const header = data.header || {};
         const items  = data.inventory?.items || [];
-        const allocationsMap: Record<number, { WorkOrder: number; Quantity: number }[]> = data.allocations || {};
+        const allocationsMap: Record<string, { WorkOrder: number; Quantity: number }[]> = data.allocations || {};
 
         const inventoryRows = items.map((row: any) => ({
             id:            row.id || null,
@@ -36,19 +36,14 @@ function GlobalSubmitButton() {
             Price:         row.Price,
             Currency:      row.Currency,
             Forex:         row.Forex,
+            allocations:   allocationsMap[String(row.id)] || [],
         }));
-
-        // DB ids of rows that actually have allocations saved
-        const allocations = Object.entries(allocationsMap).flatMap(([allocId, allocs]) =>
-            allocs.map(a => ({ allocId: Number(allocId), WorkOrder: a.WorkOrder, Quantity: a.Quantity }))
-        );
 
         const payload = {
             Supplier:     header.Supplier,
             DeliveryDate: header.DeliveryDate,
             Tax:          header.Tax,
             inventory:    inventoryRows,
-            allocations,
         };
 
         try {

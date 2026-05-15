@@ -20,8 +20,9 @@ export default function HeaderForm({ children }: { children?: React.ReactNode })
     const { setFormData, getCombinedData, registerValidator, options, initialData, id } = useFormRegistry();
 
     const [formData, setLocalFormData] = useState<FormSchema>({
-        id: null, Supplier: '', OrderDate: '', DeliveryDate: '', Tax: 0,
+        id: null, Supplier: '', OrderDate: new Date().toISOString().split('T')[0], DeliveryDate: '', Tax: 0,
     });
+
     const [errors, setErrors] = useState<Record<string, string>>({});
 
     const supplierOptions = options.suppliers || [];
@@ -50,7 +51,6 @@ export default function HeaderForm({ children }: { children?: React.ReactNode })
     const validateForm = useCallback(() => {
         const newErrors: Record<string, string> = {};
         if (!formData.Supplier)     newErrors.Supplier     = 'Supplier is required';
-        if (!formData.OrderDate)    newErrors.OrderDate    = 'Order date is required';
         if (!formData.DeliveryDate) newErrors.DeliveryDate = 'Delivery date is required';
         setErrors(newErrors);
         return Object.keys(newErrors).length === 0;
@@ -89,11 +89,10 @@ export default function HeaderForm({ children }: { children?: React.ReactNode })
                 <label className="text-xs text-muted-foreground">Order Date</label>
                 <input
                     type="date"
-                    className={THEME.TextInput}
+                    className={`${THEME.TextInput} opacity-60 cursor-not-allowed`}
                     value={formData.OrderDate}
-                    onChange={(e) => handleChange('OrderDate', e.target.value)}
+                    readOnly
                 />
-                {errors.OrderDate && <p className="text-[10px] text-red-500">{errors.OrderDate}</p>}
             </div>
 
             {/* Delivery Date */}
