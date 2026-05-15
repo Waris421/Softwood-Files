@@ -202,7 +202,10 @@ function SingleDropdownAsync({
             if (!apiUrl) throw new Error('A search url is required');
             const connector = apiUrl.includes("?") ? "&" : "?";
             const response = await fetch(`${apiUrl}${connector}search=${encodeURIComponent(searchQuery)}`);
-            if (!response.ok) throw new Error("Failed to fetch data");
+            if (!response.ok) {
+                const errorData = await response.json();
+                throw new Error(errorData.details?.message || "Failed to fetch requests");
+            }
 
             const data: ApiOption[] = await response.json();
             const formattedOptions = data.map(opt => ({ 

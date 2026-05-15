@@ -2,7 +2,7 @@
 
 import { DateRangePicker } from "@/_components/Datepicker/Datepicker";
 import LocationPreview from "@/_components/DialogBox/LocationPreview";
-import { SingleDropdown } from "@/_components/Dropdown/Dropdown";
+import { SingleDropdownAsync } from "@/_components/Dropdown/Dropdown";
 import { DropdownOption } from "@/_components/Dropdown/types";
 import { DataTable } from "@/_components/table/Table";
 import { Badge } from "@/_components/ui/badge";
@@ -425,7 +425,7 @@ export default function Attendance() {
                             <label className="label py-1">
                                 <span className="label-text-alt font-medium">Employee</span>
                             </label>
-                            <SingleDropdown
+                            <SingleDropdownAsync
                                 apiUrl="/api/options/workers"
                                 inputName="employeeId"
                                 placeholder="Select Employee"

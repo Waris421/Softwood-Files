@@ -5,20 +5,20 @@ import { Button } from '../ui/button';
 import { useShortcuts } from '../shortcuts/ShortcutContext';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '../ui/tooltip';
 import { useRouter } from 'next/navigation';
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 
 const BackForthButton = () => {
     const [canGoBack, setCanGoBack] = useState(false);
     const { registerAction } = useShortcuts();
     const router = useRouter();
 
-    const handleBackClick = () => {
+    const handleBackClick = useCallback(() => {
         router.back();
-    }
+    }, [router]);
 
-    const handleForwardClick = () => {
+    const handleForwardClick = useCallback(() => {
         router.forward();
-    }
+    }, [router]);
 
     useEffect(() => {
         if (typeof window !== 'undefined') {
@@ -28,7 +28,7 @@ const BackForthButton = () => {
         registerAction('arrowleft', handleBackClick);
         registerAction('arrowright', handleForwardClick);
         
-    }, [registerAction]);
+    }, [registerAction, handleBackClick, handleForwardClick]);
     
     return (
         <div>

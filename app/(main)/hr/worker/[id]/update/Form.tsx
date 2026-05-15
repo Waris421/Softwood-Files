@@ -56,6 +56,7 @@ export default function WorkerUpdateForm({ pk }: FormProps) {
     });
     const [errors, setErrors] = useState<Record<string, string>>({});
     const [isLoading, setIsLoading] = useState(true);
+    const [isSubmitting, setIsSubmitting] = useState(false);
     const [messageConfig, setMessageConfig] = useState<{ show: boolean; subject: string; message: string; action?: () => void; } | null>(null);
     const [options, setOptions] = useState({ departments: [], managers: [] });
 
@@ -138,6 +139,8 @@ export default function WorkerUpdateForm({ pk }: FormProps) {
         //Errors in the form
         if (!validateForm()) return ;
 
+        setIsSubmitting(true);
+
         //Form is valid now.
         const response = await fetch(`/api/hr/workers/${pk}/update`, {
             method: 'POST',
@@ -152,6 +155,7 @@ export default function WorkerUpdateForm({ pk }: FormProps) {
                 subject: "Error",
                 message: `Saving Failed: ${error.message || error}`
             });
+            setIsSubmitting(false);
             return ;
         }
 
@@ -160,6 +164,7 @@ export default function WorkerUpdateForm({ pk }: FormProps) {
             subject: "Success",
             message: `Saved Successfully`
         });
+        setIsSubmitting(false);
         return ;
     }
 
@@ -272,9 +277,26 @@ export default function WorkerUpdateForm({ pk }: FormProps) {
                 )}
 
                 <div className="md:col-span-2 mt-4">
-                    <button type="submit" className={`${THEME.ButtonBasic} w-full`}>
-                        <Save className="w-4 h-4" />
-                        Update Record
+                    <button
+                        type="submit"
+                        disabled={isSubmitting}
+                        className={`
+                            ${THEME.ButtonBasic} 
+                            w-full flex items-center justify-center gap-2 transition-all
+                            ${isSubmitting ? 'cursor-not-allowed opacity-80' : ''}
+                        `}
+                    >
+                        {isSubmitting ? (
+                            <>
+                                <Loader2 className="w-4 h-4 animate-spin" />
+                                Saving...
+                            </>
+                            ) : (
+                            <>
+                                <Save className="w-4 h-4" />
+                                Save
+                            </>
+                        )}
                     </button>
                 </div>
             </form>

@@ -1,7 +1,7 @@
 import { URLs } from "@/_components/constants/urls";
 import { NextRequest, NextResponse } from "next/server";
 
-const URL = `${URLs.MMCServer}/mmc/inventory`;
+const URL = `${URLs.MMCServer}/mmc/inventory-receipt`;
 const AUTH_COOKIE_NAME = 'authToken';
 
 export async function GET(request: NextRequest) {
@@ -31,6 +31,6 @@ export async function GET(request: NextRequest) {
         );
     }
 
-    const inventoryCards = await backendResponse.json();
-    return NextResponse.json(inventoryCards);
+    const inventoryReceipts = await backendResponse.json();
+    return NextResponse.json(inventoryReceipts);
 }

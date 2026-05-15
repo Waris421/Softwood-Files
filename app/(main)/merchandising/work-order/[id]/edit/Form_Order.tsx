@@ -200,7 +200,7 @@ export default function OrderForm({ children }: { children?: React.ReactNode }) 
     
     return (
         <>
-            <form className="lg:col-span-2 grid grid-cols-1 md:grid-cols-5 gap-2">
+            <form className="lg:col-span-2 grid grid-cols-1 md:grid-cols-5 gap-x-2 gap-y-0">
                 <FormField label="Order Number" error={errors.OrderNumber} required>
                     <input placeholder="Order Number" type="number"
                         className={THEME.TextInput} value={formData.OrderNumber}
@@ -229,7 +229,7 @@ export default function OrderForm({ children }: { children?: React.ReactNode }) 
                             <button
                                 type="button"
                                 className={cn(
-                                    "btn btn-ghost rounded-md w-fit px-3 flex-none h-12",
+                                    "btn btn-ghost btn-sm rounded-md w-fit px-2 flex-none h-10 self-end",
                                 )}
                                 disabled={!formData.Style}
                                 onClick={() => {
@@ -299,7 +299,7 @@ export default function OrderForm({ children }: { children?: React.ReactNode }) 
                         />
 
                         {/* Quantities display */}
-                        <div className={cn(THEME.TextInputReadOnly, "flex-1 flex justify-center")}>
+                        <div className={cn(THEME.TextInputReadOnly, "flex-1 flex justify-center py-1")}>
                             <div className="text-center">
                                 <span className="text-[9px] opacity-60 block leading-tight uppercase font-semibold">PO</span>
                                 <span className="font-bold text-xs leading-none">{poQuantity.toLocaleString()}</span>
@@ -313,11 +313,11 @@ export default function OrderForm({ children }: { children?: React.ReactNode }) 
                     </div>
                 </FormField>
 
-                <div className="md:col-span-5 lg:col-span-1 flex items-end gap-2 pb-1">
+                <div className="md:col-span-5 lg:col-span-1 flex items-end gap-2">
                     {children}
                 </div>
 
-                <div className="md:col-span-5 lg:col-span-1 flex items-end gap-2 pb-1">
+                <div className="md:col-span-5 lg:col-span-1 flex items-end gap-2">
                     <button
                         onClick={reCalculateRequirement}
                         disabled={isAnyLoading}

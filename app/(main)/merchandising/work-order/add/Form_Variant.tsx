@@ -29,7 +29,8 @@ const FORM_NAME_WITH_PARENT = 'variant';
 export default function VariantForm(){
     const { 
         setFormData, getCombinedData, registerValidator, registerCustomAction, customAction
-     } = useFormRegistry();
+    } = useFormRegistry();
+    
     const {
         register, control, getValues, trigger, formState: { errors }
     } = useForm<FormValues>({

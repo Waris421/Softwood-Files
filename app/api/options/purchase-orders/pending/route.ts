@@ -1,7 +1,6 @@
 import { URLs } from "@/_components/constants/urls";
 import { NextRequest, NextResponse } from "next/server";
 
-const URL = `${URLs.MMCServer}/mmc/inventory`;
 const AUTH_COOKIE_NAME = 'authToken';
 
 export async function GET(request: NextRequest) {
@@ -13,7 +12,11 @@ export async function GET(request: NextRequest) {
         );
     }
 
-    const backendResponse = await fetch(`${URL}`,{
+    const { searchParams } = new URL(request.url);
+    const search = searchParams.get('search');
+
+    const backendURL =`${URLs.MMCServer}/options/purchase-orders-api/pending?search=${search}`;
+    const backendResponse = await fetch(`${backendURL}`,{
         headers: {
             'Authorization': `Token ${authToken.value}`,
             'Content-Type': 'application/json',
@@ -31,6 +34,6 @@ export async function GET(request: NextRequest) {
         );
     }
 
-    const inventoryCards = await backendResponse.json();
-    return NextResponse.json(inventoryCards);
+    const pos = await backendResponse.json();
+    return NextResponse.json(pos);
 }

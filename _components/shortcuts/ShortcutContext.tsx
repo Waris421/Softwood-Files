@@ -1,6 +1,6 @@
 'use client';
 
-import { createContext, useContext, useEffect, useRef } from "react";
+import { createContext, useContext, useEffect, useMemo, useRef } from "react";
 
 type ShortcutContextType = {
   registerAction: (key: string, fn: () => void) => void;
@@ -29,6 +29,8 @@ export const ShortcutProvider = ({children} : { children: React.ReactNode }) => 
             if (isMod && actionsRef.current[key]) {
                 if (isInput) return;
 
+                event.preventDefault();
+
                 actionsRef.current[key]();
                 return ;
             }
@@ -42,8 +44,10 @@ export const ShortcutProvider = ({children} : { children: React.ReactNode }) => 
         return () => window.removeEventListener("keydown", handleKeyDown);
     }, []);
 
+    const value = useMemo(() => ({ registerAction }), []);
+
     return (
-        <ShortcutContext.Provider value={{ registerAction }}>
+        <ShortcutContext.Provider value={value}>
             {children}
         </ShortcutContext.Provider>
     );

@@ -1,12 +1,17 @@
 import { useState } from "react";
 
-const ExpandableList = ({ items }: { items: string[] }) => {
+interface ExpandableListProps {
+  items: string[];
+  maxLength?: number;
+}
+
+const ExpandableList = ({ items, maxLength = 3 }: ExpandableListProps) => {
     const [isExpanded, setIsExpanded] = useState(false);
     
     if (!items || items.length === 0) return null;
     
-    const hasMore = items.length > 3;
-    const displayedItems = isExpanded ? items : items.slice(0, 3);
+    const hasMore = items.length > maxLength;
+    const displayedItems = isExpanded ? items : items.slice(0, maxLength);
 
     return (
         <div className="text-xs leading-relaxed max-w-64">

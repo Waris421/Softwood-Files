@@ -15,7 +15,7 @@ export async function GET(request: NextRequest) {
     const { searchParams } = new URL(request.url);
     const search = searchParams.get('search');
 
-    const backendURL =`${URLs.HRServer}/options/suppliers-api?search=${search}`;
+    const backendURL =`${URLs.MMCServer}/options/suppliers-api?search=${search}`;
     const backendResponse = await fetch(`${backendURL}`,{
         headers: {
             'Authorization': `Token ${authToken.value}`,

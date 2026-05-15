@@ -72,7 +72,7 @@ const GetEmail = () => {
     return (
         <div className="min-h-screen flex items-center justify-center bg-base-200 p-4">
             <div className="card w-full max-w-md bg-base-100 shadow-xl">
-                <div className="card-body">
+                <div className="card-body py-10">
                     <h2 className="card-title flex items-center gap-2">
                         <Mail className="w-5 h-5 text-primary" />
                         Reset Password
@@ -80,18 +80,18 @@ const GetEmail = () => {
                     <p className="text-sm text-base-content/70">
                         Enter your email and we'll send you a secure link to reset your password.
                     </p>
-                    <form onSubmit={handlePasswordReset} className="form-control w-full mt-4 gap-4">
+                    <form onSubmit={handlePasswordReset} className="form-control w-full gap-6">
                         <div className="relative">
                             <input 
                                 type="email"
                                 placeholder="email@softwoodtextiles.com"
-                                className={THEME.textInput}
+                                className={`${THEME.TextInput} pl-10 w-full`}
                                 value={email}
                                 onChange={(e) => setEmail(e.target.value)}
                                 required
                                 disabled={loading}
                             />
-                            <Mail className="absolute left-3 top-3 w-5 h-5 opacity-50" />
+                            <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 opacity-50" />
                         </div>
                         {status && (
                             <div className={`alert ${status.type === 'success' ? 'alert-success' : 'alert-error'} text-sm`}>

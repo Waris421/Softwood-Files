@@ -1,7 +1,7 @@
 'use client';
 
 import { THEME } from "@/_components/constants/ui";
-import DatePicker from "@/_components/Datepicker/Datepicker";
+import { DatePicker } from "@/_components/Datepicker/Datepicker";
 import { MultiDropdown, SingleDropdown } from "@/_components/Dropdown/Dropdown";
 import { DropdownOption } from "@/_components/Dropdown/types";
 import { FormField } from "@/_components/generic/FormItems";

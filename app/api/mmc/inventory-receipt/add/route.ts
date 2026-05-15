@@ -11,13 +11,13 @@ export async function GET(request: NextRequest) {
             { status: 401 }
         );
     }
-    
-    const { searchParams } = new URL(request.url);
-    const employee = searchParams.get('employee');
 
-    let backendURL =`${URLs.HRServer}/hr/worker/office-assign`;
-    if (employee) {
-        backendURL += `?employee=${employee}`;;
+    const { searchParams } = new URL(request.url);
+    const po = searchParams.get('po');
+
+    let backendURL = `${URLs.MMCServer}/mmc/inventory-receipt/add`;
+    if (po) {
+        backendURL += `?po=${po}`;
     }
 
     const backendResponse = await fetch(`${backendURL}`,{
@@ -38,8 +38,8 @@ export async function GET(request: NextRequest) {
         );
     }
 
-    const format = await backendResponse.json();
-    return NextResponse.json(format);
+    const formData = await backendResponse.json();
+    return NextResponse.json(formData);
 }
 
 export async function POST(request: NextRequest) {
@@ -51,24 +51,22 @@ export async function POST(request: NextRequest) {
         );
     }
 
-    const requestBody = await request.json();
+    const formData = await request.formData();
 
-    const backendURL =`${URLs.HRServer}/hr/worker/office-assign`;
+    const backendURL = `${URLs.MMCServer}/mmc/inventory-receipt/add`;
     const backendResponse = await fetch(backendURL, {
         method: 'POST',
         headers: {
-        'Authorization': `Token ${authToken.value}`,
-        'Content-Type': 'application/json',
+            'Authorization': `Token ${authToken.value}`,
         },
-        body: JSON.stringify(requestBody),
+        body: formData,
     });
-
+    
     const data = await backendResponse.json();
     const status = backendResponse.status;
-
     if (!backendResponse.ok) {
         return NextResponse.json(data, { status: status });
     }
 
-    return NextResponse.json(data, {status: 200})
+    return NextResponse.json(data, {status: 200});
 }

@@ -111,6 +111,14 @@ export default function WorkOrders(){
         { label: 'Edit', icon: <Pencil size={16}/>, href: `/merchandising/work-order/${selectedOrder}/edit` },
         { label: 'Delete', icon: <Trash2 size={16}/>, href: `/merchandising/work-order/${selectedOrder}/delete` },
     ]
+
+    const onStyleClickFunction = (cell: Cell<any, any>) => {
+        const style = cell.getValue();
+
+        const styleEditURL = `/merchandising/style/${style}/edit`;
+
+        window.open(styleEditURL, '_blank', 'noopener,noreferrer');
+    }
     
     return (
         <>
@@ -131,7 +139,8 @@ export default function WorkOrders(){
                 searchFilters={['OrderNumber', 'StyleCode']}
                 dropdownFilters={['Customer', 'Merchandiser']}
                 columnClickHandlers={{
-                    OrderNumber: onOrderClickFunction
+                    OrderNumber: onOrderClickFunction,
+                    StyleCode: onStyleClickFunction,
                 }}
             />
 

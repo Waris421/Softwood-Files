@@ -22,7 +22,7 @@ export async function POST(request: NextRequest) {
     const backendResponse = await fetch(backendURL, {
         method: 'POST',
         headers: {
-            'Authorization': `${authToken.value}`,
+            'Authorization': `Token ${authToken.value}`,
         },
         body: formData,
     });

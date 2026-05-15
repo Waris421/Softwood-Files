@@ -31,6 +31,8 @@ type WorkerPreview = {
     Code: number,
     Name: string,
     FatherSpouseName: string,
+    ShiftStart: string,
+    ShiftEnd: string,
     CNIC: string,
     Department: string,
     SubDepartment: string,
@@ -45,6 +47,8 @@ const previewColumns: ColumnDef<WorkerPreview>[] = [
     {accessorKey: 'WorkerName', header: 'Name'},
     {accessorKey: 'FatherSpouseName', header: 'Father/Spouse'},
     {accessorKey: 'CNIC', header: 'CNIC'},
+    {accessorKey: 'ShiftStart', header: 'Shift Start'},
+    {accessorKey: 'ShiftEnd', header: 'Shift End'},
     {accessorKey: 'Department', header: 'Department'},
     {accessorKey: 'SubDepartment', header: 'Section'},
     {accessorKey: 'Manager', header: 'Manager'},
@@ -201,7 +205,7 @@ export default function WorkerAddForm() {
                         <FileUpload
                             file={formData.file}
                             onFileChange={(file) => setFormData({ ...formData, file })}
-                            helperText="Code, Name, FatherSpouse, DateOfBirth, Department, SubDepartment, ManagerCode, Gender, CNIC, Username, EmailAddress"
+                            helperText="Code, Name, FatherSpouse, DateOfBirth, Department, SubDepartment, ManagerCode, Gender, CNIC, ShiftStart, ShiftEnd, Username, EmailAddress"
                         />
                     </FormField>
 

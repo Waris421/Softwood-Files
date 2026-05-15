@@ -1,5 +1,5 @@
 import { Metadata } from 'next';
-import Parent from './parent';
+import Parent from './Parent';
 
 export const metadata: Metadata = {
   title: 'Issuance For Samples',

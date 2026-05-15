@@ -220,7 +220,8 @@ export default function Parent() {
                 subject: 'Success',
                 message: `Saved Successfully. PO Number: ${poNumber}`,
                 action: () => {
-                    window.location.reload();
+                    setFormData({ Inventories: [], Supplier: '' });
+                    setRefreshTrigger(prev => prev + 1);     
                 }
             });
         } catch (err: any) {

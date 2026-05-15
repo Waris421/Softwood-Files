@@ -7,29 +7,40 @@ import LiquidEther from "./LiquidEther";
 export default function BackgroundController() {
     const { resolvedTheme } = useTheme();
     const [mounted, setMounted] = useState(false);
-    const [webglSupported, setWebglSupported] = useState(false);
+    const [isHighPerformance, setIsHighPerformance] = useState(false);
 
     useEffect(() => {
         setMounted(true);
 
-        try {
-            const canvas = document.createElement('canvas');
-            const gl = canvas.getContext('webgl2');
+        const checkPerformance = () => {
+            try {
+                const canvas = document.createElement('canvas');
 
-            if (gl) {
-                setWebglSupported(true);
-            } else {
-                console.warn("WebGL not supported on this device/browser.");
-                setWebglSupported(false);
+                const gl = canvas.getContext('webgl2', { 
+                    failIfMajorPerformanceCaveat: true 
+                });
+
+                if (!gl) {
+                    console.warn("WebGL2 not supported or performance is too low.");
+                    return false;
+                }
+
+                if (navigator.hardwareConcurrency && navigator.hardwareConcurrency < 8) {
+                    return false;
+                }
+
+                return true;
+            } catch (e) {
+                return false;
             }
-        } catch (e) {
-            setWebglSupported(false);
         }
+
+        setIsHighPerformance(checkPerformance());
     }, []);
 
     if (!mounted) return null;
 
-    if (!webglSupported) {
+    if (!isHighPerformance) {
         return (
             <div className={`fixed inset-0 -z-10 ${resolvedTheme === 'dark' ? 'bg-neutral-950' : 'bg-neutral-50'}`} />
         );

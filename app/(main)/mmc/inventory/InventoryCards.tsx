@@ -6,7 +6,6 @@ import { DataTable } from "@/_components/table/Table";
 import { Cell, ColumnDef } from "@tanstack/react-table";
 import { Copy, Loader2, Pencil, SquarePlus, Trash2} from "lucide-react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 
 type InventoryCard = {
@@ -49,7 +48,6 @@ export default function InventoryCards() {
     const [selectedCode, setSelectedCode] = useState<string | null>(null);
     const [selectedName, setSelectedName] = useState<string | null>(null);
     const [anchorRef, setAnchorRef] = useState<HTMLElement | null>(null);
-    const router = useRouter();
 
     useEffect(() => {
         const fetchInventoryCards = async() => {
