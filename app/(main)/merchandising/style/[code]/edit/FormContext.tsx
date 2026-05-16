@@ -21,33 +21,45 @@ type FormOptions = {
 }
 
 const FormContext = createContext<{
-  setFormData: (key: string, data: any) => void;
-  getCombinedData: () => any;
-  setFormMetaData: (key: string, data: any) => void;
-  getCombinedMetaData: (key: string) => any;
-  registerValidator: (key: string, fn: () => boolean) => void;
-  validateAll: () => boolean;
-  initialData: any;
-  setLoading: (key: string, isLoading: boolean) => void;
-  isAnyLoading: boolean;
-  setError: (config: ErrorConfig) => void;
-  error: ErrorConfig;
-  options: FormOptions;
-  code: string;
+    setFormData: (key: string, data: any) => void;
+    getCombinedData: () => any;
+    setFormMetaData: (key: string, data: any) => void;
+    getCombinedMetaData: (key: string) => any;
+    registerValidator: (key: string, fn: () => boolean) => void;
+    validateAll: () => boolean;
+    setLoading: (key: string, isLoading: boolean) => void;
+    isAnyLoading: boolean;
+    setError: (config: ErrorConfig) => void;
+    error: ErrorConfig;
+    options: FormOptions;
+    code: string;
 
-  registerCustomAction: (key: string, fn: (...args: any[]) => void) => void;
-  customAction: (key: string, ...args: any[]) => void;
+    isDirty: boolean;
+    markAsClean: () => void;
+
+    registerCustomAction: (key: string, fn: (...args: any[]) => void) => void;
+    customAction: (key: string, ...args: any[]) => void;
 } | null>(null);
+
+const ESTIMATED_FORM_LOADING_TIME = 800;
 
 export const GET_API_URL = (code: string) => `/api/merchandising/style/${code}/update`;
 
 export const REDIRECT_URL = '/merchandising/style';
 
 export const FormProvider = ({ children, code }: { children: React.ReactNode, code: string }) => {    
+    //Unsaved data flag managemnt
+    const [isDirty, setIsDirty] = useState(false);
+    const isInitializing = useRef(true);
+    
     //Form data management
     const formsData = useRef<Record<string, any>>({});
     const setFormData = useCallback((key: string, data: any) => { 
         formsData.current[key] = data; 
+
+        if (!isInitializing.current) {
+            setIsDirty(true);
+        }
     }, []);
     const getCombinedData = () => formsData.current;
 
@@ -69,10 +81,6 @@ export const FormProvider = ({ children, code }: { children: React.ReactNode, co
         return results.every(isValid => isValid === true);
     }
 
-    //This is only if we need to implement reset forms functionality.
-    // Don't use this to populate children at first login,as it'll result in bugs
-    const [initialData, setInitialData] = useState<any>(null);
-
     //Loading state management
     const [loadingMap, setLoadingMap] = useState<Record<string, boolean>>({})
     const setLoading = useCallback((key: string, isLoading: boolean) => {
@@ -90,9 +98,12 @@ export const FormProvider = ({ children, code }: { children: React.ReactNode, co
 
     //Get all the options and pre-set values for all the forms in one place
     const [options, setOptions] = useState<FormOptions>({});
+    
+    //Load the data+static options from backend
     useEffect(() => {
         const fetchOptions = async() => {
             setLoading('globalOptions', true);
+            isInitializing.current = true;
 
             try {
                 if (!code) {
@@ -113,7 +124,11 @@ export const FormProvider = ({ children, code }: { children: React.ReactNode, co
 
                 formsData.current = convertedData;
 
-                //setInitialData(data.formData);
+                //Wait 0.3s for the data to load before tracking unsaved data
+                setTimeout(() => {
+                    isInitializing.current = false;
+                    setIsDirty(false);
+                }, ESTIMATED_FORM_LOADING_TIME);
             } catch (err: any) {
                 setError({
                     subject: "Fetch Error",
@@ -128,12 +143,11 @@ export const FormProvider = ({ children, code }: { children: React.ReactNode, co
         fetchOptions();
     }, [code, setLoading, setError]);
 
+    //Customised actions
     const actions = useRef<Record<string, (...args: any[]) => void>>({});
-
     const registerCustomAction = useCallback((key: string, fn: (...args: any[]) => void) => {
         actions.current[key] = fn;
     }, []);
-
     const customAction = useCallback((key: string, ...args: any[]) => {
         const action = actions.current[key];
         if (action) {
@@ -143,6 +157,24 @@ export const FormProvider = ({ children, code }: { children: React.ReactNode, co
         }
     }, []);
 
+    //Warn user if they close the page while there is unsaved data
+    useEffect(() => {
+        const handleBeforeUnload = (e: BeforeUnloadEvent) => {
+            if (isDirty) {
+                e.preventDefault();
+
+                return (e.returnValue = '');
+            }
+        };
+
+        window.addEventListener('beforeunload', handleBeforeUnload);
+
+        return () => window.removeEventListener('beforeunload', handleBeforeUnload);
+    }, [isDirty]);
+
+    //Call this function to tell browser they can reload the page without warning
+    const markAsClean = useCallback(() => setIsDirty(false), []);
+
     const contextValue = useMemo(() => ({
         setFormData, 
         getCombinedData,
@@ -150,7 +182,6 @@ export const FormProvider = ({ children, code }: { children: React.ReactNode, co
         getCombinedMetaData,
         registerValidator, 
         validateAll,
-        initialData,
         code,
         setLoading, 
         isAnyLoading,
@@ -158,9 +189,12 @@ export const FormProvider = ({ children, code }: { children: React.ReactNode, co
         error,
         options,
 
+        isDirty,
+        markAsClean,
+
         registerCustomAction,
         customAction,
-    }), [initialData, isAnyLoading, error, options, code, setLoading, setError]);
+    }), [isAnyLoading, error, options, code, setLoading, setError, isDirty, markAsClean]);
 
     return (
         <FormContext.Provider

@@ -2,7 +2,7 @@
 
 import { useFormRegistry } from "./FormContext";
 import { useCallback, useEffect, useState } from 'react';
-import { Route, ClipboardList, Info } from 'lucide-react';
+import { Route } from 'lucide-react';
 import { FormField } from "@/_components/generic/FormItems";
 import { SingleDropdown } from "@/_components/Dropdown/Dropdown";
 import { DropdownOption } from "@/_components/Dropdown/types";

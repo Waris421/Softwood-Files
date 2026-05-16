@@ -2,7 +2,7 @@
 
 import MessageBox from '@/_components/generic/MessageBox';
 import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react';
-import { DropdownOption } from 'react-day-picker';
+import { convertAPIDataToFormData } from './APIConversion';
 
 type ErrorConfig = {
     subject: string;
@@ -10,9 +10,7 @@ type ErrorConfig = {
     action?: () => void;
 } | null;
 
-type FormOptions = {
-    routes?: DropdownOption[];
-}
+type FormOptions = {}
 
 const FormContext = createContext<{
     setFormData: (key: string, data: any) => void;
@@ -26,6 +24,7 @@ const FormContext = createContext<{
     setError: (config: ErrorConfig) => void;
     error: ErrorConfig;
     options: FormOptions;
+    id: number;
 
     isDirty: boolean;
     markAsClean: () => void;
@@ -36,18 +35,18 @@ const FormContext = createContext<{
 
 const ESTIMATED_FORM_LOADING_TIME = 300;
 
-export const API_URL = '/api/merchandising/style/add';
-export const REDIRECT_URL = '/merchandising/style';
+export const GET_API_URL = (id: number) => `/api/mmc/inventory-receipt/${id}/update`;
+export const REDIRECT_URL = '/merchandising/work-order';
 
-export const FormProvider = ({ children }: { children: React.ReactNode }) => {    
+export const FormProvider = ({ children, id }: { children: React.ReactNode, id: number }) => {
     //Unsaved data flag managemnt
     const [isDirty, setIsDirty] = useState(false);
     const isInitializing = useRef(true);
-    
+
     //Form data management
     const formsData = useRef<Record<string, any>>({});
     const setFormData = useCallback((key: string, data: any) => { 
-        formsData.current[key] = data; 
+        formsData.current[key] = data;
 
         if (!isInitializing.current) {
             setIsDirty(true);
@@ -61,7 +60,6 @@ export const FormProvider = ({ children }: { children: React.ReactNode }) => {
         formMetadata.current[key] = { ...formMetadata.current[key], ...data };
     }, []);
     const getCombinedMetaData = useCallback((key: string) => formMetadata.current[key] || {}, []);
-
 
     //Form validations
     const validators = useRef<Record<string, () => boolean>>({});
@@ -97,7 +95,10 @@ export const FormProvider = ({ children }: { children: React.ReactNode }) => {
             setLoading('globalOptions', true);
             isInitializing.current = true;
             try {
-                const response = await fetch(API_URL);
+                if (!id) {
+                    throw new Error('No Receipt Number provided');
+                }
+                const response = await fetch(GET_API_URL(id));
                 if (!response.ok) {
                     const errorData = await response.json();
                     throw new Error(`${errorData.details.message}`);
@@ -105,9 +106,11 @@ export const FormProvider = ({ children }: { children: React.ReactNode }) => {
 
                 const data = await response.json();
                 
-                const routeOptions = data.routes;
+                //setOptions(prev => ({ ...prev, currencies: data.currencies }));
+                
+                const convertedData = convertAPIDataToFormData(data.FormData);
 
-                setOptions(prev => ({ ...prev, currencies: data.currencies }));
+                formsData.current = convertedData;
 
                 //Wait 0.3s for the data to load before tracking unsaved data
                 setTimeout(() => {
@@ -127,7 +130,7 @@ export const FormProvider = ({ children }: { children: React.ReactNode }) => {
 
         fetchOptions();
     }, [setLoading, setError]);
-
+    
     //Custom actions
     const actions = useRef<Record<string, (...args: any[]) => void>>({});
     const registerCustomAction = useCallback((key: string, fn: (...args: any[]) => void) => {
@@ -172,13 +175,14 @@ export const FormProvider = ({ children }: { children: React.ReactNode }) => {
         setError, 
         error,
         options,
+        id,
 
         isDirty,
         markAsClean,
 
         registerCustomAction,
         customAction,
-    }), [isAnyLoading, error, options, setLoading, setError, isDirty, markAsClean]);
+    }), [isAnyLoading, error, options, id, setLoading, setError, isDirty, markAsClean]);
 
     return (
         <FormContext.Provider

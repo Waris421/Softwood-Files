@@ -1,10 +1,11 @@
 'use client';
 
 import { THEME } from "@/_components/constants/ui";
+import CheckDisplay from "@/_components/table/Check";
 import ExpandableList from "@/_components/table/ExpandableList";
 import { DataTable } from "@/_components/table/Table";
 import { Cell, ColumnDef } from "@tanstack/react-table";
-import { Loader2, Pencil, SquarePlus } from "lucide-react";
+import { AlertCircle, CheckCircle2, Loader2, SquarePlus } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
@@ -64,7 +65,12 @@ const reportColumns: ColumnDef<InventoryReceipt>[] = [
     },
     {
         accessorKey: 'InvoicePending',
-        header: 'Pending Invoice',
+        header: 'Invoice Status',
+        cell: (({getValue}) => {
+            const isPending = getValue<boolean>();
+            
+            return <CheckDisplay check={isPending}/>
+        })
     },
 ]
 

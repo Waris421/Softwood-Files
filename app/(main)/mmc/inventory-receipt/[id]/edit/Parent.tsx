@@ -1,20 +1,22 @@
 'use client';
 
 import LoadingIcon from "@/_components/generic/Loading";
-import { GET_REDIRECT_URL, FormProvider, useFormRegistry, API_URL } from "./FormContext";
+import { FormProvider, GET_API_URL, useFormRegistry } from "./FormContext";
 import HeadingForm from "./Form_Heading";
-import { useRouter } from "next/navigation";
 import { useState } from "react";
 import MessageBox from "@/_components/generic/MessageBox";
 import { THEME } from "@/_components/constants/ui";
-import { Loader2, Save } from "lucide-react";
+import { CheckCircle2, Loader2 } from "lucide-react";
 import InventoryTable from "./Form_Inventory";
 
+type FormProps = {
+    id: number
+}
+
 function GlobalSubmitButton() {
-    const { getCombinedData, validateAll } = useFormRegistry();
+    const { getCombinedData, validateAll, id, markAsClean, isDirty } = useFormRegistry();
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [messageConfig, setMessageConfig] = useState<{ show: boolean; subject: string; message: string; action?: () => void; } | null>(null);
-    const router = useRouter();
 
     const handleSubmit = async (e: React.MouseEvent<HTMLButtonElement>) => {
         e.preventDefault();
@@ -27,22 +29,25 @@ function GlobalSubmitButton() {
         //Data is valid now
         const payload = getCombinedData();
 
+        console.log(payload);
+
+        setIsSubmitting(false);
+
+        return ;
         const formData = new FormData();
 
         formData.append("data", JSON.stringify(payload));
 
-        payload.attachment?.items.forEach((item: any, index: number) => {
+        payload.attachment.items.forEach((item: any, index: number) => {
             const newFile = item.NewFile;
             if (newFile) {
 
                 formData.append(`attachRowIdx_${index}`, newFile);
             }
         });
-
-        setIsSubmitting(true);
         
         try {
-            const response = await fetch(API_URL, {
+            const response = await fetch(GET_API_URL(id), {
                 method: 'POST',
                 body: formData,
             });
@@ -52,17 +57,13 @@ function GlobalSubmitButton() {
                 throw new Error(error.message || error);
             }
 
-            const resData = await response.json();
-            const recNumber = resData.recNumber
-            const redirectUrl = GET_REDIRECT_URL(recNumber);
+            markAsClean();
 
             setMessageConfig({
                 show: true,
-                subject: "Success",
-                message: `Saved Successfully`,
-                action: () => {
-                    router.push(redirectUrl)
-                }
+                subject: 'Success',
+                message: 'Saved Successfully',
+                action: () => (window.location.reload())
             });
         } catch (err: any) {
             setMessageConfig({
@@ -71,7 +72,7 @@ function GlobalSubmitButton() {
                 message: `Saving Failed: ${err}`
             });
         } finally {
-            setIsSubmitting(false);
+            setIsSubmitting(false)
         }
     }
 
@@ -93,7 +94,7 @@ function GlobalSubmitButton() {
             <button
                 onClick={handleSubmit}
                 disabled={isSubmitting}
-                className={`${THEME.ButtonBasic} w-full h-14 mt-2`}
+                className={`${THEME.ButtonBasic} mt-2 w-full`}
             >
                 {isSubmitting ? (
                     <>
@@ -102,13 +103,14 @@ function GlobalSubmitButton() {
                     </>
                 ) : (
                     <>
-                        <Save className="h-4 w-4" />
-                        Save
+                        <CheckCircle2 size={18} />
+                        Save {isDirty && "*"}
                     </>
                 )}
             </button>
         </>
     )
+
 }
 
 function LoadingContainer({ children }: { children: React.ReactNode }) {
@@ -124,10 +126,10 @@ function LoadingContainer({ children }: { children: React.ReactNode }) {
     );
 }
 
-export default function ParentContainer() {
+export default function ParentContainer({id}: FormProps) {
     return (
         <>
-            <FormProvider>
+            <FormProvider id={id}>
                 <LoadingContainer>
                     <div className="flex flex-col min-h-screen">
                         <div className="sticky top-16 z-30 bg-gray-100 dark:bg-gray-600 opacity-90 border-b border-base-200 px-4">

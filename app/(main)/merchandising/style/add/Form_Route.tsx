@@ -2,7 +2,7 @@
 
 import { useFormRegistry } from "./FormContext";
 import { useCallback, useEffect, useState } from 'react';
-import { Route, ClipboardList, Info } from 'lucide-react';
+import { Route } from 'lucide-react';
 import { FormField } from "@/_components/generic/FormItems";
 import { SingleDropdown } from "@/_components/Dropdown/Dropdown";
 import { DropdownOption } from "@/_components/Dropdown/types";
@@ -135,7 +135,7 @@ export default function RouteForm() {
                         <div className="flex items-center gap-3">
                             <Route className="w-5 h-5 opacity-70" />
                             <FormField label="Route Name" error={errors.RouteId}>
-                                <SingleDropdown 
+                                <SingleDropdown
                                     inputName="RouteId" placeholder="Select a route" staticOptions={routeOptions}
                                     widthClass="w-full" onSelect={handleRouteChange} defaultValue={formData.RouteId || ''}
                                 />

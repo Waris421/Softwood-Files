@@ -4,7 +4,7 @@ import StyleForm from "./Form_Style";
 import VariantForm from "./Form_Variant";
 import RouteForm from "./Form_Route";
 import { API_URL, REDIRECT_URL, FormProvider, useFormRegistry } from "./FormContext";
-import { Layers, Loader2, Route } from "lucide-react";
+import { CheckCircle2, Layers, Loader2, Route } from "lucide-react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/_components/ui/tabs";
 import { THEME } from "@/_components/constants/ui";
 import LoadingIcon from "@/_components/generic/Loading";
@@ -13,7 +13,7 @@ import MessageBox from "@/_components/generic/MessageBox";
 import { useRouter } from "next/navigation";
 
 function GlobalSubmitButton() {
-    const { getCombinedData, validateAll } = useFormRegistry();
+    const { getCombinedData, validateAll, markAsClean, isDirty } = useFormRegistry();
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [messageConfig, setMessageConfig] = useState<{ show: boolean; subject: string; message: string; action?: () => void; } | null>(null);
     const router = useRouter();
@@ -44,6 +44,8 @@ function GlobalSubmitButton() {
                 const error = await response.json();
                 throw new Error(error.message || error);
             }
+
+            markAsClean();
 
             router.push(redirectURL);
         } catch (err: any) {
@@ -83,7 +85,10 @@ function GlobalSubmitButton() {
                         Saving...
                     </>
                 ) : (
-                    "Save"
+                    <>
+                        <CheckCircle2 size={18} />
+                        Save {isDirty && "*"}
+                    </>
                 )}
             </button>
         </>

@@ -13,10 +13,20 @@ export async function GET(request: NextRequest) {
     }
 
     const { searchParams } = new URL(request.url);
-    const search = searchParams.get('search');
-    const showStyle = searchParams.get('showStyle');
+    const search = searchParams.get('search') || '';
+    const searches = searchParams.getAll('searches');
+    const extraCols = searchParams.getAll('extraCols');
 
-    const backendURL =`${URLs.MerchServer}/options/work-orders?search=${search}&showStyle=${showStyle}`;
+    const params = new URLSearchParams();
+    params.set('search', search);
+    extraCols.forEach(col => {
+        params.append('extraCols', col);
+    });
+    searches.forEach(search => {
+        params.append('searches', search);
+    })
+
+    const backendURL = `${URLs.MerchServer}/options/work-orders?${params.toString()}`;
     const backendResponse = await fetch(`${backendURL}`,{
         headers: {
             'Authorization': `Token ${authToken.value}`,

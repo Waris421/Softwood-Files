@@ -17,7 +17,7 @@ type FormProps = {
 }
 
 function GlobalSubmitButton() {
-    const { getCombinedData, validateAll, id } = useFormRegistry();
+    const { getCombinedData, validateAll, id, markAsClean, isDirty } = useFormRegistry();
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [messageConfig, setMessageConfig] = useState<{ show: boolean; subject: string; message: string; action?: () => void; } | null>(null);
 
@@ -54,6 +54,8 @@ function GlobalSubmitButton() {
                 const error = await response.json();
                 throw new Error(error.message || error);
             }
+
+            markAsClean();
 
             setMessageConfig({
                 show: true,
@@ -100,7 +102,7 @@ function GlobalSubmitButton() {
                 ) : (
                     <>
                         <CheckCircle2 size={18} />
-                        Save
+                        Save {isDirty && "*"}
                     </>
                 )}
             </button>

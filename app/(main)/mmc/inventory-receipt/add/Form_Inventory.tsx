@@ -1,7 +1,7 @@
 'use client';
 
 import * as z from "zod";
-import { GET_PO_DETAILS_URL, useFormRegistry } from "./FormContext";
+import { useFormRegistry } from "./FormContext";
 import { useFieldArray, useForm, useWatch } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useCallback, useEffect } from "react";
@@ -35,12 +35,12 @@ const formSchema = z.object({
 
 type FormValues = z.input<typeof formSchema>;
 
-const FORM_NAME_WITH_PARENT = 'inventory'
+const FORM_NAME_WITH_PARENT = 'inventory';
 
 export default function InventoryTable() {
     const { 
         setFormData, getCombinedData, registerValidator,
-        registerCustomAction, customAction, setLoading
+        registerCustomAction, customAction
     } = useFormRegistry();
     
     const {
@@ -131,7 +131,7 @@ export default function InventoryTable() {
                 <form className="space-y-4 p-4" autoComplete="off">
                     <div className="overflow-x-auto rounded-lg border border-base-300">
                         <table className="table w-full">
-                            <thead>
+                            <thead className={THEME.Table.HeaderRow}>
                                 <tr className="bg-base-200">
                                     <th className="p-1 border-b text-center w-40">Code</th>
                                     <th className="p-1 border-b text-center w-60">Name</th>
@@ -149,7 +149,10 @@ export default function InventoryTable() {
                                     return (
                                         <tr
                                             key={field.id}
-                                            className={`transition-colors hover:bg-base-40`}
+                                            className={cn(
+                                                "transition-colors",
+                                                THEME.Table.RowHover
+                                            )}
                                         >
                                             <td className="p-1 w-40">
                                                 <div className={THEME.TextInputReadOnly}>{items?.[index]?.Inventory}</div>

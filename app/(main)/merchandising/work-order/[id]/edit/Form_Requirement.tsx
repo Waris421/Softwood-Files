@@ -11,6 +11,7 @@ import { ExternalLink, Info, ListFilter, Settings2, X } from "lucide-react";
 import { Popover, PopoverClose, PopoverContent, PopoverTrigger } from "@/_components/ui/popover";
 import LoadingIcon from "@/_components/generic/Loading";
 import { Checkbox } from "@/_components/ui/checkbox";
+import { usePathname } from "next/navigation";
 
 //If we need to do any validation on rows, do so here.
 const rowSchema = z.object({
@@ -41,7 +42,7 @@ const FORM_NAME_WITH_PARENT = 'Requirement';
 
 export default function RequirementForm() {
     const { 
-        setFormData, getCombinedData, registerValidator, customAction
+        setFormData, getCombinedData, registerValidator
     } = useFormRegistry();
 
     const {
@@ -53,6 +54,7 @@ export default function RequirementForm() {
 
     const [historyData, setHistoryData] = useState<any[]>([]);
     const [isLoadingHistory, setIsLoadingHistory] = useState(false);
+    const pathname = usePathname();
 
     const watchedItems = useWatch({ control });
     const { fields } = useFieldArray({ control, name: "items" });
@@ -172,8 +174,18 @@ export default function RequirementForm() {
 
         setIsLoadingHistory(true);
         setHistoryData([]);
-        
-        const orderNumber = getCombinedData()['Order']?.['OrderNumber'];
+
+        let orderNumber = '';
+
+        const pathParts = pathname.split('/');
+        if (pathParts.length > 4) {
+            orderNumber = pathParts[3];
+        }
+
+        if (!orderNumber) {
+            setIsLoadingHistory(true);
+            return ;
+        }
 
         const url = `/api/merchandising/work-order/requirement?id=${id}&workOrder=${orderNumber}`
         try {

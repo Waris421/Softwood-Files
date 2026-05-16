@@ -10,6 +10,8 @@ import { CalculatorIcon, ExternalLink, Info, Loader2 } from "lucide-react";
 import { usePathname, useRouter } from "next/navigation";
 import { cn } from "@/_components/generic/utils";
 import MessageBox from "@/_components/generic/MessageBox";
+import WarningBox from "@/_components/generic/WarningBox";
+import { SearchPickerAsync } from "@/_components/DialogBox/SearchPicker";
 
 //Schema of the form
 type FormSchema = {
@@ -39,6 +41,7 @@ const VALIDATION_SCHEMA: ValidationSchemaType= {
     ExcessCut: (val) => (!val ? 'This is required' : null),
 }
 
+const WORK_ORDER_OPTIONS_URL = '/api/options/work-orders?extraCols=StyleCode&extraCols=Customer'
 const CUSTOMER_OPTIONS_URL = '/api/options/customers';
 const STYLE_OPTIONS_URL = '/api/options/styles';
 
@@ -52,10 +55,12 @@ const TYPE_OPTIONS = [
 ]
 
 export default function OrderForm({ children }: { children?: React.ReactNode }) {
-    const { setFormData, options, registerValidator, getCombinedData, registerCustomAction, setLoading, isAnyLoading} = useFormRegistry();
+    const { setFormData, options, registerValidator, getCombinedData, registerCustomAction, setLoading, isAnyLoading, isDirty} = useFormRegistry();
     const [errors, setErrors] = useState<Record<string, string>>({});
     const [poQuantity, setPOQuantity] = useState<number>(0);
-    const [messageConfig, setMessageConfig] = useState<{ show: boolean; subject: string; message: string; action?: () => void; } | null>(null);
+    const [pickerKey, setPickerKey] = useState(0);
+    const [messageConfig, setMessageConfig] = useState<{ show: boolean; subject: string; message: string; action?: () => void;} | null>(null);
+    const [warningConfig, setWarningConfig] = useState<{ show: boolean; subject: string; message: string; onConfirm?: () => void; onReject?: () => void;} | null>(null);
 
     const [formData, setLocalFormData] = useState({
         OrderNumber: 0, Style: '', Customer: '', DeliveryDate: '', Type: '',
@@ -81,7 +86,9 @@ export default function OrderForm({ children }: { children?: React.ReactNode }) 
 
     //Sync local state to Parent Registry whenever formData changes
     useEffect(() => {
-        setFormData(FORM_NAME_WITH_PARENT, formData);
+        const { OrderNumber, ...otherFields } = formData;
+
+        setFormData(FORM_NAME_WITH_PARENT, otherFields);
     }, [formData, setFormData]);
 
     //Register any custom actions with the parent on mount
@@ -122,22 +129,45 @@ export default function OrderForm({ children }: { children?: React.ReactNode }) 
         registerValidator(FORM_NAME_WITH_PARENT, validateForm);
     }, [validateForm, registerValidator]);
 
-    //Helper function to fetch the date for new order when order number is changed.
-    const handleOrderNumberChange = async (orderNumber: string, shouldRedirect: boolean = false) => {
-        setLocalFormData(prev => ({ ...prev, OrderNumber: Number(orderNumber) }));
+    const reloadPageWithNewOrderNumber = (orderNumber: string) => {
+        setLoading('Order', true);
+
+        const pathParts = pathname.split('/');
+
+        if (pathParts.length > 4) {
+            pathParts[3] = orderNumber;
+        }
+
+        const newPath = pathParts.join('/');
+
+        router.push(newPath);
+    }
+
+    const handleOrderNumberChange = (orderNumber: string | null) => {
+        if (!orderNumber) {
+            setPickerKey(prev => prev + 1);
+            return ;
+        }
+
+        if (Number(orderNumber) === formData.OrderNumber) return;
         
-        if (shouldRedirect && orderNumber) {
-            setLoading('Order', true);
-
-            const pathSegments = pathname.split('/');
-
-            if (pathSegments.length >= 4) {
-                pathSegments[3] = orderNumber;
-                const newPath = pathSegments.join('/');
-
-                router.push(newPath);
-            } 
-        }     
+        if (isDirty) {
+            setWarningConfig({
+                show: true,
+                subject: "Unsaved Changes",
+                message: "You have unsaved changes. Changing the order number will discard them. Do you want to proceed?",
+                onConfirm: () => {
+                    setWarningConfig(null);
+                    reloadPageWithNewOrderNumber(orderNumber);
+                },
+                onReject: () => {
+                    setWarningConfig(null);
+                    setPickerKey(prev => prev + 1);
+                }
+            });
+        } else {
+            reloadPageWithNewOrderNumber(orderNumber);
+        }
     }
 
     //Update quantity with parent upon changing the excess cut
@@ -202,16 +232,22 @@ export default function OrderForm({ children }: { children?: React.ReactNode }) 
         <>
             <form className="lg:col-span-2 grid grid-cols-1 md:grid-cols-5 gap-x-2 gap-y-0">
                 <FormField label="Order Number" error={errors.OrderNumber} required>
-                    <input placeholder="Order Number" type="number"
-                        className={THEME.TextInput} value={formData.OrderNumber}
-                        onChange={(e) => handleOrderNumberChange(e.target.value)}
-                        onKeyDown={(e) => {
-                            if (e.key === 'Enter') {
-                                e.preventDefault();
-                                handleOrderNumberChange(e.currentTarget.value, true);
-                            }
+                    <SearchPickerAsync 
+                        key={`order-picker-${pickerKey}`}
+                        id={`search-picker-wo`}
+                        apiUrl={WORK_ORDER_OPTIONS_URL}
+                        displayColumn="value"
+                        columnMapping={[
+                            {header: 'Work Order', key: 'value'},
+                            {header: 'Style', key: 'StyleCode'},
+                            {header: 'Customer', key: 'Customer'}
+                        ]}
+                        customClasses={{
+                            trigger: "w-full",
+                            dialog: "max-w-[75vw]!"
                         }}
-                        onBlur={(e) => handleOrderNumberChange(e.target.value, true)}
+                        value={formData.OrderNumber}
+                        onSelect={handleOrderNumberChange}
                     />
                 </FormField>   
 
@@ -348,6 +384,23 @@ export default function OrderForm({ children }: { children?: React.ReactNode }) 
                             if (messageConfig.action) messageConfig.action();
                             setMessageConfig(null);
                         }}  
+                    />
+                </div>
+            )}
+
+            {warningConfig?.show && (
+                <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4">
+                    <WarningBox 
+                        subject={warningConfig.subject}
+                        message={warningConfig.message}
+                        confirmText="Confirm"
+                        rejectText="Cancel"
+                        onConfirm={() => {
+                            if (warningConfig.onConfirm) warningConfig.onConfirm();
+                        }}
+                        onReject={() => {
+                            if (warningConfig.onReject) warningConfig.onReject();
+                        }}
                     />
                 </div>
             )}

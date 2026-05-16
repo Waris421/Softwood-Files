@@ -1,7 +1,7 @@
 'use client';
 
 import { FormProvider, useFormRegistry, GET_API_URL } from "./FormContext";
-import { Layers, Loader2, Paperclip, Route, Router, Zap } from "lucide-react";
+import { CheckCircle2, Layers, Loader2, Paperclip, Route, Router, Zap } from "lucide-react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/_components/ui/tabs";
 import { THEME } from "@/_components/constants/ui";
 import LoadingIcon from "@/_components/generic/Loading";
@@ -19,10 +19,9 @@ type FormProps = {
 }
 
 function GlobalSubmitButton() {
-    const { getCombinedData, validateAll, code } = useFormRegistry();
+    const { getCombinedData, validateAll, code, markAsClean, isDirty } = useFormRegistry();
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [messageConfig, setMessageConfig] = useState<{ show: boolean; subject: string; message: string; action?: () => void; } | null>(null);
-    const router = useRouter();
 
     const handleSubmit = async (e: React.MouseEvent<HTMLButtonElement>) => {
         e.preventDefault();
@@ -57,6 +56,8 @@ function GlobalSubmitButton() {
                 const error = await response.json();
                 throw new Error(error.message || error);
             }
+
+            markAsClean();
 
             setMessageConfig({
                 show: true,
@@ -101,7 +102,10 @@ function GlobalSubmitButton() {
                         Saving...
                     </>
                 ) : (
-                    "Save"
+                    <>
+                        <CheckCircle2 size={18} />
+                        Save {isDirty && "*"}
+                    </>
                 )}
             </button>
         </>

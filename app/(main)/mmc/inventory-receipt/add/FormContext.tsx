@@ -53,7 +53,6 @@ export const FormProvider = ({ children }: { children: React.ReactNode }) => {
     }, []);
     const getCombinedMetaData = useCallback((key: string) => formMetadata.current[key] || {}, []);
 
-
     //Form validations
     const validators = useRef<Record<string, () => boolean>>({});
     const registerValidator = useCallback((key: string, fn: () => boolean) => {
