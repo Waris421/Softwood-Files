@@ -58,8 +58,8 @@ export default function OrderForm({ children }: { children?: React.ReactNode }) 
     const [isCalculatingVariants, setIsCalculatingVariants] = useState(false);
 
     const [formData, setLocalFormData] = useState({
-        OrderNumber: 0, Style: '', Customer: '', DeliveryDate: '', Type: '',
-        Currency: '', Price: 0, Agency:'', Commission: 2, ExcessCut: 3,
+        OrderNumber: 0, Style: '', Customer: '', DeliveryDate: '', Type: 'Export',
+        Currency: 'USD', Price: 0, Agency:'', Commission: 2, ExcessCut: 3,
     });
 
     const currencyOptions = options.currencies || [];
@@ -186,12 +186,14 @@ export default function OrderForm({ children }: { children?: React.ReactNode }) 
                 <SingleDropdown
                     inputName='Type' placeholder="Select an option" staticOptions={TYPE_OPTIONS} 
                     widthClass="w-full" onSelect={(val: any) => handleInputChange('Type', val?.value)} 
+                    defaultValue={formData.Type}
                 />
             </FormField>
             <FormField label="Currency" error={errors.Currency}>
                 <SingleDropdown 
                     inputName="Currency" staticOptions={currencyOptions}
                     widthClass="w-full" onSelect={(val: any) => handleInputChange('Currency', val?.value)}
+                    defaultValue={formData.Currency}
                 />
             </FormField>
             <FormField label="Price" error={errors.Price} required>

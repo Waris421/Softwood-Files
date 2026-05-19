@@ -44,7 +44,7 @@ export default function VariantForm() {
     const watchedItems = useWatch({
         control,
     });
-    const { fields, append, remove, insert, replace } = useFieldArray({
+    const { fields, append, remove, insert } = useFieldArray({
         control,
         name: "items"
     });

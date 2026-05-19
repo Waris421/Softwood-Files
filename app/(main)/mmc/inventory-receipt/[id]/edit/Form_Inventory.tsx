@@ -4,9 +4,13 @@ import * as z from "zod";
 import { useFormRegistry } from "./FormContext";
 import { useFieldArray, useForm, useWatch } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useCallback, useEffect } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { cn } from "@/_components/generic/utils";
 import { THEME } from "@/_components/constants/ui";
+import { CheckCircle2, Clock, MessageSquare, Settings2, X, XCircle } from "lucide-react";
+import { Popover, PopoverClose, PopoverContent, PopoverTrigger } from "@/_components/ui/popover";
+import AllocationTable from "./Form_Allocation";
+import { FORM_NAME_WITH_PARENT as ALLOCATION_FORM_NAME } from "./Form_Allocation";
 
 const rowSchema = z.object({
     id: z.number(),
@@ -17,6 +21,8 @@ const rowSchema = z.object({
     Quantity: z.number().min(0),
     Price: z.number().optional(),
     Currency: z.string().optional(),
+    Approval: z.boolean().optional(),
+    QualityComments: z.string().optional(),
 })
 
 const formSchema = z.object({
@@ -28,10 +34,9 @@ type FormValues = z.input<typeof formSchema>;
 const FORM_NAME_WITH_PARENT = 'Inventories';
 
 export default function InventoryTable() {
-    const { 
-        setFormData, getCombinedData, registerValidator,
-        registerCustomAction, customAction
-    } = useFormRegistry();
+    const { setFormData, getCombinedData, registerValidator, customAction } = useFormRegistry();
+
+    const [localAllocSummaries, setLocalAllocSummaries] = useState<Record<number, any>>({});
     
     const {
         register, control, getValues, trigger, reset, formState: { errors }
@@ -130,10 +135,21 @@ export default function InventoryTable() {
                                 <th className="p-1 border-b text-center w-20">Quantity</th>
                                 <th className="p-1 border-b text-center w-25">Price</th>
                                 <th className="p-1 border-b text-center w-10">Approval</th>
+                                <th className="p-1 border-b text-center w-10">TempCol</th>
                             </tr>
                         </thead>
                         <tbody>
                             {fields.map((field, index) => {
+                                const currentItem = items?.[index];
+
+                                const approvalStatus = currentItem?.Approval;
+                                const approvalComments = currentItem?.QualityComments;
+
+                                const recInvId = currentItem?.id;
+                                const recQty = currentItem?.Quantity;
+
+                                const summary = customAction('getAllocationSummary', {recInvId, recQty});
+
                                 return (
                                     <tr
                                         key={field.id}
@@ -175,8 +191,82 @@ export default function InventoryTable() {
                                                 <span className="text-xs opacity-70">{items?.[index]?.Currency}</span>
                                             </div>
                                         </td>
-                                        <td className="p-1 w-25">
-                                            
+                                        <td className="p-1 w-10 text-center">
+                                            <div
+                                                className={cn(
+                                                    "tooltip tooltip-left lg:tooltip-top flex items-center gap-2 cursor-help",
+                                                    !approvalComments && "tooltip-disabled"
+                                                )}
+                                                data-tip={approvalComments || "No comments"}
+                                            >
+                                                {approvalStatus === true && (
+                                                    <div className="flex items-center gap-1 text-success font-medium text-xs">
+                                                        <CheckCircle2 size={16} />
+                                                        <span>Approved</span>
+                                                    </div>
+                                                )}
+                                                
+                                                {approvalStatus === false && (
+                                                    <div className="flex items-center gap-1 text-error font-medium text-xs">
+                                                        <XCircle size={16} />
+                                                        <span>Rejected</span>
+                                                    </div>
+                                                )}
+                                                
+                                                {approvalStatus === undefined && (
+                                                    <div className="flex items-center gap-1 text-base-content/50 font-medium text-xs italic">
+                                                        <Clock size={16} />
+                                                        <span>Pending</span>
+                                                    </div>
+                                                )}
+
+                                                {approvalComments && (
+                                                    <MessageSquare 
+                                                        size={12} 
+                                                        className={cn(
+                                                            "ml-1",
+                                                            approvalStatus === true ? "text-success/50" : 
+                                                            approvalStatus === false ? "text-error/50" : "text-base-content/30"
+                                                        )} 
+                                                    />
+                                                )}
+                                            </div>
+                                        </td>
+                                        <td className="p-1 w-10 text-center">
+                                            <Popover>
+                                                <PopoverTrigger asChild>
+                                                    <button type="button" className="btn btn-ghost btn-xs">
+                                                        <Settings2 size={16} className="text-primary" />
+                                                    </button>
+                                                </PopoverTrigger>
+                                                <PopoverContent 
+                                                    className="z-50 w-full p-4 rounded-lg shadow-xl animate-in fade-in zoom-in duration-200"
+                                                >
+                                                    <div className="bg-slate-50 dark:bg-slate-90w-112.50/50 px-3 py-2 border-b border-slate-200 dark:border-slate-700 flex justify-between items-center">
+                                                        <div className="flex flex-col gap-0.5 max-w-[85%]">
+                                                            <h4 className="text-[12px] font-semibold text-slate-800 truncate">
+                                                                Edit Allocations ({items?.[index]?.InventoryName}
+                                                                {items?.[index]?.Variant && (
+                                                                    <span className="ml-1.5 px-1.5 py-0.5 rounded bg-slate-200 dark:bg-slate-700 text-slate-600 dark:text-slate-300 font-medium text-[10px]">
+                                                                        {items?.[index]?.Variant}
+                                                                    </span>
+                                                                )}
+                                                                )
+                                                            </h4>
+                                                        </div>
+                                                        <div className="flex items-center gap-2">
+                                                            <PopoverClose className="btn btn-ghost btn-xs btn-circle text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 transition-colors">
+                                                                <X size={14} />
+                                                                <span className="sr-only">Close</span>
+                                                            </PopoverClose>
+                                                        </div>
+                                                    </div>
+                                                    <AllocationTable
+                                                        selectedRecInvId={items?.[index]?.id || 0}
+                                                        totalReceivedQty={items?.[index]?.Quantity || 0}
+                                                    />
+                                                </PopoverContent>
+                                            </Popover>
                                         </td>
                                     </tr>
                                 )

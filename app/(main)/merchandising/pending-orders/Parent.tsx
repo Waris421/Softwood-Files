@@ -8,10 +8,9 @@ import MessageBox from "@/_components/generic/MessageBox";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/_components/ui/dialog";
 import { SingleDropdownAsync } from "@/_components/Dropdown/Dropdown";
 import { THEME } from "@/_components/constants/ui";
-import { cn } from "@/_components/generic/utils";
 
 //The Threadhold above which no data would be shown user. Optimise as per user experience
-const ROW_THRESHOLD = 100;
+const ROW_THRESHOLD = 200;
 
 const API_URL = "/api/merchandising/pending-orders"
 const SUPPLIER_OPTIONS_URL = '/api/options/suppliers'

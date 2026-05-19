@@ -30,7 +30,7 @@ const FormContext = createContext<{
     markAsClean: () => void;
 
     registerCustomAction: (key: string, fn: (...args: any[]) => void) => void;
-    customAction: (key: string, ...args: any[]) => void;
+    customAction: (key: string, ...args: any[]) => any;
 } | null>(null);
 
 const ESTIMATED_FORM_LOADING_TIME = 300;
@@ -139,9 +139,10 @@ export const FormProvider = ({ children, id }: { children: React.ReactNode, id: 
     const customAction = useCallback((key: string, ...args: any[]) => {
         const action = actions.current[key];
         if (action) {
-            action(...args); // Pass the parameters here
+            return action(...args); // Pass the parameters here
         } else {
             console.warn(`Action "${key}" not found.`);
+            return null;
         }
     }, []);
 

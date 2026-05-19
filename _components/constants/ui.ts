@@ -53,8 +53,8 @@ export const THEME = {
     },
 
     Text: {
-        RedText: 'text-red-600',
-        BlueText: 'text-blue-600',
+        RedText: 'text-red-600 dark:text-red-500',
+        BlueText: 'text-blue-600 dark:text-blue-500',
         GrayText: 'text-gray-900 dark:text-gray-100',
     }
 }
