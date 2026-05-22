@@ -1,4 +1,5 @@
-import { URLs } from "@/_components/constants/urls";
+import { SERVER_URLs } from "@/_components/constants/urls";
+import { API_MAP } from "@/_components/urls/api-map";
 import { NextRequest, NextResponse } from "next/server";
 
 const AUTH_COOKIE_NAME = 'authToken';
@@ -13,10 +14,9 @@ export async function GET(request: NextRequest) {
     }
 
     const { searchParams } = new URL(request.url);
-    const search = searchParams.get('search');
+    const backendURL = API_MAP.OPTIONS.getCustomers(searchParams);
 
-    const backendURL =`${URLs.HRServer}/options/customers-api?search=${search}`;
-    const backendResponse = await fetch(`${backendURL}`,{
+    const backendResponse = await fetch(backendURL,{
         headers: {
             'Authorization': `Token ${authToken.value}`,
             'Content-Type': 'application/json',

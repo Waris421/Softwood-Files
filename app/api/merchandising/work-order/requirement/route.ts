@@ -1,4 +1,4 @@
-import { URLs } from "@/_components/constants/urls";
+import { SERVER_URLs } from "@/_components/constants/urls";
 import { NextRequest, NextResponse } from "next/server";
 
 const AUTH_COOKIE_NAME = 'authToken';
@@ -16,7 +16,7 @@ export async function GET(request: NextRequest) {
     const workOrder = searchParams.get('workOrder');
     const reqId = searchParams.get('id')
 
-    let backendURL = `${URLs.MMCServer}/merchandising/work-order/requirement/get`;
+    let backendURL = `${SERVER_URLs.MMCServer}/merchandising/work-order/requirement/get`;
     if (workOrder) {
         backendURL += `?orderNumber=${workOrder}`;
     }

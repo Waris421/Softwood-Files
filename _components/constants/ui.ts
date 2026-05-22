@@ -49,7 +49,8 @@ export const THEME = {
         Wrapper: "w-full space-y-4 [--base-200:theme(colors.slate.100)] [--base-300:theme(colors.slate.200)] dark:[--base-200:theme(colors.slate.800)] dark:[--base-300:theme(colors.slate.700)]",
         HeaderRow: "bg-[var(--base-200)]",
         TableContainer: "overflow-x-auto rounded-lg border border-[var(--base-300)]",
-        RowHover: "hover:bg-slate-500/10 dark:hover:bg-slate-400/10" ,
+        RowHover: "hover:bg-slate-500/10 dark:hover:bg-slate-400/10",
+        Footer: "mt-4 p-4 bg-base-200 rounded-lg border border-base-300",
     },
 
     Text: {

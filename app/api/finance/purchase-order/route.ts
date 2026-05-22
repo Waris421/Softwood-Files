@@ -1,7 +1,6 @@
-import { URLs } from "@/_components/constants/urls";
+import { API_MAP } from "@/_components/urls/api-map";
 import { NextRequest, NextResponse } from "next/server";
 
-const PO_URL = `${URLs.FinanceServer}/finance/purchase-order`;
 const AUTH_COOKIE_NAME = 'authToken';
 
 // Authentication check
@@ -14,7 +13,8 @@ export async function GET(req: NextRequest) {
     const { searchParams } = new URL(req.url);
     const start = searchParams.get('start') || `${new Date().getFullYear()}-01-01`;
     
-    const backendResponse = await fetch(`${PO_URL}?start=${start}`, {
+    const backendURL = API_MAP.FINANCE.PURCHASE_ORDER.getPurchaseOrders(start);
+    const backendResponse = await fetch(backendURL, {
         method: 'GET',
         headers: {
             'Authorization': `Token ${authToken.value}`,

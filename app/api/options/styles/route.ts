@@ -1,4 +1,4 @@
-import { URLs } from "@/_components/constants/urls";
+import { SERVER_URLs } from "@/_components/constants/urls";
 import { NextRequest, NextResponse } from "next/server";
 
 const AUTH_COOKIE_NAME = 'authToken';
@@ -16,7 +16,7 @@ export async function GET(request: NextRequest) {
     const search = searchParams.get('search');
     const showCustomer = searchParams.get('showCustomer');
 
-    const backendURL =`${URLs.MerchServer}/options/styles-api?search=${search}&showCustomer=${showCustomer}`;
+    const backendURL =`${SERVER_URLs.MerchServer}/options/styles-api?search=${search}&showCustomer=${showCustomer}`;
     const backendResponse = await fetch(`${backendURL}`,{
         headers: {
             'Authorization': `Token ${authToken.value}`,

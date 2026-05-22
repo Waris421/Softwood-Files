@@ -1,11 +1,11 @@
-import { URLs } from "@/_components/constants/urls";
+import { API_MAP } from "@/_components/urls/api-map";
 import { NextRequest, NextResponse } from "next/server";
 
 const AUTH_COOKIE_NAME = 'authToken';
 
 export async function GET(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
     const { id } = await params;
-    const URL = `${URLs.AMServer}/consumption/thread/request/${id}/update`;
+    const URL = API_MAP.CONSUMPTION.getThreadRequestUpdate(id);
 
     const authToken = request.cookies.get(AUTH_COOKIE_NAME);
     if (!authToken) {
@@ -40,7 +40,7 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
 export async function POST(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
     const { id } = await params;
     const requestBody = await request.json();
-    const URL = `${URLs.AMServer}/consumption/thread/request/${id}/update`;
+    const URL = API_MAP.CONSUMPTION.getThreadRequestUpdate(id);
 
     const authToken = request.cookies.get(AUTH_COOKIE_NAME);
     if (!authToken) {

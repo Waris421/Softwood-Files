@@ -1,4 +1,4 @@
-import { URLs } from "@/_components/constants/urls";
+import { API_MAP } from "@/_components/urls/api-map";
 import { NextRequest, NextResponse } from "next/server";
 
 const AUTH_COOKIE_NAME = 'authToken';
@@ -13,7 +13,7 @@ export async function DELETE(request: NextRequest, { params }: { params: Promise
     }   
 
     const {code} = await params;
-    const URL = `${URLs.MerchServer}/merchandising/style/${code}/delete`;
+    const URL = API_MAP.MERCHANDISING.STYLE.getStyleDelete(code);
 
     const backendResponse = await fetch(URL, {
         method: 'DELETE',

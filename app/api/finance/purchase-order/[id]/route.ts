@@ -1,4 +1,4 @@
-import { URLs } from "@/_components/constants/urls";
+import { API_MAP } from "@/_components/urls/api-map";
 import { NextRequest, NextResponse } from "next/server";
 
 const AUTH_COOKIE_NAME = 'authToken';
@@ -10,7 +10,9 @@ export async function GET(req: NextRequest, { params }: { params: { id: string }
         return NextResponse.json({ message: 'Unauthorized' }, { status: 401 });
     }
 
-    const backendResponse = await fetch(`${URLs.FinanceServer}/finance/purchase-order/${id}/`, {
+    const backendUrl = API_MAP.FINANCE.PURCHASE_ORDER.getPurchaseOrder(id);
+
+    const backendResponse = await fetch(backendUrl, {
         method: 'GET',
         headers: {
             'Authorization': `Token ${authToken.value}`,

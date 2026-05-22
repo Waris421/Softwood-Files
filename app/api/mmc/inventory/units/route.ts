@@ -1,4 +1,4 @@
-import { URLs } from "@/_components/constants/urls";
+import { API_MAP } from "@/_components/urls/api-map";
 import { NextRequest, NextResponse } from "next/server";
 
 const AUTH_COOKIE_NAME = 'authToken';
@@ -13,12 +13,7 @@ export async function GET(request: NextRequest) {
     }
 
     const { searchParams } = new URL(request.url);
-    const group = searchParams.get('group');
-
-    let backendURL =`${URLs.MMCServer}/api/units`;
-    if (group) {
-        backendURL += `?group=${group}`;
-    }
+    const backendURL = API_MAP.MMC.INVENTORY.getUnits(searchParams);
 
     const backendResponse = await fetch(`${backendURL}`,{
         headers: {

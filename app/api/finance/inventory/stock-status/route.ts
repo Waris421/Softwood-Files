@@ -1,7 +1,7 @@
-import { URLs } from "@/_components/constants/urls";
+import { API_MAP } from "@/_components/urls/api-map";
 import { NextRequest, NextResponse } from "next/server";
 
-const URL = `${URLs.AMServer}/inventory/stock-report`;
+const URL = API_MAP.FINANCE.INVENTORY.getStockStatus();
 const AUTH_COOKIE_NAME = 'authToken';
 
 export async function GET(request: NextRequest) {

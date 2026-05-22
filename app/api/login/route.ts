@@ -1,7 +1,8 @@
-import { URLs } from "@/_components/constants/urls";
+import { SERVER_URLs } from "@/_components/constants/urls";
+import { API_MAP } from "@/_components/urls/api-map";
 import { NextRequest, NextResponse } from "next/server";
 
-const LOGIN_URL = `${URLs.AuthServer}/api/login`;
+const LOGIN_URL = API_MAP.AUTH.getLogin();
 
 export async function POST(req: NextRequest) {
     const requestBody = await req.json();

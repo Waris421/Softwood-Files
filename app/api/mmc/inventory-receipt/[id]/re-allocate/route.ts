@@ -3,7 +3,7 @@ import { NextRequest, NextResponse } from "next/server";
 
 const AUTH_COOKIE_NAME = 'authToken';
 
-export async function GET(request: NextRequest) {
+export async function GET(request: NextRequest, { params }: { params: Promise<{ id: number }> }) {
     const authToken = request.cookies.get(AUTH_COOKIE_NAME);
     if (!authToken) {
         return NextResponse.json(
@@ -12,10 +12,10 @@ export async function GET(request: NextRequest) {
         );
     }
 
-    const { searchParams } = new URL(request.url);
-    const backendURL = API_MAP.MERCHANDISING.STYLE.getStyleRoute(searchParams);
-
-    const backendResponse = await fetch(`${backendURL}`,{
+    const {id} = await params;
+    const URbackendURLL = API_MAP.MMC.INVENTORY_RECEIPT.getReceiptReallocate(id);;
+    
+    const backendResponse = await fetch(`${URbackendURLL}`,{
         headers: {
             'Authorization': `Token ${authToken.value}`,
             'Content-Type': 'application/json',
@@ -33,6 +33,6 @@ export async function GET(request: NextRequest) {
         );
     }
 
-    const routes = await backendResponse.json();
-    return NextResponse.json(routes);
+    const data = await backendResponse.json();
+    return NextResponse.json(data);
 }

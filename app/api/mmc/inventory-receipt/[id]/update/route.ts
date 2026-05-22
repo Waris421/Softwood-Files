@@ -1,4 +1,4 @@
-import { URLs } from "@/_components/constants/urls";
+import { API_MAP } from "@/_components/urls/api-map";
 import { NextRequest, NextResponse } from "next/server";
 
 const AUTH_COOKIE_NAME = 'authToken';
@@ -13,9 +13,9 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
     }
 
     const {id} = await params;
-    const URbackendURLL = `${URLs.MMCServer}/mmc/inventory-receipt/${id}/update`;
+    const backendURL = API_MAP.MMC.INVENTORY_RECEIPT.getReceiptUpdate(id);
 
-    const backendResponse = await fetch(`${URbackendURLL}`,{
+    const backendResponse = await fetch(`${backendURL}`,{
         headers: {
             'Authorization': `Token ${authToken.value}`,
             'Content-Type': 'application/json',

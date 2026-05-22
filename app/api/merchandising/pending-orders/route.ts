@@ -1,9 +1,7 @@
-import { URLs } from "@/_components/constants/urls";
+import { API_MAP } from "@/_components/urls/api-map";
 import { NextRequest, NextResponse } from "next/server";
 
 const AUTH_COOKIE_NAME = 'authToken';
-
-const backendURL = new URL(`${URLs.MerchServer}/mmc/inventory-orders/pending`);
 
 export async function GET(request: NextRequest) {
     const authToken = request.cookies.get(AUTH_COOKIE_NAME);
@@ -15,9 +13,9 @@ export async function GET(request: NextRequest) {
     }
 
     const { searchParams } = new URL(request.url);
+    const backendURL = API_MAP.MERCHANDISING.INVENTORY.getPendingOrders(searchParams);
 
-    backendURL.search = searchParams.toString();
-    const backendResponse = await fetch(`${backendURL}`,{
+    const backendResponse = await fetch(backendURL,{
         headers: {
             'Authorization': `Token ${authToken.value}`,
             'Content-Type': 'application/json',
@@ -49,6 +47,7 @@ export async function POST(request: NextRequest) {
     }
 
     const requestBody = await request.json();
+    const backendURL = API_MAP.MERCHANDISING.INVENTORY.getPendingOrders(null);
 
     const backendResponse = await fetch(backendURL, {
         method: 'POST',

@@ -1,20 +1,19 @@
-import { URLs } from "@/_components/constants/urls";
+import { API_MAP } from "@/_components/urls/api-map";
 import { NextRequest, NextResponse } from "next/server";
 
 const AUTH_COOKIE_NAME = 'authToken';
 
 export async function GET(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
-    const { id } = await params;
-    const URL = `${URLs.HRServer}/hr/worker/${id}/update`;
-
     const authToken = request.cookies.get(AUTH_COOKIE_NAME);
-
     if (!authToken) {
         return NextResponse.json(
             { error: 'Unauthorized' }, 
             { status: 401 }
         );
     }
+
+    const { id } = await params;
+    const URL = API_MAP.HR.WORKER.getUpdateWorker(id);
 
     const backendResponse = await fetch(`${URL}`,{
         headers: {
@@ -39,10 +38,6 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
 }
 
 export async function POST(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
-    const { id } = await params;
-    const requestBody = await request.json();
-    const URL = `${URLs.HRServer}/hr/worker/${id}/update`;
-
     const authToken = request.cookies.get(AUTH_COOKIE_NAME);
     if (!authToken) {
         return NextResponse.json(
@@ -50,6 +45,11 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
             { status: 401 }
         );
     }
+
+    const { id } = await params;
+    const URL = API_MAP.HR.WORKER.getUpdateWorker(id);
+
+    const requestBody = await request.json();
 
     const backendResponse = await fetch(URL, {
         method: 'POST',

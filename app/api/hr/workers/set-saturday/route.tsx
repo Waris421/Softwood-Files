@@ -1,4 +1,4 @@
-import { URLs } from "@/_components/constants/urls";
+import { API_MAP } from "@/_components/urls/api-map";
 import { NextRequest, NextResponse } from "next/server";
 
 const AUTH_COOKIE_NAME = 'authToken';
@@ -13,13 +13,7 @@ export async function GET(request: NextRequest) {
     }
 
     const { searchParams } = new URL(request.url);
-    const employee = searchParams.get('employee');
-
-    let backendURL =`${URLs.HRServer}/hr/worker/set-saturday`;
-
-    if (employee) {
-        backendURL += `?employee=${employee}`;;
-    }
+    const backendURL = API_MAP.HR.WORKER.getSetSaturday(searchParams);
 
     const backendResponse = await fetch(`${backendURL}`,{
         headers: {
@@ -53,8 +47,7 @@ export async function POST(request: NextRequest) {
     }
 
     const requestBody = await request.json();
-
-    const backendURL =`${URLs.HRServer}/hr/worker/set-saturday`;
+    const backendURL = API_MAP.HR.WORKER.getSetSaturday(null);
 
     const backendResponse = await fetch(backendURL, {
         method: 'POST',

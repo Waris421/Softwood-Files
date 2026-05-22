@@ -1,7 +1,7 @@
-import { URLs } from "@/_components/constants/urls";
+import { API_MAP } from "@/_components/urls/api-map";
 import { NextRequest, NextResponse } from "next/server";
 
-const URL = `${URLs.AMServer}/consumption/thread/requests/pending`;
+const URL = API_MAP.CONSUMPTION.getPendingThreadRequests();
 const AUTH_COOKIE_NAME = 'authToken';
 
 export async function GET(request: NextRequest) {

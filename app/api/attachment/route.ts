@@ -1,4 +1,4 @@
-import { URLs } from "@/_components/constants/urls";
+import { API_MAP } from "@/_components/urls/api-map";
 import { NextRequest, NextResponse } from "next/server";
 
 const AUTH_COOKIE_NAME = 'authToken';
@@ -11,14 +11,10 @@ export async function GET(request: NextRequest) {
             { status: 401 }
         );
     }
-
-    let backendURL = `${URLs.FTPServer}`;
     
     const { searchParams } = new URL(request.url);
     const backendURLExtension = searchParams.get('url');
-    if (backendURLExtension) {
-        backendURL += backendURLExtension;
-    }
+    const backendURL = API_MAP.FTP.getAttachemnt(backendURLExtension || "");
 
     const backendResponse = await fetch(backendURL, {
         headers: {

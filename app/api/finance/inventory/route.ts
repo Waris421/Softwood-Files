@@ -1,8 +1,6 @@
-import { URLs } from "@/_components/constants/urls";
+import { API_MAP } from "@/_components/urls/api-map";
 import { NextRequest, NextResponse } from "next/server";
 
-const SEARCH_URL = `${URLs.AMServer}/api/inventories`;
-//Name of the cookie in which user credentials are saved.
 const AUTH_COOKIE_NAME = 'authToken';
 
 export async function GET(request: NextRequest) {
@@ -18,8 +16,10 @@ export async function GET(request: NextRequest) {
             { status: 401 }
         );
     }
+
+    const backendURL = API_MAP.FINANCE.INVENTORY.getInventories(query);
     
-    const backendResponse = await fetch(`${SEARCH_URL}?search=${query}`,{
+    const backendResponse = await fetch(backendURL, {
         headers: {
             'Authorization': `Token ${authToken.value}`,
             'Content-Type': 'application/json',

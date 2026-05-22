@@ -1,4 +1,4 @@
-import { URLs } from "@/_components/constants/urls";
+import { SERVER_URLs } from "@/_components/constants/urls";
 import { NextRequest, NextResponse } from "next/server";
 
 const AUTH_COOKIE_NAME = 'authToken';
@@ -13,7 +13,7 @@ export async function DELETE(request: NextRequest, { params }: { params: Promise
     }
 
     const {code} = await params;
-    const URL = `${URLs.MMCServer}/mmc/inventory/${code}/delete`;
+    const URL = `${SERVER_URLs.MMCServer}/mmc/inventory/${code}/delete`;
 
     const backendResponse = await fetch(URL, {
         method: 'DELETE',

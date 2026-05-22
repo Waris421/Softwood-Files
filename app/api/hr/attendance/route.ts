@@ -1,4 +1,4 @@
-import { URLs } from "@/_components/constants/urls";
+import { API_MAP } from "@/_components/urls/api-map";
 import { NextRequest, NextResponse } from "next/server";
 
 const AUTH_COOKIE_NAME = 'authToken';
@@ -13,16 +13,7 @@ export async function GET(request: NextRequest) {
     }
 
     const { searchParams } = new URL(request.url);
-
-    const backendURL = new URL(`${URLs.HRServer}/hr/attendance`);
-
-    const allowedKeys = ['employeeCode', 'from', 'to'];
-    allowedKeys.forEach(key => {
-        const value = searchParams.get(key);
-        if (value) {
-            backendURL.searchParams.append(key, value);
-        }
-    });
+    const backendURL = API_MAP.HR.ATTENDANCE.getAttendance(searchParams);
 
     const backendResponse = await fetch(`${backendURL}`,{
         headers: {

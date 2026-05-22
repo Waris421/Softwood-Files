@@ -1,8 +1,8 @@
-import { URLs } from "@/_components/constants/urls";
+import { API_MAP } from "@/_components/urls/api-map";
 import { NextRequest, NextResponse } from "next/server";
 
 const AUTH_COOKIE_NAME = 'authToken';
-const URL = `${URLs.MerchServer}/merchandising/work-order/add`;
+const URL = API_MAP.MERCHANDISING.WORKORDER.getWorkOrderAdd();
 
 export async function GET(request: NextRequest) {
     const authToken = request.cookies.get(AUTH_COOKIE_NAME);

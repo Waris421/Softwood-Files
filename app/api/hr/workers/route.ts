@@ -1,7 +1,6 @@
-import { URLs } from "@/_components/constants/urls";
+import { API_MAP } from "@/_components/urls/api-map";
 import { NextRequest, NextResponse } from "next/server";
 
-const URL = `${URLs.HRServer}/hr/workers`;
 const AUTH_COOKIE_NAME = 'authToken';
 
 export async function GET(request: NextRequest) {
@@ -13,7 +12,7 @@ export async function GET(request: NextRequest) {
         );
     }
 
-    const backendResponse = await fetch(`${URL}`,{
+    const backendResponse = await fetch(API_MAP.HR.WORKER.getWorkers(),{
         headers: {
             'Authorization': `Token ${authToken.value}`,
             'Content-Type': 'application/json',

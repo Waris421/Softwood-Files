@@ -1,7 +1,7 @@
-import { URLs } from "@/_components/constants/urls";
+import { API_MAP } from "@/_components/urls/api-map";
 import { NextRequest, NextResponse } from "next/server";
 
-const URL = `${URLs.MMCServer}/mmc/inventory-receipt`;
+const URL = API_MAP.MMC.INVENTORY_RECEIPT.getReceipts();
 const AUTH_COOKIE_NAME = 'authToken';
 
 export async function GET(request: NextRequest) {

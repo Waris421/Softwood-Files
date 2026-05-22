@@ -1,4 +1,4 @@
-import { URLs } from "@/_components/constants/urls";
+import { API_MAP } from "@/_components/urls/api-map";
 import { NextRequest, NextResponse } from "next/server";
 
 const AUTH_COOKIE_NAME = 'authToken';
@@ -13,11 +13,9 @@ export async function POST(request: NextRequest) {
     }
 
     const formData = await request.formData();
-
     const { searchParams } = new URL(request.url);
-    const dryRun = searchParams.get('dry_run');
 
-    const backendURL = `${URLs.HRServer}/hr/worker/bulk-add?dry_run=${dryRun}`;
+    const backendURL = API_MAP.HR.WORKER.getBulkAdd(searchParams);
 
     const backendResponse = await fetch(backendURL, {
         method: 'POST',

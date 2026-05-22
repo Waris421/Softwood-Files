@@ -1,10 +1,9 @@
-import { URLs } from "@/_components/constants/urls";
+import { API_MAP } from "@/_components/urls/api-map";
 import { NextRequest, NextResponse } from "next/server";
 
 export async function GET(request: NextRequest, { params }: { params: Promise<{ uid: string, token: string }> }) {
     const { uid, token } = await params;
-
-    const URL = `${URLs.AuthServer}/reset-password/${uid}/${token}/`;
+    const URL = API_MAP.AUTH.confirmResetPassword(uid, token);
     
     const backendResponse = await fetch(URL,{
         headers: {
@@ -25,10 +24,8 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
 
 export async function POST(request: NextRequest, { params }: { params: Promise<{ uid: string, token: string }> }) {
     const requestBody = await request.json();
-
     const { uid, token } = await params;
-
-    const URL = `${URLs.AuthServer}/reset-password/${uid}/${token}/`;
+    const URL = API_MAP.AUTH.confirmResetPassword(uid, token);
 
     const backendResponse = await fetch(URL, {
         method: 'POST',

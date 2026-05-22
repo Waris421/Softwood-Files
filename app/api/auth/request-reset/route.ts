@@ -1,7 +1,8 @@
-import { URLs } from "@/_components/constants/urls";
+import { SERVER_URLs } from "@/_components/constants/urls";
+import { API_MAP } from "@/_components/urls/api-map";
 import { NextRequest, NextResponse } from "next/server";
 
-const URL = `${URLs.AuthServer}/api/reset-password`;
+const URL = API_MAP.AUTH.getResetPassword();
 
 export async function POST(request: NextRequest) {
     const requestBody = await request.json();
