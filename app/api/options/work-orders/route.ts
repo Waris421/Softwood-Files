@@ -13,9 +13,20 @@ export async function GET(request: NextRequest) {
     }
 
     const { searchParams } = new URL(request.url);
-    const type = searchParams.get('type') || '';
+    const search = searchParams.get('search') || '';
+    const searches = searchParams.getAll('searches');
+    const extraCols = searchParams.getAll('extraCols');
 
-    const backendURL =`${URLs.MMCServer}/api/inventories?showAll=yes&showUnits=yes&type=${type}`;
+    const params = new URLSearchParams();
+    params.set('search', search);
+    extraCols.forEach(col => {
+        params.append('extraCols', col);
+    });
+    searches.forEach(search => {
+        params.append('searches', search);
+    })
+
+    const backendURL = `${URLs.MerchServer}/options/work-orders?${params.toString()}`;
     const backendResponse = await fetch(`${backendURL}`,{
         headers: {
             'Authorization': `Token ${authToken.value}`,
@@ -34,6 +45,6 @@ export async function GET(request: NextRequest) {
         );
     }
 
-    const inventories = await backendResponse.json();
-    return NextResponse.json(inventories);
+    const workers = await backendResponse.json();
+    return NextResponse.json(workers);
 }

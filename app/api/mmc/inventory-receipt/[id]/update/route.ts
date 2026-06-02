@@ -3,7 +3,7 @@ import { NextRequest, NextResponse } from "next/server";
 
 const AUTH_COOKIE_NAME = 'authToken';
 
-export async function GET(request: NextRequest) {
+export async function GET(request: NextRequest, { params }: { params: Promise<{ id: number }> }) {
     const authToken = request.cookies.get(AUTH_COOKIE_NAME);
     if (!authToken) {
         return NextResponse.json(
@@ -12,11 +12,10 @@ export async function GET(request: NextRequest) {
         );
     }
 
-    const { searchParams } = new URL(request.url);
-    const type = searchParams.get('type') || '';
+    const {id} = await params;
+    const URbackendURLL = `${URLs.MMCServer}/mmc/inventory-receipt/${id}/update`;
 
-    const backendURL =`${URLs.MMCServer}/api/inventories?showAll=yes&showUnits=yes&type=${type}`;
-    const backendResponse = await fetch(`${backendURL}`,{
+    const backendResponse = await fetch(`${URbackendURLL}`,{
         headers: {
             'Authorization': `Token ${authToken.value}`,
             'Content-Type': 'application/json',
@@ -34,6 +33,6 @@ export async function GET(request: NextRequest) {
         );
     }
 
-    const inventories = await backendResponse.json();
-    return NextResponse.json(inventories);
+    const data = await backendResponse.json();
+    return NextResponse.json(data);
 }

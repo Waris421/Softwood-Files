@@ -13,9 +13,9 @@ export async function GET(request: NextRequest) {
     }
 
     const { searchParams } = new URL(request.url);
-    const type = searchParams.get('type') || '';
+    const search = searchParams.get('search');
 
-    const backendURL =`${URLs.MMCServer}/api/inventories?showAll=yes&showUnits=yes&type=${type}`;
+    const backendURL =`${URLs.HRServer}/options/departments-api?search=${search}`;
     const backendResponse = await fetch(`${backendURL}`,{
         headers: {
             'Authorization': `Token ${authToken.value}`,
@@ -34,6 +34,6 @@ export async function GET(request: NextRequest) {
         );
     }
 
-    const inventories = await backendResponse.json();
-    return NextResponse.json(inventories);
+    const departments = await backendResponse.json();
+    return NextResponse.json(departments);
 }
