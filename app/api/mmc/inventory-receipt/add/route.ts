@@ -51,17 +51,18 @@ export async function POST(request: NextRequest) {
         );
     }
 
-    const formData = await request.formData();
+    const body = await request.json();
 
     const backendURL = `${URLs.MMCServer}/mmc/inventory-receipt/add`;
     const backendResponse = await fetch(backendURL, {
         method: 'POST',
         headers: {
             'Authorization': `Token ${authToken.value}`,
+            'Content-Type': 'application/json',
         },
-        body: formData,
+        body: JSON.stringify(body),
     });
-    
+        
     const data = await backendResponse.json();
     const status = backendResponse.status;
     if (!backendResponse.ok) {

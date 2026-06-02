@@ -27,29 +27,28 @@ function GlobalSubmitButton() {
         setIsSubmitting(true);
         
         //Data is valid now
-        const payload = getCombinedData();
+        const raw = getCombinedData();
 
-        console.log(payload);
+        const payload = {
+            heading: {
+                Amount: raw.Receipt?.BiltyValue,
+                Bilty: raw.Receipt?.Bilty,
+                Vehicle: raw.Receipt?.Vehicle,
+                Invoice: raw.Receipt?.Invoice,
+            },
+            inventory: (raw.Inventories?.items || []).map((item: any) => ({
+                id: item.POInvId,
+                Quantity: item.Quantity,
+                Inventory: item.Inventory,
+                Variant: item.Variant,
+            })),
+        };
 
-        setIsSubmitting(false);
-
-        return ;
-        const formData = new FormData();
-
-        formData.append("data", JSON.stringify(payload));
-
-        payload.attachment.items.forEach((item: any, index: number) => {
-            const newFile = item.NewFile;
-            if (newFile) {
-
-                formData.append(`attachRowIdx_${index}`, newFile);
-            }
-        });
-        
         try {
             const response = await fetch(GET_API_URL(id), {
-                method: 'POST',
-                body: formData,
+                method: 'PATCH',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(payload),
             });
 
             if (!response.ok) {
@@ -63,19 +62,18 @@ function GlobalSubmitButton() {
                 show: true,
                 subject: 'Success',
                 message: 'Saved Successfully',
-                action: () => (window.location.reload())
+                action: () => window.location.reload()
             });
         } catch (err: any) {
             setMessageConfig({
                 show: true,
-                subject: "Error",
+                subject: 'Error',
                 message: `Saving Failed: ${err}`
             });
         } finally {
-            setIsSubmitting(false)
+            setIsSubmitting(false);
         }
     }
-
     return (
         <>
             {messageConfig?.show && (

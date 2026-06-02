@@ -25,26 +25,31 @@ function GlobalSubmitButton() {
         setIsSubmitting(true);
         
         //Data is valid now
-        const payload = getCombinedData();
+        const raw = getCombinedData();
 
-        const formData = new FormData();
-
-        formData.append("data", JSON.stringify(payload));
-
-        payload.attachment?.items.forEach((item: any, index: number) => {
-            const newFile = item.NewFile;
-            if (newFile) {
-
-                formData.append(`attachRowIdx_${index}`, newFile);
-            }
-        });
+        const payload = {
+            heading: {
+                PONumber: raw.heading?.PONumber,
+                Amount: raw.heading?.Amount,
+                Bilty: raw.heading?.Bilty,
+                Vehicle: raw.heading?.Vehicle,
+                Invoice: raw.heading?.Invoice,
+            },
+            inventory: (raw.inventory?.items || []).map((item: any) => ({
+                id: item.id,
+                Quantity: item.Quantity,
+                Inventory: item.Inventory,
+                Variant: item.Variant,
+            })),
+        };
 
         setIsSubmitting(true);
-        
+
         try {
             const response = await fetch(API_URL, {
                 method: 'POST',
-                body: formData,
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(payload),
             });
 
             if (!response.ok) {

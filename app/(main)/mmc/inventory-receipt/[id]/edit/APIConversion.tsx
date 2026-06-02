@@ -12,6 +12,7 @@ const mapReceiptData = (receipt: any) => ({
 const mapInventoryData = (inventory=[]) => ({
     items: inventory.map((i: any) => ({
         id: i.id || "",
+        POInvId: i.POInvId || "",
         Inventory: i.InventoryCode || "",
         InventoryName: i.InventoryName || "",
         Variant: i.Variant || "",

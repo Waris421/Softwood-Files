@@ -2,7 +2,7 @@ import { URLs } from "@/_components/constants/urls";
 import { NextRequest, NextResponse } from "next/server";
 
 const AUTH_COOKIE_NAME = 'authToken';
-const URL = `${URLs.MMCServer}/mmc/issuance/add-sampling`;
+const URL = `${URLs.MMCServer}/api/issuance/sampling/add`;
 
 export async function GET(request: NextRequest) {
     const authToken = request.cookies.get(AUTH_COOKIE_NAME);

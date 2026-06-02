@@ -15,7 +15,7 @@ export async function GET(request: NextRequest) {
     const { searchParams } = new URL(request.url);
     const search = searchParams.get('search');
 
-    const backendURL =`${URLs.MMCServer}/options/purchase-orders-api/pending?search=${search}`;
+    const backendURL = `${URLs.MMCServer}/options/purchaseorders/open?search=${search}`;
     const backendResponse = await fetch(`${backendURL}`,{
         headers: {
             'Authorization': `Token ${authToken.value}`,
@@ -35,5 +35,11 @@ export async function GET(request: NextRequest) {
     }
 
     const pos = await backendResponse.json();
-    return NextResponse.json(pos);
+    const converted = pos
+        .filter((opt: any) => opt.value !== null)
+        .map((opt: any) => ({
+            value: opt.value,
+            label: opt.text,
+        }));
+    return NextResponse.json(converted);
 }

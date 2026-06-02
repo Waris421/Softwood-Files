@@ -14,7 +14,8 @@ type InventoryReceipt = {
     id: number,
     POId: number,
     ReceiptDate: string,
-    Supplier: string,
+    SupplierId: string,
+    SupplierName: string,
     InventoryCodes: string[],
     InventoryNames: string[],
     WorkOrders: number[],
@@ -36,7 +37,7 @@ const reportColumns: ColumnDef<InventoryReceipt>[] = [
         header: 'Date',
     },
     {
-        accessorKey: 'Supplier',
+        accessorKey: 'SupplierName',
         header: 'Supplier',
     },
     {
@@ -133,7 +134,7 @@ export default function InventoryReceipts(){
         setRedirecting(true);
         const poId = cell.getValue();
 
-        router.push(`/mmc/inventory-order/${poId}/edit`);
+        router.push(`/mmc/purchase-order/${poId}/edit`);
     }
 
     return (
@@ -153,7 +154,7 @@ export default function InventoryReceipts(){
                     showDownload={false}
                     showPrint={false}
                     searchFilters={['id', 'POId', 'InventoryNames', 'WorkOrders']}
-                    dropdownFilters={['Supplier']}
+                    dropdownFilters={['SupplierName']}
                     toggleFilters={['InvoicePending']}
                     customActions={customHeaderButtons()}
                     columnClickHandlers={{
