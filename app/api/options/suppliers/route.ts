@@ -1,4 +1,4 @@
-import { SERVER_URLs } from "@/_components/constants/urls";
+import { API_MAP } from "@/_components/urls/api-map";
 import { NextRequest, NextResponse } from "next/server";
 
 const AUTH_COOKIE_NAME = 'authToken';
@@ -13,9 +13,8 @@ export async function GET(request: NextRequest) {
     }
 
     const { searchParams } = new URL(request.url);
-    const search = searchParams.get('search');
 
-    const backendURL =`${SERVER_URLs.MMCServer}/options/suppliers-api?search=${search}`;
+    const backendURL = API_MAP.OPTIONS.getSuppliers(searchParams);
     const backendResponse = await fetch(`${backendURL}`,{
         headers: {
             'Authorization': `Token ${authToken.value}`,

@@ -1,4 +1,13 @@
-import { SERVER_URLs } from "../constants/urls";
+const SERVER_URLs = {
+    AuthServer: 'http://206.42.124.10:8001',
+    AMServer: 'http://206.42.124.10:8001',
+    QualityServer: 'http://206.42.124.10:8001',
+    FinanceServer: 'http://206.42.124.10:8001',
+    HRServer: 'http://206.42.124.10:8001',
+    MMCServer: 'http://206.42.124.10:8001',
+    MerchServer: 'http://206.42.124.10:8001',
+    FTPServer: 'http://206.42.124.10:8001',
+} as const;
 
 export const API_MAP = {
     FTP: {
@@ -52,6 +61,75 @@ export const API_MAP = {
                 }
             });
 
+            return url.toString();
+        },
+        getPendingPOs: (searchParams: URLSearchParams) => {
+            const url = new URL(`${SERVER_URLs.MMCServer}/options/purchase-orders-api/pending`);
+            const allowedKeyValues = {'search': ''}
+            Object.entries(allowedKeyValues).forEach(([key, defaultValue]) => {
+                const value = searchParams.get(key) ?? defaultValue;
+
+                if (value !== null && value !== undefined) {
+                    url.searchParams.set(key, String(value));
+                }
+            });
+            return url.toString();            
+        },
+        getStyles: (searchParams: URLSearchParams) => {
+            const url = new URL(`${SERVER_URLs.MerchServer}/options/styles-api`);
+            const allowedKeyValues = {search: null, showCustomer: null}
+            Object.entries(allowedKeyValues).forEach(([key, defaultValue]) => {
+                const value = searchParams.get(key) ?? defaultValue;
+
+                if (value !== null && value !== undefined) {
+                    url.searchParams.set(key, String(value));
+                }
+            });
+            return url.toString();
+        },
+        getSuppliers: (searchParams: URLSearchParams) => {
+            const url = new URL(`${SERVER_URLs.MMCServer}/options/suppliers-api`);
+            const allowedKeyValues = {search: null} 
+            Object.entries(allowedKeyValues).forEach(([key, defaultValue]) => {
+                const value = searchParams.get(key) ?? defaultValue;
+
+                if (value !== null && value !== undefined) {
+                    url.searchParams.set(key, String(value));
+                }
+            });
+
+            return url.toString();
+        },
+        getWorkOrders: (searchParams: URLSearchParams) => {
+            const url = new URL(`${SERVER_URLs.MerchServer}/options/work-orders`);
+            const allowedKeyValues = {search: '', searches: [], extraCols: []};
+
+            Object.keys(allowedKeyValues).forEach((key) => {
+                const value = searchParams.get(key) || searchParams.getAll(key);
+
+                if (value && value.length > 0) {
+                    if (Array.isArray(value)) {
+                        value.forEach(val => url.searchParams.append(key, val));
+                    } else {
+                        url.searchParams.set(key, value);
+                    }
+                } else if (allowedKeyValues[key as keyof typeof allowedKeyValues]) {
+                    const defaultValue = allowedKeyValues[key as keyof typeof allowedKeyValues];
+                    if (typeof defaultValue === 'string' && defaultValue !== '') {
+                        url.searchParams.set(key, defaultValue);
+                    }
+                }
+            });
+
+            return url.toString();
+        },
+        getWorkers: (searchParams: URLSearchParams) => {
+            const url = new URL(`${SERVER_URLs.HRServer}/options/workers`);
+            const allowedKeys = ['search'];
+            allowedKeys.forEach((key) => {
+                const value = searchParams.get(key);
+                if (value) url.searchParams.append(key, value);
+            });
             return url.toString();
         },
     },
@@ -177,6 +255,17 @@ export const API_MAP = {
             getWorkOrderAdd: () => `${SERVER_URLs.MerchServer}/merchandising/work-order/add`,
             getWorkOrderUpdate: (id: number) => `${SERVER_URLs.MerchServer}/merchandising/work-order/${id}/update`,
             getWorkOrderDelete: (id: number) => `${SERVER_URLs.MerchServer}/merchandising/work-order/${id}/delete`,
+            getRequirementHistory: (searchParams: URLSearchParams) => {
+                const url = new URL(`${SERVER_URLs.MMCServer}/merchandising/work-order/requirement/get`);
+
+                const workOrder = searchParams.get('workOrder');
+                const id = searchParams.get('id');
+
+                if (workOrder) url.searchParams.append('orderNumber', workOrder);
+                if (id) url.searchParams.append('id', id);
+            
+                return url.toString();
+            },
             getRequirementCalculate: () => `${SERVER_URLs.MerchServer}/merchandising/work-order/requirement/calculate`,
             getVariantsCalculate: (style: string) => `${SERVER_URLs.MerchServer}/merchandising/work-order/variants/calculate?styleCode=${style}`
         },
@@ -216,9 +305,18 @@ export const API_MAP = {
             getReceipts: () => `${SERVER_URLs.MMCServer}/mmc/inventory-receipt`,
             getReceiptAdd: () => `${SERVER_URLs.MMCServer}/mmc/inventory-receipt/add`,
             getReceiptUpdate: (id: number) => `${SERVER_URLs.MMCServer}/mmc/inventory-receipt/${id}/update`,
-            getReceiptReallocate: (id: number) => `${SERVER_URLs.MMCServer}/mmc/inventory-receipt/${id}/re-allocate`,
+            getReceiptReallocate: (id: number, searchParams: URLSearchParams) => {
+                const url = new URL(`${SERVER_URLs.MMCServer}/mmc/inventory-receipt/${id}/re-allocate`);
+                const keys = searchParams.keys();
+                keys.forEach((key) => {
+                    const value = searchParams?.get(key);
+                    if (value) url.searchParams.append(key, value);
+                })
+                return url.toString();
+            },
         },
         INVENTORY_ISSUANCE: {
+            getIssuances: () => `${SERVER_URLs.MMCServer}/mmc/issuance`,
             getIssueSamplingAdd: () => `${SERVER_URLs.MMCServer}/mmc/issuance/add-sampling`,
         },
     },

@@ -5,7 +5,7 @@ import CheckDisplay from "@/_components/table/Check";
 import ExpandableList from "@/_components/table/ExpandableList";
 import { DataTable } from "@/_components/table/Table";
 import { Cell, ColumnDef } from "@tanstack/react-table";
-import { AlertCircle, CheckCircle2, Loader2, SquarePlus } from "lucide-react";
+import { Loader2, SquarePlus } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";

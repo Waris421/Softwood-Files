@@ -151,7 +151,7 @@ export default function InventoryTable() {
     }
 
     return (
-        <div className="w-full space-y-4 z-30">
+        <div className="w-full space-y-4 z-10">
             <form className="space-y-4 p-4" autoComplete="off">
                 <div className="overflow-x-auto rounded-lg border border-base-300">
                     <table className="table w-full">

@@ -13,7 +13,10 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
     }
 
     const {id} = await params;
-    const URbackendURLL = API_MAP.MMC.INVENTORY_RECEIPT.getReceiptReallocate(id);;
+    
+    const { searchParams } = new URL(request.url);
+    
+    const URbackendURLL = API_MAP.MMC.INVENTORY_RECEIPT.getReceiptReallocate(id, searchParams);;
     
     const backendResponse = await fetch(`${URbackendURLL}`,{
         headers: {

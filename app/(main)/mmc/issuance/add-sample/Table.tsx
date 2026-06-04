@@ -6,7 +6,7 @@ import { cn } from "@/_components/generic/utils";
 import { Checkbox } from "@/_components/ui/checkbox";
 import { Popover, PopoverClose, PopoverContent, PopoverTrigger } from "@/_components/ui/popover";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Info, X } from "lucide-react";
+import { ExternalLink, Info, X } from "lucide-react";
 import { useEffect } from "react";
 import { Controller, useFieldArray, useForm, useWatch } from "react-hook-form";
 import * as z from "zod";
@@ -27,7 +27,8 @@ const rowSchema = z.object({
     Details: z.array(z.object({
         ReceiptNumber: z.number(),
         ReceiptDate: z.string(),
-        BalanceQty: z.number()
+        BalanceQty: z.number(),
+        URL: z.string(),
     })).optional(),
 })
 
@@ -65,6 +66,10 @@ export default function Table ({ initialData, onDataChange, isLoading }: TablePr
                     Inventory: item.Inventory,
                     Variant: item.Variant,
                     Quantity: item.Quantity,
+                    Details: item.Details?.map(detail => ({
+                        ReceiptNumber: detail.ReceiptNumber,
+                        BalanceQty: detail.BalanceQty
+                    })) || []
                 }));
             
             onDataChange(selectedInventories);
@@ -174,7 +179,28 @@ export default function Table ({ initialData, onDataChange, isLoading }: TablePr
                                                         <tbody>
                                                             {field.Details.map((detail, idx) => (
                                                                 <tr key={idx}>
-                                                                    <td>{detail.ReceiptNumber}</td>
+                                                                    <td>
+                                                                        <a
+                                                                            href={detail.URL}
+                                                                            target="_blank"
+                                                                            rel="noopener noreferrer"
+                                                                            className="group inline-flex items-center gap-1"
+                                                                        >
+                                                                            <code className={cn(
+                                                                                    "text-[10px] font-mono font-medium px-1.5 py-0.5 rounded",
+                                                                                    "bg-blue-50 dark:bg-blue-900/30",
+                                                                                    "text-blue-700 dark:text-blue-300",
+                                                                                    "border border-blue-100 dark:border-blue-800",
+                                                                                    "group-hover:bg-blue-100 dark:group-hover:bg-blue-800/50",
+                                                                                    "group-hover:border-blue-300 dark:group-hover:border-blue-500",
+                                                                                    "transition-colors cursor-pointer",
+                                                                                )}
+                                                                            >
+                                                                                {detail.ReceiptNumber}
+                                                                            </code>
+                                                                            <ExternalLink size={10} className="text-blue-400 opacity-0 group-hover:opacity-100 transition-opacity" />
+                                                                        </a>
+                                                                    </td>
                                                                     <td>{new Date(detail.ReceiptDate).toLocaleDateString()}</td>
                                                                     <td className="font-mono">{detail.BalanceQty}</td>
                                                                 </tr>

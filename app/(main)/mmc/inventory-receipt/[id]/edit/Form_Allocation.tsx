@@ -43,7 +43,7 @@ interface AllocationPopoverProps {
 export const FORM_NAME_WITH_PARENT = 'Allocations';
 
 const WORK_ORDER_OPTIONS_URL = '/api/options/work-orders';
-const GET_RECEIPT_REALLOCATE_URL = (id: number, method: string) => `/api/mmc/inventory-receipt/${id}/re-allocate?allocationMethod=${method}`;
+const GET_RECEIPT_REALLOCATE_URL = (id: number, method: string, totalQty: number) => `/api/mmc/inventory-receipt/${id}/re-allocate?allocationMethod=${method}&totalQty=${totalQty}`;
 
 export default function AllocationTable({
     selectedRecInvId,
@@ -115,7 +115,7 @@ export default function AllocationTable({
     };
 
     const handleReAllocate = async (method: string) => {
-        const url = GET_RECEIPT_REALLOCATE_URL(selectedRecInvId, method);
+        const url = GET_RECEIPT_REALLOCATE_URL(selectedRecInvId, method, totalRecQuantity);
         
         setIsReallocating(true);
 
@@ -125,8 +125,30 @@ export default function AllocationTable({
                 const error = await response.json();
                 throw new Error(error.message || error);
             }
-            const data = await response.json();
-            console.log(data);
+            const apiData = await response.json();
+            
+            const updatedItems = [...watchedItems];
+
+            apiData.forEach((apiItem: { WorkOrder: number; Quantity: number }) => {
+                const existingItemIndex = updatedItems.findIndex(
+                    (item) => item.WorkOrder === apiItem.WorkOrder
+                );
+
+                if (existingItemIndex !== -1) {
+                    updatedItems[existingItemIndex] = {
+                        ...updatedItems[existingItemIndex],
+                        Quantity: apiItem.Quantity,
+                    };
+                } else {
+                    updatedItems.push({
+                        RecInvId: selectedRecInvId,
+                        WorkOrder: apiItem.WorkOrder,
+                        Quantity: apiItem.Quantity,
+                    });
+                }
+            });
+
+            reset({ items: updatedItems });
         } catch (err: any) {
             console.error(err);
         } finally {
@@ -135,14 +157,14 @@ export default function AllocationTable({
     }    
 
     return (
-        <div className={cn(THEME.Table.Wrapper, "flex flex-col h-full")}>
-            <div className={cn(THEME.Table.TableContainer, "grow overflow-y-auto")}>
-                <table className="table w-full">
+        <div className={cn(THEME.Table.Wrapper, "flex flex-col h-full max-w-full overflow-hidden")}>
+            <div className={cn(THEME.Table.TableContainer, "grow overflow-y-auto overflow-x-hidden w-full")}>
+                <table className="table w-full table-fixed border-collapse">
                     <thead className="sticky top-0 z-20">
                         <tr className={THEME.Table.HeaderRow}>
-                            <th className="p-1 border-b text-center w-25">Work Order</th>
-                            <th className="p-1 border-b text-center w-40">Quantity</th>
-                            <th className="p-1 border-b text-center w-25">Actions</th>
+                            <th className="p-1 border-b text-center w-[65%]">Work Order</th>
+                            <th className="p-1 border-b text-center w-[20%]">Quantity</th>
+                            <th className="p-1 border-b text-center w-[15%]">Actions</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -155,7 +177,7 @@ export default function AllocationTable({
                                         THEME.Table.RowHover,
                                     )}
                                 >
-                                    <td className="p-1 w-25">
+                                    <td className="p-1 w-[65%]">
                                         <Controller 
                                             control={control}
                                             name={`items.${index}.WorkOrder` as const}
@@ -179,7 +201,7 @@ export default function AllocationTable({
                                             <p className="text-[10px] text-red-500 mt-1">{errors.items[index]?.WorkOrder?.message}</p>
                                         )}
                                     </td>
-                                    <td className="p-1 w-40">
+                                    <td className="p-1 w-[20%]">
                                         <input 
                                             {...register(`items.${index}.Quantity` as const, { valueAsNumber: true })} 
                                             className={THEME.TextInput}
@@ -190,7 +212,7 @@ export default function AllocationTable({
                                             <p className="text-[10px] text-red-500 mt-1">{errors.items[index]?.Quantity?.message}</p>
                                         )}
                                     </td>
-                                    <td className="p-1 w-25">
+                                    <td className="p-1 w-[15%]">
                                         <div className="flex justify-center gap-1">
                                             <Button
                                                 type="button"

@@ -28,28 +28,15 @@ function GlobalSubmitButton() {
         
         //Data is valid now
         const payload = getCombinedData();
+        
+        const formDataToUpload = new FormData();
 
-        console.log(payload);
-
-        setIsSubmitting(false);
-
-        return ;
-        const formData = new FormData();
-
-        formData.append("data", JSON.stringify(payload));
-
-        payload.attachment.items.forEach((item: any, index: number) => {
-            const newFile = item.NewFile;
-            if (newFile) {
-
-                formData.append(`attachRowIdx_${index}`, newFile);
-            }
-        });
+        formDataToUpload.append("data", JSON.stringify(payload));
         
         try {
             const response = await fetch(GET_API_URL(id), {
                 method: 'POST',
-                body: formData,
+                body: formDataToUpload,
             });
 
             if (!response.ok) {
@@ -63,7 +50,7 @@ function GlobalSubmitButton() {
                 show: true,
                 subject: 'Success',
                 message: 'Saved Successfully',
-                action: () => (window.location.reload())
+                //action: () => (window.location.reload())
             });
         } catch (err: any) {
             setMessageConfig({

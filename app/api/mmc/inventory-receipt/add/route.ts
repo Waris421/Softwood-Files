@@ -1,4 +1,3 @@
-import { SERVER_URLs } from "@/_components/constants/urls";
 import { API_MAP } from "@/_components/urls/api-map";
 import { NextRequest, NextResponse } from "next/server";
 
@@ -54,7 +53,7 @@ export async function POST(request: NextRequest) {
 
     const formData = await request.formData();
 
-    const backendURL = `${SERVER_URLs.MMCServer}/mmc/inventory-receipt/add`;
+    const backendURL = API_MAP.MMC.INVENTORY_RECEIPT.getReceiptAdd();
     const backendResponse = await fetch(backendURL, {
         method: 'POST',
         headers: {
