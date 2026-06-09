@@ -4,9 +4,7 @@ import { THEME } from "@/_components/constants/ui";
 import LoadingIcon from "@/_components/generic/Loading";
 import { cn } from "@/_components/generic/utils";
 import { Checkbox } from "@/_components/ui/checkbox";
-import { Popover, PopoverClose, PopoverContent, PopoverTrigger } from "@/_components/ui/popover";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Info, X } from "lucide-react";
 import { useEffect } from "react";
 import { Controller, useFieldArray, useForm, useWatch } from "react-hook-form";
 import * as z from "zod";
@@ -24,11 +22,6 @@ const rowSchema = z.object({
     Unit: z.string().optional(),
     Quantity: z.number().min(0),
     selected: z.boolean().default(false),
-    Details: z.array(z.object({
-        ReceiptNumber: z.number(),
-        ReceiptDate: z.string(),
-        BalanceQty: z.number()
-    })).optional(),
 })
 
 const formSchema = z.object({
@@ -139,53 +132,9 @@ export default function Table ({ initialData, onDataChange, isLoading }: TablePr
                                     <div className={THEME.TextInputReadOnly}>{field.Inventory}</div>
                                 </td>
                                 <td className="p-1 w-100 text-center">
-                                    <div className={cn(THEME.TextInputReadOnly, "flex items-center justify-between gap-2 px-2")}>
-                                        <span className="truncate">{field.InventoryName}</span>
-
-                                        {field.Details && field.Details.length > 0 && (
-                                            <Popover>
-                                                <PopoverTrigger asChild>
-                                                    <button
-                                                        className={THEME.ButtonOutLine}
-                                                        type="button"
-                                                    >
-                                                        <Info size={16} />
-                                                    </button>
-                                                </PopoverTrigger>
-                                                <PopoverContent
-                                                    side="right"
-                                                    align="start"
-                                                    sideOffset={10}
-                                                    className="z-50 w-80 p-4 rounded-lg shadow-xl animate-in fade-in zoom-in duration-200"
-                                                >
-                                                    <PopoverClose className="absolute right-4 top-4 rounded-sm opacity-70 ring-offset-background transition-opacity hover:opacity-100 focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:pointer-events-none">
-                                                        <X className="h-4 w-4" />
-                                                        <span className="sr-only">Close</span>
-                                                    </PopoverClose>
-                                                    <h3 className="font-bold text-sm mb-2 border-b pb-1">Inventory Receipts</h3>
-                                                    <table className="table table-xs w-full">
-                                                        <thead>
-                                                            <tr>
-                                                                <th>Receipt #</th>
-                                                                <th>Date</th>
-                                                                <th>Qty</th>
-                                                            </tr>
-                                                        </thead>
-                                                        <tbody>
-                                                            {field.Details.map((detail, idx) => (
-                                                                <tr key={idx}>
-                                                                    <td>{detail.ReceiptNumber}</td>
-                                                                    <td>{new Date(detail.ReceiptDate).toLocaleDateString()}</td>
-                                                                    <td className="font-mono">{detail.BalanceQty}</td>
-                                                                </tr>
-                                                            ))}
-                                                        </tbody>
-                                                    </table>
-                                                </PopoverContent>
-                                            </Popover>
-                                        )}
-                                    </div>
+                                    <div className={THEME.TextInputReadOnly}>{field.InventoryName}</div>
                                 </td>
+
                                 <td className="p-1 w-40 text-center">
                                     <div className={THEME.TextInputReadOnly}>{field.Variant}</div>
                                 </td>
