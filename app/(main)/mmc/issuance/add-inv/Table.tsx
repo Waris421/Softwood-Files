@@ -38,7 +38,7 @@ const formSchema = z.object({
 
 type FormValues = z.input<typeof formSchema>;
 
-export default function Table ({ initialData, onDataChange, isLoading }: TableProps) {
+export default function Table({ initialData, onDataChange, isLoading }: TableProps){
     const { 
         register, control, reset, setValue, formState: { errors } 
     } = useForm<FormValues>({
@@ -52,7 +52,7 @@ export default function Table ({ initialData, onDataChange, isLoading }: TablePr
     });
 
     const { fields } = useFieldArray({ control, name: "items" });
-
+    
     const watchedItems = useWatch({
         control,
         name: "items",
@@ -82,11 +82,7 @@ export default function Table ({ initialData, onDataChange, isLoading }: TablePr
     useEffect(() => {
         if (!isLoading && initialData) {
             reset({ 
-                items: initialData.map(item => ({ 
-                    ...item, 
-                    initialQuantity: item.Quantity, 
-                    selected: false 
-                })) 
+                items: initialData.map(item => ({ ...item, selected: false })) 
             });
         }
     }, [isLoading, initialData, reset]);
@@ -153,7 +149,6 @@ export default function Table ({ initialData, onDataChange, isLoading }: TablePr
                                 <td className="p-1 w-100 text-center">
                                     <div className={cn(THEME.TextInputReadOnly, "flex items-center justify-between gap-2 px-2")}>
                                         <span className="truncate">{field.InventoryName}</span>
-
                                         {field.Details && field.Details.length > 0 && (
                                             <Popover>
                                                 <PopoverTrigger asChild>

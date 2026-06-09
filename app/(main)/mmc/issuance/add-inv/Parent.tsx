@@ -1,47 +1,39 @@
 'use client';
 
-import { DropdownOption } from "@/_components/Dropdown/types";
+import MessageBox from "@/_components/generic/MessageBox";
 import { useCallback, useEffect, useState } from "react";
 import Filters from "./Filters";
 import Table from "./Table";
-import MessageBox from "@/_components/generic/MessageBox";
 
-const API_URL = `/api/mmc/issuance/add-sample`;
+const API_URL = `/api/mmc/issuance/add-inv`;
 
 export default function Parent() {
     const [formData, setFormData] = useState<any>({ Inventories: [], Department: '' });
-    const [majorFilters, setMajorFilters] = useState<any>({});
-    const [minorFilters, setMinorFilters] = useState<any>({});
+    const [filters, setFilters] = useState<any>({});
     const [refreshTrigger, setRefreshTrigger] = useState(0);
-    const [rawData, setRawData] = useState<any[]>([]);          //Data from the server
-    const [tableData, setTableData] = useState<any[]>([]);      //Data that the user see
+    const [tableData, setTableData] = useState<any[]>([]);
     const [isLoading, setIsLoading] = useState(false);
     const [messageConfig, setMessageConfig] = useState<{ show: boolean; subject: string; message: string; action?: () => void; } | null>(null);
-    const [inventoryFilterOptions, setInventoryFilterOptions] = useState<DropdownOption[]>([]);
 
-    //Get options for the dropdown options of minor filters
-    const generateDropdownOptions = (data: any[]) => {
-        const inventoryMap = new Map();
-
-        data.forEach(item => {
-            if (item.Inventory && !inventoryMap.has(item.Inventory)) {
-                inventoryMap.set(item.Inventory, item.InventoryName);
-            }
-        });
-
-        setInventoryFilterOptions(Array.from(inventoryMap).map(([code, name]) => ({
-            value: code,
-            label: name
-        })));
-    }
-
-    //Fetch all un-issued sampling inventory
+    //Fetch all un-issued receipts of selected inventories
     useEffect(() => {
         const loadData = async() => {
             setIsLoading(true);
+            const params = new URLSearchParams();
+
+            if (filters && filters.length > 0) {
+                filters.forEach((filter: string) => {
+                    params.append('filters', filter);
+                });
+            } else {
+                setIsLoading(false);
+                return ;
+            }
+
+            const apiUrl = `${API_URL}?${params.toString()}`;
 
             try {
-                const response = await fetch(API_URL);
+                const response = await fetch(apiUrl);
                 if (!response.ok) {
                     const errorData = await response.json();
                     throw new Error(`${errorData.details.message}`);
@@ -49,9 +41,7 @@ export default function Parent() {
 
                 const data = await response.json();
 
-                setRawData(data);
-
-                generateDropdownOptions(data);
+                setTableData(data);
             } catch (err: any) {
                 setMessageConfig({
                     show: true,
@@ -61,42 +51,23 @@ export default function Parent() {
             } finally {
                 setIsLoading(false);
             }
-        }
+        };
 
-        loadData()
-    }, [majorFilters, refreshTrigger]);
-
-    //Refresh the visible data when the minor filters change
-    useEffect(() => {
-        setIsLoading(true);
-        let filtered = [...rawData];
-
-        if (minorFilters.Inventories && minorFilters.Inventories.length > 0) {
-            const selectedInv = Array.isArray(minorFilters.Inventories) ? minorFilters.Inventories : [minorFilters.Inventories];
-            filtered = filtered.filter(item => selectedInv.includes(item.Inventory));
-        }
-
-        setTableData(filtered);
-
-        setIsLoading(false);
-    }, [rawData, minorFilters]);
+        loadData();
+    },[filters, refreshTrigger]);
 
     const handleFilterSubmit = (allFilters: any) => {
-        setIsLoading(true);
-        //Split major and minor filters.
-        const { Inventories,...rest } = allFilters;
+        //Split department and the rest.
+        const { Inventories } = allFilters;
 
         //Is a major filter changed
-        const majorChanged = JSON.stringify(rest) !== JSON.stringify(majorFilters);
+        const filterChanged = JSON.stringify(Inventories) !== JSON.stringify(filters);
 
         //Only call backend if a major filter is changed
-        if (majorChanged) {
-            setMajorFilters(rest);
-            setRefreshTrigger(prev => prev + 1);
+        if (filterChanged) {
+            setFilters(Inventories);
         }
-
-        setMinorFilters({ Inventories });
-        setIsLoading(false);
+        setRefreshTrigger(prev => prev + 1);
     };
 
     const handleTableDataChange = useCallback((selectedItems: any[]) => {
@@ -137,7 +108,7 @@ export default function Parent() {
         }
 
         setIsLoading(true);
-
+        
         try {
             const response = await fetch(API_URL, {
                 method: "POST",
@@ -148,7 +119,6 @@ export default function Parent() {
                     value === undefined ? null : value
                 ),
             })
-
             if (!response.ok) {
                 const error = await response.json();
                 throw new Error(error.message || error);
@@ -162,9 +132,10 @@ export default function Parent() {
                 subject: 'Success',
                 message: `Saved Successfully. Issuance Number: ${issuanceNumber}`,
                 action: () => {
-                    window.location.reload();
+                    setRefreshTrigger(prev => prev + 1);;
                 }
             });
+            setIsLoading(false);
         } catch (err: any) {
             setMessageConfig({
                 show: true,
@@ -175,22 +146,20 @@ export default function Parent() {
             setIsLoading(false);
         }
     }
-        
+
     return (
         <>
-            <Filters
+            <Filters 
                 onFilterSubmit={handleFilterSubmit}
                 onDataChange={(data) => setFormData((prev: any) => ({ ...prev, ...data }))}
                 onTableSubmit={handleFinalSubmit}
                 isLoading={isLoading}
-                options={{ invFilterOptions: inventoryFilterOptions}}
             />
             <Table
                 initialData={tableData}
                 isLoading={isLoading}
                 onDataChange={handleTableDataChange}
             />
-
             {messageConfig?.show && (
                 <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4">
                     <MessageBox 

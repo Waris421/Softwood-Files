@@ -1,12 +1,12 @@
 'use client';
 
-import { DropdownOption } from "@/_components/Dropdown/types";
+import MessageBox from "@/_components/generic/MessageBox";
 import { useCallback, useEffect, useState } from "react";
 import Filters from "./Filters";
+import { DropdownOption } from "@/_components/Dropdown/types";
 import Table from "./Table";
-import MessageBox from "@/_components/generic/MessageBox";
 
-const API_URL = `/api/mmc/issuance/add-sample`;
+const API_URL = `/api/mmc/issuance/add-order`;
 
 export default function Parent() {
     const [formData, setFormData] = useState<any>({ Inventories: [], Department: '' });
@@ -34,14 +34,21 @@ export default function Parent() {
             label: name
         })));
     }
-
+    
     //Fetch all un-issued sampling inventory
     useEffect(() => {
         const loadData = async() => {
+            const workOrder = majorFilters.WorkOrder;
+            if (!workOrder) {
+                setRawData([]);
+                generateDropdownOptions([]);
+                return;
+            }
+
             setIsLoading(true);
 
             try {
-                const response = await fetch(API_URL);
+                const response = await fetch(`${API_URL}?workOrder=${workOrder}`);
                 if (!response.ok) {
                     const errorData = await response.json();
                     throw new Error(`${errorData.details.message}`);
@@ -61,10 +68,10 @@ export default function Parent() {
             } finally {
                 setIsLoading(false);
             }
-        }
+        };
 
-        loadData()
-    }, [majorFilters, refreshTrigger]);
+        loadData();
+    }, [majorFilters, refreshTrigger])
 
     //Refresh the visible data when the minor filters change
     useEffect(() => {
@@ -76,15 +83,19 @@ export default function Parent() {
             filtered = filtered.filter(item => selectedInv.includes(item.Inventory));
         }
 
+        if (minorFilters.Type) {
+            filtered = filtered.filter(item => item.Type === minorFilters.Type);
+        }
+
         setTableData(filtered);
 
         setIsLoading(false);
     }, [rawData, minorFilters]);
-
+    
     const handleFilterSubmit = (allFilters: any) => {
         setIsLoading(true);
         //Split major and minor filters.
-        const { Inventories,...rest } = allFilters;
+        const { Inventories, Type,...rest } = allFilters;
 
         //Is a major filter changed
         const majorChanged = JSON.stringify(rest) !== JSON.stringify(majorFilters);
@@ -95,7 +106,7 @@ export default function Parent() {
             setRefreshTrigger(prev => prev + 1);
         }
 
-        setMinorFilters({ Inventories });
+        setMinorFilters({ Inventories, Type });
         setIsLoading(false);
     };
 
@@ -175,7 +186,7 @@ export default function Parent() {
             setIsLoading(false);
         }
     }
-        
+
     return (
         <>
             <Filters

@@ -51,7 +51,7 @@ export const API_MAP = {
         },
         getInventories: (searchParams: URLSearchParams) => {
             const url = new URL(`${SERVER_URLs.MMCServer}/api/inventories?showAll=yes&showUnits=yes`);
-            const allowedKeyValues = {search: null, type: '', showAll: 'yes', showUnits: 'yes'}
+            const allowedKeyValues = {search: null, type: '', showAll: 'yes', showUnits: 'yes', limit: 15}
 
             Object.entries(allowedKeyValues).forEach(([key, defaultValue]) => {
                 const value = searchParams.get(key) ?? defaultValue;
@@ -318,6 +318,20 @@ export const API_MAP = {
         INVENTORY_ISSUANCE: {
             getIssuances: () => `${SERVER_URLs.MMCServer}/mmc/issuance`,
             getIssueSamplingAdd: () => `${SERVER_URLs.MMCServer}/mmc/issuance/add-sampling`,
+            getIssueInventoryAdd: (searchParams?: URLSearchParams) => {
+                const url = new URL(`${SERVER_URLs.MMCServer}/mmc/issuance/add-inventory`);
+
+                url.search = searchParams?.toString() || '';
+
+                return url.toString();
+            },
+            getIssueOrderAdd: (searchParams?: URLSearchParams) => {
+                const url = new URL(`${SERVER_URLs.MMCServer}/mmc/issuance/add-order`);
+
+                url.search = searchParams?.toString() || '';
+
+                return url.toString();
+            },
         },
     },
 } as const;

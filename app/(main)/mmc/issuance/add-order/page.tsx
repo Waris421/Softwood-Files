@@ -2,14 +2,14 @@ import { Metadata } from 'next';
 import Parent from './Parent';
 
 export const metadata: Metadata = {
-  title: 'Issuance For Indirect Material',
-  description: 'Inventory issuance for Indirect Material',
+  title: 'Issuance For Direct Material',
+  description: 'Inventory issuance for Direct Material',
 }
 
 const page = () => {
-  return (
-    <Parent />
-  )
+    return (
+        <Parent />
+    )
 }
 
 export default page;
