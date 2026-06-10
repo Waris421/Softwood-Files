@@ -3,7 +3,6 @@
 import { THEME } from "@/_components/constants/ui";
 import LocationPreview from "@/_components/DialogBox/LocationPreview";
 import { DataTable } from "@/_components/table/Table";
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/_components/ui/dialog";
 import { Cell, ColumnDef } from "@tanstack/react-table";
 import { Database, MapPinPlus, Plus } from "lucide-react";
 import Link from "next/link";

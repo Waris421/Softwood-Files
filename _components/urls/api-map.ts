@@ -6,6 +6,7 @@ const SERVER_URLs = {
     HRServer: 'http://206.42.124.10:8001',
     MMCServer: 'http://206.42.124.10:8001',
     MerchServer: 'http://206.42.124.10:8001',
+    ProductionServer: 'http://206.42.124.10:8001',
     FTPServer: 'http://206.42.124.10:8001',
 } as const;
 
@@ -333,5 +334,15 @@ export const API_MAP = {
                 return url.toString();
             },
         },
+        INVENTORY_DEMAND: {
+            getDemands: () => `${SERVER_URLs.MMCServer}/mmc/demand`,
+        },
     },
+    PRODUCTIVITY: {
+        OPERATION: {
+            getOperations: () => `${SERVER_URLs.ProductionServer}/productivity/api/operation`,
+            getOperationAdd: () => `${SERVER_URLs.ProductionServer}/productivity/api/operation/add`,
+            getOperationUpdate: (id: number) => `${SERVER_URLs.ProductionServer}/productivity/api/operation/${id}/update`,
+        }
+    }
 } as const;

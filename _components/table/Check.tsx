@@ -1,12 +1,13 @@
 import { AlertCircle, CheckCircle2 } from "lucide-react"
 
 type Props = {
-    check: boolean
+    check: boolean,
+    helpText?: string,
 }
 
-export default function CheckDisplay({check}: Props) {
-    return (
-        <div className="flex justify-center">
+export default function CheckDisplay({check, helpText}: Props) {
+    const content = (
+        <>
             {check ? (
                 <div className="flex items-center gap-2 py-1.5 px-4 rounded-full 
                     bg-amber-500/10 border border-amber-500/30 
@@ -26,6 +27,21 @@ export default function CheckDisplay({check}: Props) {
                     <span>Received</span>
                 </div>
             )}
-        </div>
+        </>
     )
+
+    if (helpText) {
+        return (
+            <div className="flex justify-center">
+                <div 
+                    className="tooltip tooltip-bottom cursor-help" 
+                    data-tip={helpText}
+                >
+                    {content}
+                </div>
+            </div>
+        )
+    }
+
+    return <div className="flex justify-center">{content}</div>
 }

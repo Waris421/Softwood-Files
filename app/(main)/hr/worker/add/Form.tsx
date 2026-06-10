@@ -9,7 +9,6 @@ import { FormField } from '@/_components/generic/FormItems';
 import { THEME } from '@/_components/constants/ui';
 import { useRouter } from 'next/navigation';
 
-
 //Schema of the form
 type FormSchema = {
     Name: string;

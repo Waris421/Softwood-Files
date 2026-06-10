@@ -4,6 +4,7 @@ import * as React from "react"
 import * as SliderPrimitive from "@radix-ui/react-slider"
 import * as TooltipPrimitive from "@radix-ui/react-tooltip"
 import { cn } from "@/_components/generic/utils"
+import { useEffect } from "react"
 
 function Slider({
   className,
@@ -16,26 +17,27 @@ function Slider({
 }: React.ComponentProps<typeof SliderPrimitive.Root>) {
   const initialValue = value || defaultValue || [min]
   // Manage internal state to keep tooltips "live" if the component is uncontrolled
-  const [internalValue, setInternalValue] = React.useState(value || defaultValue || [min])
+  const [internalValue, setInternalValue] = React.useState(defaultValue || [min])
   const [pressedIndex, setPressedIndex] = React.useState<number | null>(null)
   const [hoveredIndex, setHoveredIndex] = React.useState<number | null>(null)
   
   const activeValues = value || internalValue
 
   const handleValueChange = (newValues: number[]) => {
-    setInternalValue(newValues)
+    if (!value) {
+      setInternalValue(newValues)
+    }
     if (onValueChange) onValueChange(newValues)
   }
 
-  const _values = React.useMemo(
-    () =>
-      Array.isArray(value)
-        ? value
-        : Array.isArray(defaultValue)
-          ? defaultValue
-          : [min, max],
-    [value, defaultValue, min, max]
-  )
+  useEffect(() => {
+    if (pressedIndex === null) return;
+
+    const handleGlobalMouseUp = () => setPressedIndex(null);
+    window.addEventListener("mouseup", handleGlobalMouseUp);
+
+    return () => window.removeEventListener("mouseup", handleGlobalMouseUp);
+  }, [pressedIndex]);
 
   return (
     <TooltipPrimitive.Provider delayDuration={0}>
@@ -66,7 +68,9 @@ function Slider({
           />
         </SliderPrimitive.Track>
         {activeValues.map((value, index) => {
-          const isOpen = pressedIndex === index || hoveredIndex === index
+          const isPressed = pressedIndex === index;
+          const isHovered = hoveredIndex === index;
+          const isOpen = isPressed || isHovered
           
           return (
             <TooltipPrimitive.Root
@@ -80,7 +84,10 @@ function Slider({
               <TooltipPrimitive.Trigger asChild>
                 <SliderPrimitive.Thumb
                   data-slot="slider-thumb"
-                  className="border-primary ring-ring/50 block size-4 shrink-0 rounded-full border bg-background shadow-sm transition-shadow hover:ring-4 focus-visible:ring-4 focus-visible:outline-hidden disabled:pointer-events-none disabled:opacity-50"
+                  className={cn(
+                    "block size-5 shrink-0 rounded-full border-2 border-primary bg-base-100 shadow-md transition-all focus-visible:ring-4 focus-visible:ring-primary/30 focus-visible:outline-hidden disabled:pointer-events-none disabled:opacity-50",
+                    isPressed ? "cursor-grabbing scale-110 shadow-lg" : "cursor-grab hover:scale-105"
+                  )}
                   onPointerDown={() => setPressedIndex(index)}
                   onPointerUp={() => setPressedIndex(null)}
                 />

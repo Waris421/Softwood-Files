@@ -68,21 +68,25 @@ export function DataTable<TData, TValue> ({
         
             return bounds
     }, [data, sliderFilters]);
-
-    //Helper function to filter rows irrespective of data type or text case
-    const fuzzyFilterFn: FilterFn<any> = (row, columnId, filterValue) => {
-        const rowValue = row.getValue(columnId);
-        if (rowValue == null) return false;
-
-        return String(rowValue).toLowerCase().includes(String(filterValue).toLowerCase());
-    };
     
     //Table object
     const table = useReactTable({
         data,
         columns,
         defaultColumn: {
-            filterFn: fuzzyFilterFn, 
+            // Dynamically apply fuzzy filter or number range depending on the incoming filter value type
+
+            filterFn: (row, columnId, filterValue) => {
+                if (Array.isArray(filterValue)) {
+                    const [min, max] = filterValue;
+                    const rowValue = Number(row.getValue(columnId));
+                    return rowValue >= min && rowValue <= max;
+                }
+
+                const rowValue = row.getValue(columnId);
+                if (rowValue == null) return false;
+                return String(rowValue).toLowerCase().includes(String(filterValue).toLowerCase());
+            }, 
         },
         getCoreRowModel: getCoreRowModel(),
         getPaginationRowModel: getPaginationRowModel(),
@@ -243,8 +247,9 @@ export function DataTable<TData, TValue> ({
                     if (!column) return null;
 
                     const bounds = sliderBounds[columnId] || { min: 0, max: 100 };
-                    // Default to min if no filter is set
-                    const currentValue = (column.getFilterValue() as [number, number]) ?? [bounds.min, bounds.max];
+
+                    const filterValue = column.getFilterValue() as [number, number] | undefined;
+                    const currentValue = filterValue ?? [bounds.min, bounds.max];
 
                     return (
                         <div key={columnId} className={THEME.Slider}>
@@ -255,13 +260,13 @@ export function DataTable<TData, TValue> ({
                                 className="py-2"
                                 min={bounds.min}
                                 max={bounds.max}
-                                step={(bounds.min - bounds.max) / 100}
+                                step={bounds.max - bounds.min > 0 ? (bounds.max - bounds.min) / 100 : 1}
                                 value={currentValue}
                                 onValueChange={(value) => {
+                                    // Force state transition stability if needed, or update cleanly
                                     column.setFilterValue(value);
                                 }}
                             />
-        
                         </div>
                     )
                 })}
