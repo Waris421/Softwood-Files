@@ -5,7 +5,7 @@ import CheckDisplay from "@/_components/table/Check";
 import ExpandableList from "@/_components/table/ExpandableList";
 import { DataTable } from "@/_components/table/Table";
 import { Cell, ColumnDef } from "@tanstack/react-table";
-import { AlertCircle, CheckCircle2, Loader2, SquarePlus } from "lucide-react";
+import { Loader2, SquarePlus } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
@@ -14,8 +14,7 @@ type InventoryReceipt = {
     id: number,
     POId: number,
     ReceiptDate: string,
-    SupplierId: string,
-    SupplierName: string,
+    Supplier: string,
     InventoryCodes: string[],
     InventoryNames: string[],
     WorkOrders: number[],
@@ -37,7 +36,7 @@ const reportColumns: ColumnDef<InventoryReceipt>[] = [
         header: 'Date',
     },
     {
-        accessorKey: 'SupplierName',
+        accessorKey: 'Supplier',
         header: 'Supplier',
     },
     {
@@ -134,7 +133,7 @@ export default function InventoryReceipts(){
         setRedirecting(true);
         const poId = cell.getValue();
 
-        router.push(`/mmc/purchase-order/${poId}/edit`);
+        router.push(`/mmc/inventory-order/${poId}/edit`);
     }
 
     return (
@@ -154,7 +153,7 @@ export default function InventoryReceipts(){
                     showDownload={false}
                     showPrint={false}
                     searchFilters={['id', 'POId', 'InventoryNames', 'WorkOrders']}
-                    dropdownFilters={['SupplierName']}
+                    dropdownFilters={['Supplier']}
                     toggleFilters={['InvoicePending']}
                     customActions={customHeaderButtons()}
                     columnClickHandlers={{
