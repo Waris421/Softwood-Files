@@ -6,8 +6,9 @@ import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } f
 import { FormField } from "@/_components/generic/FormItems";
 import { SingleDropdown } from "@/_components/Dropdown/Dropdown";
 import { THEME } from "@/_components/constants/ui";
-import { Check, Loader2 } from "lucide-react";
+import { AlertCircle, Check, Loader2, XCircle } from "lucide-react";
 import LoadingIcon from "@/_components/generic/Loading";
+import { cn } from "@/_components/generic/utils";
 
 interface EditOperationModalProps {
     isOpen: boolean;
@@ -48,11 +49,19 @@ export function EditOperationModal({ isOpen, onClose, onSuccess, operationId }: 
         OperationName: '', Section: '', Category: '', Level: 1, SAM: 0,
         Rate: 0, OperationCode: '', MachineType: '',
     });
-
     const [errors, setErrors] = useState<Record<string, string>>({});
     const [fetching, setFetching] = useState(false);
     const [submitting, setSubmitting] = useState(false);
     const [fetchError, setFetchError] = useState<string | null>(null);
+    const [saveError, setSaveError] = useState<string | null>(null);
+
+    useEffect(() => {
+        if (isOpen) {
+            setFetchError(null);
+            setSaveError(null);
+            setErrors({});
+        };
+    }, [isOpen, operationId]);
 
     useEffect(() => {
         const fetchOperationData = async() => {
@@ -70,7 +79,7 @@ export function EditOperationModal({ isOpen, onClose, onSuccess, operationId }: 
 
                 setFormData(data);                
             } catch (err: any) {
-                console.error(err);
+                setFetchError(err.message || 'An unexpected error occurred.');
             } finally {
                 setFetching(false);
             }
@@ -148,7 +157,7 @@ export function EditOperationModal({ isOpen, onClose, onSuccess, operationId }: 
             onSuccess();
             onClose();
         } catch (err: any) {
-            console.log(err);
+            setSaveError(err.message || 'An unexpected error occurred while saving.');
         } finally {
             setSubmitting(false);
         }
@@ -165,55 +174,76 @@ export function EditOperationModal({ isOpen, onClose, onSuccess, operationId }: 
                         Fill out the details carefully to update the operation
                     </DialogDescription>
                 </DialogHeader>
+
                 {fetching ? (
-                    <LoadingIcon />
-                ) : (
-                    <form onSubmit={handleSubmit} className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                        <FormField label="Name" error={errors.OperationName} required>
-                            <input type="text" placeholder="Full Name" className={THEME.TextInput} value={formData.OperationName}
-                                    onChange={(e) => handleInputChange('OperationName', e.target.value)} />
-                        </FormField>
-                        <FormField label="Section" error={errors.Section} required>
-                            <SingleDropdown inputName='Section' placeholder="Select Section" staticOptions={SECTION_OPTIONS} defaultValue={formData.Section}
-                                widthClass="w-full" onSelect={(val: any) => handleInputChange('Section', val?.value)} />
-                        </FormField>
-                        <FormField label="Category" error={errors.Category} required>
-                            <SingleDropdown inputName='Category' placeholder="Select Category" staticOptions={CATEGORY_OPTIONS} defaultValue={formData.Category}
-                                widthClass="w-full" onSelect={(val: any) => handleInputChange('Category', val?.value)} />
-                        </FormField>
-                        <FormField label="Level" error= {errors.Level} required>
-                            <SingleDropdown inputName='Level' placeholder="Select Level" staticOptions={LEVEL_OPTIONS} defaultValue={`${formData.Level}`}
-                                widthClass="w-full" onSelect={(val: any) => handleSAMORLevelChange('Level', val?.value)} />
-                        </FormField>
-                        <FormField label="SAM" error={errors.SAM} required>
-                            <input type="number" placeholder="SAM" className={THEME.TextInput} value={formData.SAM}
-                                    onChange={(e) => handleSAMORLevelChange('SAM', e.target.value)} />
-                        </FormField>
-                        <FormField label="Rate" error={errors.Rate} required>
-                            <input type="number" placeholder="Rate" className={THEME.TextInput} value={formData.Rate}
-                                    onChange={(e) => handleInputChange('Rate', e.target.value)} />
-                        </FormField>
-                        <FormField label="Code" error={errors.Code}>
-                            <input type="text" placeholder="Full Code" className={THEME.TextInput} value={formData.OperationCode}
-                                    onChange={(e) => handleInputChange('OperationCode', e.target.value)} />
-                        </FormField>
-                        <FormField label="Machine Type" error= {errors.MachineType} required>
-                            <SingleDropdown inputName='MachineType' placeholder="Select a type" staticOptions={MACHINE_TYPE_OPTIONS}  defaultValue={formData.MachineType}
-                                widthClass="w-full" onSelect={(val: any) => handleInputChange('MachineType', val?.value)} />
-                        </FormField>
-                        <div className="md:col-span-2 mt-4">
-                            <button type="submit" className={`${THEME.ButtonBasic} w-full ${submitting ? 'opacity-70 cursor-not-allowed' : ''}`} disabled={submitting}>
-                                {submitting ? (
-                                    <Loader2 className="w-4 h-4 animate-spin" />
-                                ) : (
-                                    <Check className="w-4 h-4" />
-                                )}
-                                {submitting ? 'Saving...' : 'Save Operation'}
-                            </button>
+                    <div className="py-8 flex justify-center items-center">
+                        <LoadingIcon />
+                    </div>
+                ) : fetchError ? (
+                    <div className="alert alert-error shadow-sm flex flex-col md:flex-row items-center justify-between gap-4 my-4">
+                        <div className="flex items-start gap-2">
+                            <AlertCircle className={cn("w-6 h-6 shrink-0", THEME.Text.RedText)} />
+                            <div>
+                                <h3 className={cn("font-bold", THEME.Text.RedText)}>Could not retrieve data</h3>
+                                <p className={cn("text-sm", THEME.Text.RedText)}>{fetchError}</p>
+                            </div>
                         </div>
-                    </form>
-                )}
-                
+                    </div>
+                ) : (
+                    <div className="flex flex-col gap-4">
+                        <form onSubmit={handleSubmit} className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            {saveError && (
+                                <div className="alert alert-error sm:col-span-1 md:col-span-2 flex items-center gap-2 py-3 shadow-sm">
+                                    <XCircle className={cn("w-5 h-5", THEME.Text.RedText)} />
+                                    <span className={cn("text-sm font-medium", THEME.Text.RedText)}>{saveError}</span>
+                                </div>
+                            )}
+
+                            <FormField label="Name" error={errors.OperationName} required>
+                                <input type="text" placeholder="Full Name" className={THEME.TextInput} value={formData.OperationName}
+                                        onChange={(e) => handleInputChange('OperationName', e.target.value)} />
+                            </FormField>
+                            <FormField label="Section" error={errors.Section} required>
+                                <SingleDropdown inputName='Section' placeholder="Select Section" staticOptions={SECTION_OPTIONS} defaultValue={formData.Section}
+                                    widthClass="w-full" onSelect={(val: any) => handleInputChange('Section', val?.value)} />
+                            </FormField>
+                            <FormField label="Category" error={errors.Category} required>
+                                <SingleDropdown inputName='Category' placeholder="Select Category" staticOptions={CATEGORY_OPTIONS} defaultValue={formData.Category}
+                                    widthClass="w-full" onSelect={(val: any) => handleInputChange('Category', val?.value)} />
+                            </FormField>
+                            <FormField label="Level" error={errors.Level} required>
+                                <SingleDropdown inputName='Level' placeholder="Select Level" staticOptions={LEVEL_OPTIONS} defaultValue={`${formData.Level}`}
+                                    widthClass="w-full" onSelect={(val: any) => handleSAMORLevelChange('Level', val?.value)} />
+                            </FormField>
+                            <FormField label="SAM" error={errors.SAM} required>
+                                <input type="number" placeholder="SAM" className={THEME.TextInput} value={formData.SAM}
+                                        onChange={(e) => handleSAMORLevelChange('SAM', e.target.value)} />
+                            </FormField>
+                            <FormField label="Rate" error={errors.Rate} required>
+                                <input type="number" placeholder="Rate" className={THEME.TextInput} value={formData.Rate}
+                                        onChange={(e) => handleInputChange('Rate', e.target.value)} />
+                            </FormField>
+                            <FormField label="Code" error={errors.OperationCode}>
+                                <input type="text" placeholder="Full Code" className={THEME.TextInput} value={formData.OperationCode}
+                                        onChange={(e) => handleInputChange('OperationCode', e.target.value)} />
+                            </FormField>
+                            <FormField label="Machine Type" error={errors.MachineType} required>
+                                <SingleDropdown inputName='MachineType' placeholder="Select a type" staticOptions={MACHINE_TYPE_OPTIONS}  defaultValue={formData.MachineType}
+                                    widthClass="w-full" onSelect={(val: any) => handleInputChange('MachineType', val?.value)} />
+                            </FormField>
+                            <div className="md:col-span-2 mt-4">
+                                <button type="submit" className={`${THEME.ButtonBasic} w-full flex items-center justify-center gap-2 ${submitting ? 'opacity-70 cursor-not-allowed' : ''}`} disabled={submitting}>
+                                    {submitting ? (
+                                        <Loader2 className="w-4 h-4 animate-spin" />
+                                    ) : (
+                                        <Check className="w-4 h-4" />
+                                    )}
+                                    {submitting ? 'Saving...' : 'Save Operation'}
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                )}                
             </DialogContent>
         </Dialog>
     )

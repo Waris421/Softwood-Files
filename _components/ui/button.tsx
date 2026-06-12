@@ -36,19 +36,25 @@ const buttonVariants = cva(
   }
 )
 
+type TooltipPosition = "top" | "bottom" | "left" | "right"
+
 function Button({
   className,
   variant = "default",
   size = "default",
   asChild = false,
+  tooltip,
+  tooltipPosition = "top",
   ...props
 }: React.ComponentProps<"button"> &
   VariantProps<typeof buttonVariants> & {
     asChild?: boolean
+    tooltip?: string,
+    tooltipPosition?: TooltipPosition
   }) {
   const Comp = asChild ? Slot : "button"
 
-  return (
+  const buttonElement = (
     <Comp
       data-slot="button"
       data-variant={variant}
@@ -57,6 +63,26 @@ function Button({
       {...props}
     />
   )
+
+  if (tooltip) {
+    const positionClasses = {
+      top: "tooltip-top",
+      bottom: "tooltip-bottom",
+      left: "tooltip-left",
+      right: "tooltip-right",
+    };
+
+    return (
+      <div 
+        className={cn("tooltip", positionClasses[tooltipPosition])} 
+        data-tip={tooltip}
+      >
+        {buttonElement}
+      </div>
+    )
+  }
+
+  return buttonElement
 }
 
 export { Button, buttonVariants }

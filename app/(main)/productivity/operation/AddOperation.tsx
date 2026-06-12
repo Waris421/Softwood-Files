@@ -6,7 +6,7 @@ import { FormField } from "@/_components/generic/FormItems";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/_components/ui/dialog";
 import { useState } from "react";
 import { CATEGORY_OPTIONS, LEVEL_OPTIONS, MACHINE_TYPE_OPTIONS, SECTION_OPTIONS, SAM_FACTOR } from "./Constants";
-import { Check, Loader2 } from "lucide-react";
+import { Check, Loader2, XCircle } from "lucide-react";
 
 interface AddOperationModalProps {
     isOpen: boolean;
@@ -49,6 +49,7 @@ export function AddOperationModal({ isOpen, onClose, onSuccess }: AddOperationMo
     });
     const [errors, setErrors] = useState<Record<string, string>>({});
     const [submitting, setSubmitting] = useState(false);
+    const [saveError, setSaveError] = useState<string | null>(null);
 
     //Helper function that triggers when user types something
     const handleInputChange = (field: keyof FormSchema, value: any) => {
@@ -118,7 +119,7 @@ export function AddOperationModal({ isOpen, onClose, onSuccess }: AddOperationMo
             onSuccess();
             onClose();
         } catch (err: any) {
-            console.log(err);
+            setSaveError(err.message || 'An unexpected error occurred while saving.');
         } finally {
             setSubmitting(false);
         }
@@ -136,6 +137,12 @@ export function AddOperationModal({ isOpen, onClose, onSuccess }: AddOperationMo
                     </DialogDescription>
                 </DialogHeader>
                 <form onSubmit={handleSubmit} className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    {saveError && (
+                        <div className="alert alert-error sm:col-span-1 md:col-span-2 flex items-center gap-2 py-3 shadow-sm">
+                            <XCircle className="w-5 h-5 text-error-content" />
+                            <span className="text-sm text-red-500 font-medium">{saveError}</span>
+                        </div>
+                    )}
                     <FormField label="Name" error={errors.OperationName} required>
                         <input type="text" placeholder="Full Name" className={THEME.TextInput} value={formData.OperationName}
                                 onChange={(e) => handleInputChange('OperationName', e.target.value)} />

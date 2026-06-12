@@ -343,6 +343,14 @@ export const API_MAP = {
             getOperations: () => `${SERVER_URLs.ProductionServer}/productivity/api/operation`,
             getOperationAdd: () => `${SERVER_URLs.ProductionServer}/productivity/api/operation/add`,
             getOperationUpdate: (id: number) => `${SERVER_URLs.ProductionServer}/productivity/api/operation/${id}/update`,
+            getRateApproval: () => `${SERVER_URLs.ProductionServer}/productivity/api/rate-approval`,
+        },
+        MACHINE: {
+            getMachines: () => `${SERVER_URLs.ProductionServer}/productivity/api/machine`,
+            getMachineAdd: () => `${SERVER_URLs.ProductionServer}/productivity/api/machine/add`,
+            getMachineUpdate: (id: number) => `${SERVER_URLs.ProductionServer}/productivity/api/machine/${id}/update`,
+            getStatusChange: (id: number) => `${SERVER_URLs.ProductionServer}/productivity/api/machine/${id}/status-change`,
+            getDepartmentChange: (id: number) => `${SERVER_URLs.ProductionServer}/productivity/api/machine/${id}/department-change`,
         }
     }
 } as const;

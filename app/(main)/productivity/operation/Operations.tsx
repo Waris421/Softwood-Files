@@ -3,7 +3,7 @@
 import { THEME } from "@/_components/constants/ui";
 import { DataTable } from "@/_components/table/Table";
 import { Cell, ColumnDef } from "@tanstack/react-table";
-import { Loader2, SquarePlus } from "lucide-react";
+import { CheckCircle, Loader2, SquarePlus } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
@@ -61,7 +61,7 @@ const reportColumns: ColumnDef<Operation>[] = [
     },
 ]
 
-export default function Offices() {
+export default function Operations() {
     const [data, setData] = useState<Operation[]>([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
@@ -70,8 +70,6 @@ export default function Offices() {
     const [isAddModalOpen, setIsAddModalOpen] = useState(false);
     const [isEditModalOpen, setIsEditModalOpen] = useState(false);
     const [operationToUpdate, setOperationToUpdate] = useState<number | null>(null);
-
-    const router = useRouter();
 
     useEffect(() => {
         const fetchOperations = async() => {
@@ -108,6 +106,14 @@ export default function Offices() {
                     <SquarePlus size={18}  />
                     Add Operation
                 </div>
+                <Link
+                    href="/productivity/operation/rate-approve"
+                    className={`${THEME.ButtonSecondary} ${redirecting ? 'pointer-events-none opacity-50' : ''}`}
+                    onClick={() => setRedirecting(true)}
+                >
+                    <CheckCircle size={18}  />
+                    Approve Rate
+                </Link>
             </>
         )
     }
@@ -117,10 +123,6 @@ export default function Offices() {
 
         setOperationToUpdate(operationId);
         setIsEditModalOpen(true);
-    }
-
-    const onRateClickAction = (cell: Cell<any, any>) => {
-        console.log(cell);
     }
 
     const handleOperationAddition = () => {
@@ -148,7 +150,6 @@ export default function Offices() {
                     customActions={customHeaderButtons()}
                     columnClickHandlers={{
                         id: onOperationClickAction,
-                        Rate: onRateClickAction,
                     }}
                 />
             </div>

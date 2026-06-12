@@ -86,7 +86,7 @@ const ActionDialog: React.FC<ActionDialogProps> = ({
                 style={style}
                 className="fixed z-50 w-80 gap-0 p-0 outline-none sm:max-w-[320px] translate-x-0 translate-y-0 duration-200"
             >
-                <DialogHeader className="p-4 border-b">
+                <DialogHeader>
                     <DialogTitle className="text-sm font-bold">
                         {title || 'Choose an action'}
                     </DialogTitle>
