@@ -133,10 +133,10 @@ export default function ItemsForm() {
                                                     <SearchPicker
                                                         id={`search-picker-inv-${index}`}
                                                         apiUrl="/api/options/inventories"
-                                                        displayColumn="label"
+                                                        displayColumn="text"
                                                         columnMapping={[
                                                             { header: 'Code', key: 'value' },
-                                                            { header: 'Name', key: 'label' },
+                                                            { header: 'Name', key: 'text' },
                                                             { header: 'Unit', key: 'Unit' },
                                                         ]}
                                                         customClasses={{ trigger: "w-48" }}
