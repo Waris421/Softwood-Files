@@ -27,28 +27,16 @@ function GlobalSubmitButton() {
         setIsSubmitting(true);
         
         //Data is valid now
-        const raw = getCombinedData();
+        const payload = getCombinedData();
+        
+        const formDataToUpload = new FormData();
 
-        const payload = {
-            heading: {
-                Amount: raw.Receipt?.BiltyValue,
-                Bilty: raw.Receipt?.Bilty,
-                Vehicle: raw.Receipt?.Vehicle,
-                Invoice: raw.Receipt?.Invoice,
-            },
-            inventory: (raw.Inventories?.items || []).map((item: any) => ({
-                id: item.POInvId,
-                Quantity: item.Quantity,
-                Inventory: item.Inventory,
-                Variant: item.Variant,
-            })),
-        };
-
+        formDataToUpload.append("data", JSON.stringify(payload));
+        
         try {
             const response = await fetch(GET_API_URL(id), {
-                method: 'PATCH',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(payload),
+                method: 'POST',
+                body: formDataToUpload,
             });
 
             if (!response.ok) {
@@ -62,18 +50,19 @@ function GlobalSubmitButton() {
                 show: true,
                 subject: 'Success',
                 message: 'Saved Successfully',
-                action: () => window.location.reload()
+                //action: () => (window.location.reload())
             });
         } catch (err: any) {
             setMessageConfig({
                 show: true,
-                subject: 'Error',
+                subject: "Error",
                 message: `Saving Failed: ${err}`
             });
         } finally {
-            setIsSubmitting(false);
+            setIsSubmitting(false)
         }
     }
+
     return (
         <>
             {messageConfig?.show && (

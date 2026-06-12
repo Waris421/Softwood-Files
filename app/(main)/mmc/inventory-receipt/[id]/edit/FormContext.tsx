@@ -30,7 +30,7 @@ const FormContext = createContext<{
     markAsClean: () => void;
 
     registerCustomAction: (key: string, fn: (...args: any[]) => void) => void;
-    customAction: (key: string, ...args: any[]) => void;
+    customAction: (key: string, ...args: any[]) => any;
 } | null>(null);
 
 const ESTIMATED_FORM_LOADING_TIME = 300;
@@ -40,8 +40,10 @@ export const REDIRECT_URL = '/merchandising/work-order';
 
 export const FormProvider = ({ children, id }: { children: React.ReactNode, id: number }) => {
     //Unsaved data flag managemnt
-    const [isDirty, setIsDirty] = useState(false);
+    const [isDirty, setIsDirtyState] = useState(false);
+    const isDirtyRef = useRef(false);
     const isInitializing = useRef(true);
+    const isCleaningUp = useRef(false);
 
     //Form data management
     const formsData = useRef<Record<string, any>>({});
@@ -139,18 +141,24 @@ export const FormProvider = ({ children, id }: { children: React.ReactNode, id: 
     const customAction = useCallback((key: string, ...args: any[]) => {
         const action = actions.current[key];
         if (action) {
-            action(...args); // Pass the parameters here
+            return action(...args); // Pass the parameters here
         } else {
             console.warn(`Action "${key}" not found.`);
+            return null;
         }
     }, []);
 
+    //Helper function to update dirty state and value
+    const setIsDirty = (value: boolean) => {
+        isDirtyRef.current = value;
+        setIsDirtyState(value);
+    };
+    
     //Warn user if they close the page while there is unsaved data
     useEffect(() => {
         const handleBeforeUnload = (e: BeforeUnloadEvent) => {
-            if (isDirty) {
+            if (isDirtyRef.current) {
                 e.preventDefault();
-
                 return (e.returnValue = '');
             }
         };
@@ -158,10 +166,17 @@ export const FormProvider = ({ children, id }: { children: React.ReactNode, id: 
         window.addEventListener('beforeunload', handleBeforeUnload);
 
         return () => window.removeEventListener('beforeunload', handleBeforeUnload);
-    }, [isDirty]);
+    }, []);
 
     //Call this function to tell browser they can reload the page without warning
-    const markAsClean = useCallback(() => setIsDirty(false), []);
+    const markAsClean = useCallback(() => {
+        isCleaningUp.current = true;
+        setIsDirty(false);
+        
+        setTimeout(() => {
+            isCleaningUp.current = false;
+        }, 100);
+    }, []);
 
     const contextValue = useMemo(() => ({
         setFormData, 

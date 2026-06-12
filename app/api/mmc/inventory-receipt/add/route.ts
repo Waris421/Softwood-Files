@@ -1,4 +1,4 @@
-import { URLs } from "@/_components/constants/urls";
+import { API_MAP } from "@/_components/urls/api-map";
 import { NextRequest, NextResponse } from "next/server";
 
 const AUTH_COOKIE_NAME = 'authToken';
@@ -15,7 +15,7 @@ export async function GET(request: NextRequest) {
     const { searchParams } = new URL(request.url);
     const po = searchParams.get('po');
 
-    let backendURL = `${URLs.MMCServer}/mmc/inventory-receipt/add`;
+    let backendURL = API_MAP.MMC.INVENTORY_RECEIPT.getReceiptAdd();
     if (po) {
         backendURL += `?po=${po}`;
     }
@@ -51,18 +51,17 @@ export async function POST(request: NextRequest) {
         );
     }
 
-    const body = await request.json();
+    const formData = await request.formData();
 
-    const backendURL = `${URLs.MMCServer}/mmc/inventory-receipt/add`;
+    const backendURL = API_MAP.MMC.INVENTORY_RECEIPT.getReceiptAdd();
     const backendResponse = await fetch(backendURL, {
         method: 'POST',
         headers: {
             'Authorization': `Token ${authToken.value}`,
-            'Content-Type': 'application/json',
         },
-        body: JSON.stringify(body),
+        body: formData,
     });
-        
+    
     const data = await backendResponse.json();
     const status = backendResponse.status;
     if (!backendResponse.ok) {

@@ -12,7 +12,6 @@ const mapReceiptData = (receipt: any) => ({
 const mapInventoryData = (inventory=[]) => ({
     items: inventory.map((i: any) => ({
         id: i.id || "",
-        POInvId: i.POInvId || "",
         Inventory: i.InventoryCode || "",
         InventoryName: i.InventoryName || "",
         Variant: i.Variant || "",
@@ -20,7 +19,7 @@ const mapInventoryData = (inventory=[]) => ({
         Unit: i.Unit || "",
         Price: i.Price || "",
         Currency: i.Currency || "",
-        Approval: i.Approval || false,
+        Approval: i.Approval || undefined,
         QualityComments: i.QualityComments || "",
     }))
 });
@@ -28,7 +27,7 @@ const mapInventoryData = (inventory=[]) => ({
 const mapAllocationData = (allocation=[]) => ({
     items: allocation.map((a: any) => ({
         id: a.id || "",
-        RecIvId: a.RecInvId || "",
+        RecInvId: a.RecInvId || "",
         WorkOrder: a.WorkOrder || "",
         Quantity: a.Quantity || "",
     }))
