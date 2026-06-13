@@ -8,7 +8,7 @@ export async function GET(req: NextRequest) {
     if (!authToken) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
 
     try {
-        const res = await fetch(`${URLs.MMCServer}/options/suppliers`, {
+        const res = await fetch(`${URLs.MMCServer}/options/suppliers-api`, {
             cache: 'no-store',
             headers: { 'Authorization': `Token ${authToken.value}` }
         });

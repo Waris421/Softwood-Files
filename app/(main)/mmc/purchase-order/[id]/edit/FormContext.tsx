@@ -95,8 +95,8 @@ export const FormProvider = ({ children, id }: { children: React.ReactNode; id: 
                 }
 
                 const poData = await poRes.json();
-                const suppliers = await suppliersRes.json().catch(() => []);
-                const currencies = await currenciesRes.json().catch(() => []);
+                const suppliers = suppliersRes.ok ? await suppliersRes.json().catch(() => []) : [];
+                const currencies = currenciesRes.ok ? await currenciesRes.json().catch(() => []) : [];
 
                 const workorders = (poData.workorders || []).map((w: any) => ({ value: w.value, label: w.text }));
                 setOptions({ suppliers, currencies, workorders });

@@ -139,10 +139,10 @@ export default function ItemsForm() {
                                                     <SearchPicker
                                                         id={`search-picker-inv-${index}`}
                                                         apiUrl="/api/options/inventories"
-                                                        displayColumn="label"
+                                                        displayColumn="text"
                                                         columnMapping={[
                                                             { header: 'Code', key: 'value' },
-                                                            { header: 'Name', key: 'label' },
+                                                            { header: 'Name', key: 'text' },
                                                             { header: 'Unit', key: 'Unit' },
                                                         ]}
                                                         customClasses={{ trigger: "w-48" }}
@@ -240,14 +240,12 @@ export default function ItemsForm() {
                                                             return updated;
                                                         });
                                                     }}
+                                                    onIncreaseRowQty={(total) => setValue(`items.${index}.Quantity`, total)}
                                                     rowId={Number(getValues(`items.${index}.id`))}
                                                     rowName={getValues(`items.${index}.InventoryName`) || ''}
                                                     rowVariant={getValues(`items.${index}.Variant`) || ''}
-                                                    rowInventory={getValues(`items.${index}.Inventory`) || ''}
                                                     rowQuantity={Number(getValues(`items.${index}.Quantity`)) || 0}
-                                                    poNumber={String(getCombinedData()?.header?.id || '')}
                                                     initialAllocations={rowAllocations[String(getValues(`items.${index}.id`))] || null}
-                                                    workOrders={options.workorders || []}
                                                 />
 
                                                 <Button type="button" variant="outline" size="icon" className="h-8 w-8 cursor-pointer" onClick={() => addEmptyRow(index)}>

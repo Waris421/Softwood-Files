@@ -10,19 +10,20 @@ import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 
 type PurchaseOrder = {
-    PONumber:     number;
-    DeliveryDate: string;
-    Supplier:     string;
-    Name:         string;
-    WorkOrder:    string;
+    PONumber:  number;
+    OrderDate: string;
+    Supplier:  number;
+    ItemName:  string;
+    ItemCode:  string;
+    Currency:  string;
 }
 
 const columns: ColumnDef<PurchaseOrder>[] = [
-    { accessorKey: 'PONumber',     header: 'PO Number' },
-    { accessorKey: 'DeliveryDate', header: 'Delivery Date' },
-    { accessorKey: 'Supplier',     header: 'Supplier' },
-    { accessorKey: 'Name',         header: 'Inventory Items' },
-    { accessorKey: 'WorkOrder',    header: 'Work Orders' },
+    { accessorKey: 'PONumber',  header: 'PO Number' },
+    { accessorKey: 'OrderDate', header: 'Order Date' },
+    { accessorKey: 'Supplier',  header: 'Supplier' },
+    { accessorKey: 'ItemName',  header: 'Inventory Items' },
+    { accessorKey: 'ItemCode',  header: 'Item Code' },
 ]
 
 export default function PurchaseOrders() {
@@ -38,13 +39,13 @@ export default function PurchaseOrders() {
         const fetchOrders = async () => {
             try {
                 setLoading(true);
-                const res = await fetch('/api/mmc/purchase-order');
+                const res = await fetch(`/api/mmc/purchase-order?start=${new Date().getFullYear()}-01-01`);
                 if (!res.ok) {
                     const err = await res.json();
                     throw new Error(err.message || 'Failed to load purchase orders');
                 }
                 const json = await res.json();
-                setData(Array.isArray(json.orders) ? json.orders : []);
+                setData(Array.isArray(json.results) ? json.results : []);
             } catch (err: any) {
                 setError(err.message);
             } finally {
@@ -81,7 +82,7 @@ export default function PurchaseOrders() {
                 isLoading={loading}
                 error={error}
                 dropdownFilters={['Supplier']}
-                searchFilters={['PONumber', 'Name']}
+                searchFilters={['PONumber', 'ItemName']}
                 showDownload={false}
                 showPrint={false}
                 customActions={addButton()}
@@ -93,7 +94,7 @@ export default function PurchaseOrders() {
                     isOpen={isOpen}
                     onClose={() => setIsOpen(false)}
                     title={`PO #${selectedPO.PONumber}`}
-                    description={`${selectedPO.Supplier} — ${selectedPO.DeliveryDate}`}
+                    description={`${selectedPO.Supplier} — ${selectedPO.OrderDate}`}
                     actions={dialogActions}
                     anchorRef={anchorRef ? { current: anchorRef } : undefined}
                 />
