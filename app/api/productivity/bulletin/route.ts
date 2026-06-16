@@ -2,6 +2,7 @@ import { API_MAP } from "@/_components/urls/api-map";
 import { NextRequest, NextResponse } from "next/server";
 
 const AUTH_COOKIE_NAME = 'authToken';
+const backendURL = API_MAP.PRODUCTIVITY.BULLETIN.getBulletins();
 
 export async function GET(request: NextRequest) {
     const authToken = request.cookies.get(AUTH_COOKIE_NAME);
@@ -11,10 +12,7 @@ export async function GET(request: NextRequest) {
             { status: 401 }
         );
     }
-
-    const { searchParams } = new URL(request.url);
-
-    const backendURL = API_MAP.OPTIONS.getInventories(searchParams);
+    
     const backendResponse = await fetch(`${backendURL}`,{
         headers: {
             'Authorization': `Token ${authToken.value}`,
@@ -33,6 +31,6 @@ export async function GET(request: NextRequest) {
         );
     }
 
-    const inventories = await backendResponse.json();
-    return NextResponse.json(inventories);
+    const bulletins = await backendResponse.json();
+    return NextResponse.json(bulletins);
 }

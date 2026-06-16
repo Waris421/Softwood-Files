@@ -1,14 +1,14 @@
 import { Metadata } from 'next'
+import ExportData from './ExportData'
 
 export const metadata: Metadata = {
-  title: 'Merchandising',
-  description: 'Merchandising',
+  title: 'Customer Master List',
+  description: 'Customer Master List',
 }
 
 const page = () => {
     return (
-        <div>
-        </div>
+        <ExportData />
     )
 }
 

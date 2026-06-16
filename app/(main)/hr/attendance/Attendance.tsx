@@ -444,7 +444,7 @@ export default function Attendance() {
                             <DateRangePicker
                                 value={formData.DateRange}
                                 onChange={(val) => {
-                                handleInputChange("DateRange", val || { from: "", to: "" });
+                                    handleInputChange("DateRange", val || { from: "", to: "" });
                                 }}
                             />
                         </div>
@@ -483,7 +483,7 @@ export default function Attendance() {
                             const Icon = type.icon;
                             const employeeCode = formData.Employee;
                             const date = correctionRow?.Date;
-                            const dateStr = date ? new Date(date).toISOString().split('T')[0] : null;
+                            const dateStr = date ? new Date(date).toLocaleDateString('en-PK') : null;
                             const correctionType = type.value;
 
                             return (

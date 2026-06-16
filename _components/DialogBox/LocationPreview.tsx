@@ -16,19 +16,18 @@ export default function LocatinPreview({ location, onClose }: LocationPreviewDia
     if (!location) return null;
 
     const embedUrl = `https://maps.google.com/maps?q=${location.Latitude},${location.Longitude}&z=15&output=embed`;
-
-    const externalUrl = `https://www.google.com/maps/search/?api=1&query=${location.Latitude},${location.Longitude}`;
+    const externalUrl = `https://www.google.com/maps?q=${location.Latitude},${location.Longitude}`;
 
     return (
         <Dialog open={!!location} onOpenChange={(open) => !open && onClose()}>
-            <DialogContent className="sm:max-w-150">
+            <DialogContent className="sm:max-w-4xl w-[90vw] h-[85vh] flex flex-col justify-between">
                 <DialogHeader>
                   <DialogTitle>{location.Name}</DialogTitle>
                   <DialogDescription>
                     Previewing location at {location.Latitude}, {location.Longitude}
                   </DialogDescription>
                 </DialogHeader>
-                <div className="w-full aspect-video rounded-md overflow-hidden border bg-muted">
+                <div className="w-full flex-1 min-h-0 rounded-md overflow-hidden border bg-muted my-2">
                   <iframe
                     title={`Map of ${location.Name}`}
                     width="100%"

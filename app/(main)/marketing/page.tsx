@@ -1,8 +1,8 @@
 import { Metadata } from 'next'
 
 export const metadata: Metadata = {
-  title: 'Merchandising',
-  description: 'Merchandising',
+  title: 'Marketing',
+  description: 'Marketing',
 }
 
 const page = () => {

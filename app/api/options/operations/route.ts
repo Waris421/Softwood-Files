@@ -13,8 +13,8 @@ export async function GET(request: NextRequest) {
     }
 
     const { searchParams } = new URL(request.url);
+    const backendURL = API_MAP.OPTIONS.getOperations(searchParams);
 
-    const backendURL = API_MAP.OPTIONS.getInventories(searchParams);
     const backendResponse = await fetch(`${backendURL}`,{
         headers: {
             'Authorization': `Token ${authToken.value}`,
@@ -33,6 +33,6 @@ export async function GET(request: NextRequest) {
         );
     }
 
-    const inventories = await backendResponse.json();
-    return NextResponse.json(inventories);
+    const operations = await backendResponse.json();
+    return NextResponse.json(operations);
 }

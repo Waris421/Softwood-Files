@@ -53,7 +53,14 @@ export const THEME = {
         Footer: "mt-4 p-4 bg-base-200 rounded-lg border border-base-300",
     },
 
+    Background: {
+        Base: "bg-gray-100 dark:bg-gray-900",
+        Highlighted100: "bg-gray-200 dark:bg-gray-800",
+        Highlighted200: "bg-gray-300 dark:bg-gray-700",
+    },
+
     Text: {
+        NormalText: 'text-gray-800 dark:text-gray-100',
         RedText: 'text-red-600 dark:text-red-500',
         BlueText: 'text-blue-600 dark:text-blue-500',
         GrayText: 'text-gray-900 dark:text-gray-100',

@@ -7,6 +7,7 @@ const SERVER_URLs = {
     MMCServer: 'http://206.42.124.10:8001',
     MerchServer: 'http://206.42.124.10:8001',
     ProductionServer: 'http://206.42.124.10:8001',
+    MarketingServer: 'http://206.42.124.10:8001',
     FTPServer: 'http://206.42.124.10:8001',
 } as const;
 
@@ -53,6 +54,20 @@ export const API_MAP = {
         getInventories: (searchParams: URLSearchParams) => {
             const url = new URL(`${SERVER_URLs.MMCServer}/api/inventories?showAll=yes&showUnits=yes`);
             const allowedKeyValues = {search: null, type: '', showAll: 'yes', showUnits: 'yes', limit: 15}
+
+            Object.entries(allowedKeyValues).forEach(([key, defaultValue]) => {
+                const value = searchParams.get(key) ?? defaultValue;
+
+                if (value !== null && value !== undefined) {
+                    url.searchParams.set(key, String(value));
+                }
+            });
+
+            return url.toString();
+        },
+        getOperations: (searchParams: URLSearchParams) => {
+            const url = new URL(`${SERVER_URLs.ProductionServer}/options/api/operations`);
+            const allowedKeyValues = {search: null};
 
             Object.entries(allowedKeyValues).forEach(([key, defaultValue]) => {
                 const value = searchParams.get(key) ?? defaultValue;
@@ -172,11 +187,11 @@ export const API_MAP = {
                 return url.toString();
             },
             CORRECTION: {
-                getAddCorrection: (searchParams: URLSearchParams) => {
+                getAddCorrection: (searchParams?: URLSearchParams) => {
                     const url = new URL(`${SERVER_URLs.HRServer}/hr/attendance/correction/add`);
                     const allowedKeys = ['date', 'type', 'employee'];
                     allowedKeys.forEach(key => {
-                        const value = searchParams.get(key);
+                        const value = searchParams?.get(key);
                         if (value) {
                             url.searchParams.append(key, value);
                         }
@@ -351,6 +366,41 @@ export const API_MAP = {
             getMachineUpdate: (id: number) => `${SERVER_URLs.ProductionServer}/productivity/api/machine/${id}/update`,
             getStatusChange: (id: number) => `${SERVER_URLs.ProductionServer}/productivity/api/machine/${id}/status-change`,
             getDepartmentChange: (id: number) => `${SERVER_URLs.ProductionServer}/productivity/api/machine/${id}/department-change`,
-        }
-    }
+        },
+        BULLETIN: {
+            getBulletins: () => `${SERVER_URLs.ProductionServer}/productivity/api/bulletin`,
+        },
+    },
+    MARKETING: {
+        EXPORTDATA: {
+            getCountries: (searchParams: URLSearchParams) => {
+                const url = new URL (`${SERVER_URLs.MarketingServer}/marketing/export-data/api/countries`);
+                const keys = Array.from(new Set(searchParams.keys()));
+                
+                keys.forEach((key) => {
+                    const values = searchParams.getAll(key);
+                    
+                    values.forEach((value) => {
+                        if (value) url.searchParams.append(key, value);
+                    });
+                });
+
+                return url.toString();
+            },
+            getMonths: (searchParams: URLSearchParams) => {
+                const url = new URL (`${SERVER_URLs.MarketingServer}/marketing/export-data/api/months`);
+                const keys = Array.from(new Set(searchParams.keys()));
+                
+                keys.forEach((key) => {
+                    const values = searchParams.getAll(key);
+                    
+                    values.forEach((value) => {
+                        if (value) url.searchParams.append(key, value);
+                    });
+                });
+
+                return url.toString();
+            },
+        },
+    },
 } as const;
