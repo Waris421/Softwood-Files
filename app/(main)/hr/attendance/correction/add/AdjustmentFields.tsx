@@ -39,7 +39,7 @@ export function AdjustmentFields({ data, errors, onChange }: AdjustmentFieldsPro
                         type="text" 
                         placeholder="Location" 
                         className={`${data.InLocationFlag ? THEME.TextInput : THEME.TextInputReadOnly} pr-12`}
-                        value={data.InLocation}
+                        value={data.InLocation || ""}
                         readOnly={!data.InLocationFlag}
                         onChange={data.InLocationFlag ? (e) => onChange('InLocation', e.target.value) : undefined}
                     />
@@ -70,7 +70,7 @@ export function AdjustmentFields({ data, errors, onChange }: AdjustmentFieldsPro
                         type="text" 
                         placeholder="Location" 
                         className={`${data.OutLocationFlag ? THEME.TextInput : THEME.TextInputReadOnly} pr-12`}
-                        value={data.OutLocation}
+                        value={data.OutLocation || ""}
                         readOnly={!data.OutLocationFlag}
                         onChange={data.OutLocationFlag ? (e) => onChange('OutLocation', e.target.value) : undefined}
                     />
@@ -97,25 +97,25 @@ export function AdjustmentFields({ data, errors, onChange }: AdjustmentFieldsPro
 
             {data.InLocationFlag && (
                 <FormField label="Login Location Adjustment Reason" error={errors.InLocationReason} required>
-                    <input type="text" placeholder={data.InDetails} className={THEME.TextInput} value={data.InLocationReason || ""} onChange={(e) => onChange('InLocationReason', e.target.value)} />
+                    <input type="text" placeholder="Reason for Login Time Adjustment" className={THEME.TextInput} value={data.InLocationReason || ""} onChange={(e) => onChange('InLocationReason', e.target.value)} />
                 </FormField>
             )}
 
             {data.OutLocationFlag && (
                 <FormField label="Logout Location Adjustment Reason" error={errors.OutLocationReason} required>
-                    <input type="text" placeholder={data.OutDetails} className={THEME.TextInput} value={data.OutLocationReason || ""} onChange={(e) => onChange('OutLocationReason', e.target.value)} />
+                    <input type="text" placeholder="Reason for Login Location Adjustment" className={THEME.TextInput} value={data.OutLocationReason || ""} onChange={(e) => onChange('OutLocationReason', e.target.value)} />
                 </FormField>
             )}
 
             {data.InTimeFlag && (
                 <FormField label="Login Time Adjustment Reason" error={errors.InTimeReason} required>
-                    <input type="text" placeholder={data.InDetails} className={THEME.TextInput} value={data.InTimeReason || ""} onChange={(e) => onChange('InTimeReason', e.target.value)} />
+                    <input type="text" placeholder="Reason for Logout Time Adjustment" className={THEME.TextInput} value={data.InTimeReason || ""} onChange={(e) => onChange('InTimeReason', e.target.value)} />
                 </FormField>
             )}
 
             {data.OutTimeFlag && (
                 <FormField label="Logout Time Adjustment Reason" error={errors.OutTimeReason} required>
-                    <input type="text" placeholder={data.OutDetails} className={THEME.TextInput} value={data.OutTimeReason || ""} onChange={(e) => onChange('OutTimeReason', e.target.value)} />
+                    <input type="text" placeholder="Reason for Logout Location Adjustment" className={THEME.TextInput} value={data.OutTimeReason || ""} onChange={(e) => onChange('OutTimeReason', e.target.value)} />
                 </FormField>
             )}
 

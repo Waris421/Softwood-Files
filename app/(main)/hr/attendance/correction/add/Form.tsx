@@ -25,9 +25,9 @@ type AdjustmentSubSchema = BaseFields & {
     CorrectionType: 'adjustment';
     InLatitude: number | null; OutLatitude: number | null;
     InLongitude: number | null; OutLongitude: number | null;
-    InTime: string; OutTime: string;
-    InLocation: string; OutLocation: string;
-    InDetails: string; OutDetails: string;
+    InTime: string | null; OutTime: string | null;
+    InLocation: string | null; OutLocation: string | null;
+    InDetails: string | null; OutDetails: string | null;
     InLocationReason: string | null; OutLocationReason: string | null;
     InTimeReason: string | null; OutTimeReason: string | null;
     InTimeFlag: boolean; OutTimeFlag: boolean;
@@ -39,7 +39,10 @@ type LeaveSubSchema = BaseFields & {
     AllowableOptions: DropdownOption[] | null;
     LeaveType: string;
     LeaveReason: string;
-    LeavesRange: { from: string; to: string };
+    LeavesRange: { from: string; to: string } | null;
+    LeaveDate: string | null;
+    SHLStartTime: string | null;
+    SHLDuration: number | null;
 };
 
 type TravelSubSchema = BaseFields & {
@@ -74,7 +77,7 @@ const getInitialState = (type: string, date: string): FormSchema => {
     const base = { Date: date };
     switch (type) {
         case 'leave':
-            return { ...base, CorrectionType: 'leave', AllowableOptions: null, LeaveType: '', LeaveReason: '', LeavesRange: { from: '', to: '' } };
+            return { ...base, CorrectionType: 'leave', AllowableOptions: null, LeaveType: '', LeaveReason: '', LeavesRange: { from: '', to: '' }, LeaveDate: '', SHLStartTime: '', SHLDuration: 0 };
         case 'travel':
             return { ...base, CorrectionType: 'travel', TravelDateRange: { from: '', to: '' }, TravelDestination: '', TravelReason: '' };
         case 'over-time':
@@ -173,7 +176,7 @@ export default function CorrectionForm({
 
     const getCleanPayload = (data: FormSchema) => {
         const basePayload = { CorrectionType: data.CorrectionType, Date: data.Date };
-        
+
         switch (data.CorrectionType) {
             case 'adjustment':
                 const { CorrectionType: c1, Date: d1, ...adjustmentProps } = data;

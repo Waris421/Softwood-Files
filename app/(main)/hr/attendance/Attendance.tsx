@@ -9,32 +9,68 @@ import { Badge } from "@/_components/ui/badge";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/_components/ui/dialog";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/_components/ui/tooltip";
 import { Cell, ColumnDef } from "@tanstack/react-table";
-import { Check, Clock, MapPin, PlaneIcon, TimerIcon, UserMinus, X } from "lucide-react";
+import { AlertCircle, Check, Clock, MapPin, PlaneIcon, RefreshCcwDot, TimerIcon, UserMinus, X } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useCallback, useEffect, useState, useMemo } from "react";
+import { CorrectionDialog } from "./StatusClickDialog";
+import { EditAdjustmentModal } from "./EditAdjustment";
+import { THEME } from "@/_components/constants/ui";
+import { cn } from "@/_components/generic/utils";
+import { EditLeaveModal } from "./EditLeave";
 
 type Attendance = {
+    //Main attendance flags
     Date: Date,
-    InDetails: string,
-    InLatitude: number,
-    InLocation: string,
-    InLocationFlag: boolean,
-    InLongitude: number,
-    InTime: string,
-    InTimeDiff: number,
-    InTimeFlag: boolean,
-    OutDetails: string,
-    OutLatitude: number,
-    OutLocation: string,
-    OutLocationFlag: boolean,
-    OutLongitude: number,
-    OutTime: string,
-    OutTimeDiff: number,
-    OutTimeFlag: boolean,
-    WeekendFlag: boolean,
-    HolidayFlag: boolean,
-    AbsentFlag: boolean,
-    OverTime: number
+    InDetails: string | null,
+    InLatitude: number | null,
+    InLocation: string | null,
+    InLocationFlag: boolean | null,
+    InLongitude: number | null,
+    InTime: string | null,
+    InTimeDiff: number | null,
+    InTimeFlag: boolean | null,
+    OutDetails: string | null,
+    OutLatitude: number | null,
+    OutLocation: string | null,
+    OutLocationFlag: boolean | null,
+    OutLongitude: number | null,
+    OutTime: string | null,
+    OutTimeDiff: number | null,
+    OutTimeFlag: boolean | null,
+    WeekendFlag: boolean | null,
+    HolidayFlag: boolean | null,
+    AbsentFlag: boolean | null,
+    FullLeaveFlag: boolean,
+    OverTime: number | null,
+
+    //In Time Adjustment
+    InTimeAdjustmentId: number | null,
+    InTimeAdjustmentApproval: boolean | null,
+    InTImeAdjustmentReason: string | null,
+    InTimeAdjustmentComments: string | null,
+
+    //In Location Adjustments
+    InLocationAdjustmentId: number | null,
+    InLocationAdjustmentApproval: boolean | null,
+    InLocationAdjustmentReason: string | null,
+    InLocationAdjustmentComments: string | null,
+
+    //Out Time Adjustmnet
+    OutTimeAdjustmentId: number | null,
+    OutTimeAdjustmentApproval: boolean | null,
+    OutTImeAdjustmentReason: string | null,
+    OutTimeAdjustmentComments: string | null,
+
+    //Out Location Adjustments
+    OutLocationAdjustmentId: number | null,
+    OutLocationAdjustmentApproval: boolean | null,
+    OutLocationAdjustmentReason: string | null,
+    OutLocationAdjustmentComments: string | null,
+
+    FullLeaveAdjustmentId: number|null,
+    FullLeaveType: string|null, 
+    FullLeaveAdjustmentApproval: boolean | null
+    FullLeaveAdjustmentManagerComments: string | null,
 }
 
 const listColumns: ColumnDef<Attendance>[] = [
@@ -50,29 +86,30 @@ const listColumns: ColumnDef<Attendance>[] = [
                 WeekendFlag,
                 HolidayFlag,
                 AbsentFlag,
+                FullLeaveFlag,
             } = row.original;
 
-            const isComplete = WeekendFlag || HolidayFlag || (InLocationFlag && InTimeFlag && OutLocationFlag && OutTimeFlag);
+            const isComplete = WeekendFlag || HolidayFlag || FullLeaveFlag || (InLocationFlag && InTimeFlag && OutLocationFlag && OutTimeFlag);
             const isSpecialDay = WeekendFlag || HolidayFlag;
             
             return (
                 <div className="flex justify-center">
                     {AbsentFlag ? (
                         // Distinct styling for Absent status
-                        <span className="text-gray-400">
+                        <span className={THEME.Text.AmberText}>
                             <UserMinus className="w-5 h-5" strokeWidth={3} />
                         </span>
                     ) : isComplete ? (
                         <span className="text-success text-xl">
                             <Check 
-                                className={`${isSpecialDay ? "text-blue-500" : "text-green-500"} w-5 h-5`}
+                                className={`${isSpecialDay ? THEME.Text.BlueText : THEME.Text.GreenText} w-5 h-5`}
                                 strokeWidth={3} 
                             />
                         </span>
                     ) : (
                         <span className="text-error text-xl">
                             <X 
-                                className="text-red-500 w-5 h-5" 
+                                className={cn("w-5 h-5", THEME.Text.RedText)}
                                 strokeWidth={3} 
                             />
                         </span>
@@ -85,12 +122,54 @@ const listColumns: ColumnDef<Attendance>[] = [
     {
         accessorKey:'Date',
         header: 'Date',
-        cell: ({ getValue }) => {
+        cell: ({ row, getValue }) => {
             const dateValue = getValue<string>();
+            const { FullLeaveAdjustmentId, FullLeaveAdjustmentApproval, FullLeaveAdjustmentManagerComments } = row.original;
 
             if (!dateValue) return '---';
 
+            //dd-mmm format
             const date = new Date(dateValue);
+            const formattedDate = new Intl.DateTimeFormat('en-GB', {
+                day: '2-digit',
+                month: 'short',
+            }).format(date).replace(' ', '-');
+
+            return (
+                <div className="flex items-center gap-1.5">
+                    <span>{formattedDate}</span>
+                    {FullLeaveAdjustmentId && (
+                        <TooltipProvider>
+                            <Tooltip>
+                                <TooltipTrigger asChild>
+                                    <span className="cursor-help flex items-center">
+                                        {FullLeaveAdjustmentApproval === null && (
+                                            <span className={THEME.Text.AmberText}>
+                                                <AlertCircle className="w-4 h-4" />
+                                            </span>
+                                        )}
+                                        {FullLeaveAdjustmentApproval === true && (
+                                            <span className={THEME.Text.GreenText}>
+                                                <Check className="w-4 h-4" strokeWidth={3} />
+                                            </span>
+                                        )}
+                                        {FullLeaveAdjustmentApproval === false && (
+                                            <span className={THEME.Text.RedText}>
+                                                <X className="w-4 h-4" strokeWidth={3} />
+                                            </span>
+                                        )}
+                                    </span>
+                                </TooltipTrigger>
+                                <TooltipContent>
+                                    {FullLeaveAdjustmentApproval === null && "Leave approval pending"}
+                                    {FullLeaveAdjustmentApproval === true && "Leave approved"}
+                                    {FullLeaveAdjustmentApproval === false && `Leave rejected. Reason: ${FullLeaveAdjustmentManagerComments}`}
+                                </TooltipContent>
+                            </Tooltip>
+                        </TooltipProvider>
+                    )}
+                </div>
+            )
 
             //dd-mmm format
             return new Intl.DateTimeFormat('en-GB', {
@@ -103,21 +182,183 @@ const listColumns: ColumnDef<Attendance>[] = [
     {
         accessorKey:'InTime',
         header: 'In Time',
+        cell: ({ row }) => {
+            const { InTime, InTimeAdjustmentId, InTimeAdjustmentApproval, InTimeAdjustmentComments } = row.original;
+
+            if (!InTime && !InTimeAdjustmentId) return '-';
+
+            return (
+                <div className="flex items-center gap-1.5">
+                    <span>{InTime || '---'}</span>
+                    {InTimeAdjustmentId && (
+                        <TooltipProvider>
+                            <Tooltip>
+                                <TooltipTrigger asChild>
+                                    <span className="cursor-help flex items-center">
+                                        {InTimeAdjustmentApproval === null && (
+                                            <span className={THEME.Text.AmberText}>
+                                                <AlertCircle className="w-4 h-4" />
+                                            </span>
+                                        )}
+                                        {InTimeAdjustmentApproval === true && (
+                                            <span className={THEME.Text.GreenText}>
+                                                <Check className="w-4 h-4" strokeWidth={3} />
+                                            </span>
+                                        )}
+                                        {InTimeAdjustmentApproval === false && (
+                                            <span className={THEME.Text.RedText}>
+                                                <X className="w-4 h-4" strokeWidth={3} />
+                                            </span>
+                                        )}
+                                    </span>
+                                </TooltipTrigger>
+                                <TooltipContent>
+                                    {InTimeAdjustmentApproval === null && "Adjustment approval pending"}
+                                    {InTimeAdjustmentApproval === true && "Adjustment approved"}
+                                    {InTimeAdjustmentApproval === false && `Adjustment rejected. Reason: ${InTimeAdjustmentComments}`}
+                                </TooltipContent>
+                            </Tooltip>
+                        </TooltipProvider>
+                    )}
+                </div>
+            )
+        },
     },
 
     {
         accessorKey:'InLocation',
         header: 'In Location',
+        cell: ({ row }) => {
+            const { InLocation, InLocationAdjustmentId, InLocationAdjustmentApproval, InLocationAdjustmentComments } = row.original;
+            if (!InLocation && !InLocationAdjustmentId) return '-';
+
+            return (
+                <div className="flex items-center gap-1.5">
+                    <span>{InLocation || '---'}</span>
+                    {InLocationAdjustmentId && (
+                        <TooltipProvider>
+                            <Tooltip>
+                                <TooltipTrigger asChild>
+                                    <span className="cursor-help flex items-center">
+                                        {InLocationAdjustmentApproval === null && (
+                                            <span className={THEME.Text.AmberText}>
+                                                <AlertCircle className="w-4 h-4" />
+                                            </span>
+                                        )}
+                                        {InLocationAdjustmentApproval === true && (
+                                            <span className={THEME.Text.GreenText}>
+                                                <Check className="w-4 h-4" strokeWidth={3} />
+                                            </span>
+                                        )}
+                                        {InLocationAdjustmentApproval === false && (
+                                            <span className={THEME.Text.RedText}>
+                                                <X className="w-4 h-4" strokeWidth={3} />
+                                            </span>
+                                        )}
+                                    </span>
+                                </TooltipTrigger>
+                                <TooltipContent>
+                                    {InLocationAdjustmentApproval === null && "Adjustment approval pending"}
+                                    {InLocationAdjustmentApproval === true && "Adjustment approved"}
+                                    {InLocationAdjustmentApproval === false && `Adjustment rejected. Reason: ${InLocationAdjustmentComments}`}
+                                </TooltipContent>
+                            </Tooltip>
+                        </TooltipProvider>
+                    )}
+                </div>
+            )
+        }
     },
 
     {
         accessorKey:'OutTime',
         header: 'Out Time',
+        cell: ({ row}) => {
+            const { OutTime, OutTimeAdjustmentId, OutTimeAdjustmentApproval, OutTimeAdjustmentComments } = row.original;
+
+            if (!OutTime && !OutTimeAdjustmentId) return '-';
+
+            return (
+                <div className="flex items-center gap-1.5">
+                    <span>{OutTime || '---'}</span>
+                    {OutTimeAdjustmentId && (
+                        <TooltipProvider>
+                            <Tooltip>
+                                <TooltipTrigger asChild>
+                                    <span className="cursor-help flex items-center">
+                                        {OutTimeAdjustmentApproval === null && (
+                                            <span className={THEME.Text.AmberText}>
+                                                <AlertCircle className="w-4 h-4" />
+                                            </span>
+                                        )}
+                                        {OutTimeAdjustmentApproval === true && (
+                                            <span className={THEME.Text.GreenText}>
+                                                <Check className="w-4 h-4" strokeWidth={3} />
+                                            </span>
+                                        )}
+                                        {OutTimeAdjustmentApproval === false && (
+                                            <span className={THEME.Text.RedText}>
+                                                <X className="w-4 h-4" strokeWidth={3} />
+                                            </span>
+                                        )}
+                                    </span>
+                                </TooltipTrigger>
+                                <TooltipContent>
+                                    {OutTimeAdjustmentApproval === null && "Adjustment approval pending"}
+                                    {OutTimeAdjustmentApproval === true && "Adjustment approved"}
+                                    {OutTimeAdjustmentApproval === false && `Adjustment rejected. Reason: ${OutTimeAdjustmentComments}`}
+                                </TooltipContent>
+                            </Tooltip>
+                        </TooltipProvider>
+                    )}
+                </div>
+            )
+        }
     },
 
     {
         accessorKey:'OutLocation',
         header: 'Out Location',
+        cell: ({ row }) => {
+            const { OutLocation, OutLocationAdjustmentId, OutLocationAdjustmentApproval, OutLocationAdjustmentComments } = row.original;
+            if (!OutLocation && !OutLocationAdjustmentId) return '-';
+
+            return (
+                <div className="flex items-center gap-1.5">
+                    <span>{OutLocation || '---'}</span>
+                    {OutLocationAdjustmentId && (
+                        <TooltipProvider>
+                            <Tooltip>
+                                <TooltipTrigger asChild>
+                                    <span className="cursor-help flex items-center">
+                                        {OutLocationAdjustmentApproval === null && (
+                                            <span className={THEME.Text.AmberText}>
+                                                <AlertCircle className="w-4 h-4" />
+                                            </span>
+                                        )}
+                                        {OutLocationAdjustmentApproval === true && (
+                                            <span className={THEME.Text.GreenText}>
+                                                <Check className="w-4 h-4" strokeWidth={3} />
+                                            </span>
+                                        )}
+                                        {OutLocationAdjustmentApproval === false && (
+                                            <span className={THEME.Text.RedText}>
+                                                <X className="w-4 h-4" strokeWidth={3} />
+                                            </span>
+                                        )}
+                                    </span>
+                                </TooltipTrigger>
+                                <TooltipContent>
+                                    {OutLocationAdjustmentApproval === null && "Adjustment approval pending"}
+                                    {OutLocationAdjustmentApproval === true && "Adjustment approved"}
+                                    {OutLocationAdjustmentApproval === false && `Adjustment rejected. Reason: ${OutLocationAdjustmentComments}`}
+                                </TooltipContent>
+                            </Tooltip>
+                        </TooltipProvider>
+                    )}
+                </div>
+            );
+        }
     },
 
     {
@@ -163,7 +404,7 @@ const listColumns: ColumnDef<Attendance>[] = [
         cell: ({row}) => {
             const { 
                 InTimeFlag, InLocationFlag, OutTimeFlag, OutLocationFlag, 
-                WeekendFlag, HolidayFlag, AbsentFlag,
+                WeekendFlag, HolidayFlag, AbsentFlag, FullLeaveFlag, FullLeaveType,
                 InDetails, OutDetails, InLocation, OutLocation,
             } = row.original;
 
@@ -176,6 +417,12 @@ const listColumns: ColumnDef<Attendance>[] = [
                         {AbsentFlag && (
                             <Badge variant="secondary" className="bg-gray-100 text-gray-700 border-gray-300">
                                 Absent
+                            </Badge>
+                        )}
+
+                        {FullLeaveFlag && (
+                            <Badge className="bg-purple-50 text-purple-700 border-purple-200">
+                                {FullLeaveType || 'Leave'}
                             </Badge>
                         )}
 
@@ -276,15 +523,16 @@ export default function Attendance() {
         Employee: '', 
         DateRange: getCurrentMonthRange(),
     });
-
     const [data, setData] = useState<Attendance[]>([]);
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState(null);
     const [errors, setErrors] = useState<Record<string, string>>({});
     const [previewLocation, setPreviewLocation] = useState<Location | null>(null);
-    const [correctionRow, setCorrectionRow] = useState<Attendance | null>(null);
+    const [refreshTrigger, setRefreshTrigger] = useState(0);
 
-    const router = useRouter();
+    const [correctionRow, setCorrectionRow] = useState<Attendance | null>(null);
+    const [adjustmentId, setAdjustmentId] = useState<number | null>(null);
+    const [leaveAdjId, setLeaveAdjId] = useState<number | null>(null);
 
     const fetchData = useCallback(async () => {
         setLoading(true);
@@ -309,15 +557,14 @@ export default function Attendance() {
                 throw new Error(errorData.details?.message || "Failed to fetch attendance data");
             }
 
-            const result = await response.json();
-
+            const result: {data: Attendance[]} = await response.json();
             setData(result.data);
         } catch (err: any) {
             setError(err.message || "An error occurred");
         } finally {
             setLoading(false);
         }
-    }, [formData.Employee, formData.DateRange]);
+    }, [formData.Employee, formData.DateRange, refreshTrigger]);
 
     //Helper function that triggers when user types something
     const handleInputChange = (field: keyof FormSchema, value: any) => {
@@ -347,8 +594,8 @@ export default function Attendance() {
 
             // Count Late Logins/early logout (Only if not a holiday/weekend/absent)
             if (!curr.AbsentFlag && !curr.HolidayFlag && !curr.WeekendFlag) {
-                if (!curr.InTimeFlag) acc.totalTime += curr.InTimeDiff;
-                if (!curr.OutTimeFlag) acc.totalTime += curr.OutTimeDiff;
+                if (!curr.InTimeFlag) acc.totalTime += (curr.InTimeDiff || 0);
+                if (!curr.OutTimeFlag) acc.totalTime += (curr.OutTimeDiff || 0);
             }
 
             //Count the leaves and their types
@@ -357,15 +604,32 @@ export default function Attendance() {
         }, { totalAbsents: 0, totalTime: 0});
     }, [data]);
 
-    const correctionTypes = [
-        { label: "Adjustment", value: "adjustment", icon: Clock },
-        { label: "Leave", value: "leave", icon: UserMinus },
-        { label: "Travel", value: "travel", icon: PlaneIcon},
-        { label: "Over Time", value: 'over-time', icon: TimerIcon},
-    ]
-
     const onStatusClick = (cell: Cell<any, any>) => {
         setCorrectionRow(cell.row.original);
+    }
+
+    const onDateClick = (cell: Cell<any, any>) => {
+        const { FullLeaveAdjustmentApproval, FullLeaveAdjustmentId } = cell.row.original;
+
+        if (FullLeaveAdjustmentId === null || FullLeaveAdjustmentApproval !== null) return;
+        
+        setLeaveAdjId(FullLeaveAdjustmentId);
+    }
+
+    const onInTimeClick = (cell: Cell<any, any>) => {
+        const { InTimeAdjustmentId, InTimeAdjustmentApproval } = cell.row.original;
+        
+        if (InTimeAdjustmentId === null || InTimeAdjustmentApproval !== null) return;
+
+        setAdjustmentId(InTimeAdjustmentId);
+    }
+
+    const onOutTimeClick = (cell: Cell<any, any>) => {
+        const { OutTimeAdjustmentId, OutTimeAdjustmentApproval } = cell.row.original;
+
+        if (OutTimeAdjustmentId === null || OutTimeAdjustmentApproval !== null) return;
+        
+        setAdjustmentId(OutTimeAdjustmentId);
     }
 
     const onLocationClick = (cell: Cell<any, any>, type: 'In' | 'Out') => {
@@ -384,10 +648,24 @@ export default function Attendance() {
     }
 
     const onInLocationClick = (cell: Cell<any, any>) => {
+        const { InLocationAdjustmentId, InLocationAdjustmentApproval } = cell.row.original;
+
+        if (InLocationAdjustmentId !== null && InLocationAdjustmentApproval === null) {
+            setAdjustmentId(InLocationAdjustmentId);
+            return ;
+        }
+
         onLocationClick(cell, 'In')
     }
 
     const onOutLocationClick = (cell: Cell<any, any>) => {
+        const { OutLocationAdjustmentId, OutLocationAdjustmentApproval } = cell.row.original;
+
+        if (OutLocationAdjustmentId !== null && OutLocationAdjustmentApproval === null) {
+            setAdjustmentId(OutLocationAdjustmentId);
+            return ;
+        }
+
         onLocationClick(cell, 'Out');
     }
 
@@ -398,7 +676,17 @@ export default function Attendance() {
                 <div className="flex flex-col lg:flex-row lg:items-end justify-between gap-4 mb-8">
                     {/* Title and Subtext */}
                     <div className="flex-1">
-                        <h1 className="text-3xl font-extrabold tracking-tight">Attendance</h1>
+                        <div className="flex items-center gap-3">
+                            <h1 className="text-3xl font-extrabold tracking-tight">Attendance</h1>
+                            <button
+                                onClick={() => setRefreshTrigger(prev => prev+1)}
+                                disabled={loading}
+                                className={THEME.ButtonOutLine}
+                                title="Refresh Attendance"
+                            >
+                                <RefreshCcwDot className={`w-4 h-4 ${loading ? 'animate-spin' : ''}`} />
+                            </button>
+                        </div>
                         <p className="text-sm text-base-content/70">
                         View your or your subordinates' attendance
                         </p>
@@ -406,15 +694,15 @@ export default function Attendance() {
 
                     {/* Attendance Summary */}
                     {!loading && data.length > 0 && (
-                        <div className="stats stats-vertical sm:stats-horizontal bg-base-100 border border-base-200 shadow-sm">
+                        <div className="stats stats-vertical sm:stats-horizontal bg-base-100 border border-base-200 rounded-lg shadow-sm">
                             <div className="stat py-2 px-4">
                                 <div className="stat-title text-xs uppercase font-bold">Absent</div>
-                                <div className="stat-value text-lg text-gray-500">{summary.totalAbsents} days</div>
+                                <div className={cn("stat-value text-lg", THEME.Text.GrayText)}>{summary.totalAbsents} days</div>
                             </div>
 
                             <div className="stat py-2 px-4">
                                 <div className="stat-title text-xs uppercase font-bold text-error">Late</div>
-                                <div className="stat-value text-lg text-red-500">{summary.totalTime} mins</div>
+                                <div className={cn("stat-value text-lg", THEME.Text.RedText)}>{summary.totalTime} mins</div>
                             </div>
                         </div>
                     )}
@@ -462,6 +750,9 @@ export default function Attendance() {
                     showDownload={false}
                     columnClickHandlers={{
                         status: onStatusClick,
+                        Date: onDateClick,
+                        InTime: onInTimeClick,
+                        OutTime: onOutTimeClick,
                         InLocation: onInLocationClick,
                         OutLocation: onOutLocationClick,
                     }}
@@ -469,45 +760,23 @@ export default function Attendance() {
             </div>
 
             {/* The detailed status of an attendance */}
-            <Dialog open={!!correctionRow} onOpenChange={() => setCorrectionRow(null)}>
-                <DialogContent className="sm:max-w-md">
-                    <DialogHeader>
-                        <DialogTitle>Apply for Correction</DialogTitle>
-                        <DialogDescription>
-                            Select the type of correction for {correctionRow?.Date ? new Date(correctionRow.Date).toLocaleDateString('en-PK', { day: '2-digit', month: 'short' }) : ''}
-                        </DialogDescription>
-                    </DialogHeader>
+            <CorrectionDialog 
+                correctionRow={correctionRow}
+                onClose={() => setCorrectionRow(null)}
+                employeeCode={formData.Employee}
+            />
 
-                    <div className="grid grid-cols-1 gap-3 py-4">
-                        {correctionTypes.map((type) => {
-                            const Icon = type.icon;
-                            const employeeCode = formData.Employee;
-                            const date = correctionRow?.Date;
-                            const dateStr = date ? new Date(date).toLocaleDateString('en-PK') : null;
-                            const correctionType = type.value;
+            <EditAdjustmentModal
+                adjustmentId = {adjustmentId}
+                onClose={() => setAdjustmentId(null)}
+                onSuccess={() => setRefreshTrigger(prev => prev + 1)}
+            />
 
-                            return (
-                                <button
-                                    key={type.value}
-                                    className="flex items-center gap-4 p-4 rounded-xl border border-base-300 hover:border-primary hover:bg-primary/5 transition-all group text-left cursor-pointer"
-                                    onClick={() => {
-                                        router.push(`/hr/attendance/correction/add?date=${dateStr}&type=${correctionType}&employee=${employeeCode}`);
-                                        setCorrectionRow(null);
-                                    }}
-                                >
-                                    <div className="p-2 rounded-lg bg-base-200 group-hover:bg-primary group-hover:text-primary-foreground">
-                                        <Icon className="w-5 h-5" />
-                                    </div>
-                                    <div>
-                                        <p className="font-semibold text-sm">{type.label}</p>
-                                        <p className="text-xs text-base-content/60">Request correction for this record</p>
-                                    </div>
-                                </button>
-                            )
-                        })}
-                    </div>
-                </DialogContent>
-            </Dialog>
+            <EditLeaveModal
+                adjustmentId = {leaveAdjId}
+                onClose={() => setLeaveAdjId(null)}
+                onSuccess={() => setRefreshTrigger(prev => prev + 1)}
+            />
 
             {/* The location previous dialog */}
             <LocationPreview

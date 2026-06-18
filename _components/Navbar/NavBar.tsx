@@ -8,6 +8,7 @@ import HomeButton from "../generic/HomeBtn";
 import { ThemeToggle } from "../generic/ThemeToggle";
 import BackForthButton from "../generic/BackForthBtn";
 import { NavigationMenu, NavigationMenuContent, NavigationMenuItem, NavigationMenuLink, NavigationMenuList, NavigationMenuTrigger, navigationMenuTriggerStyle, NavigationMenuViewport } from "../ui/navigation-menu";
+import { Loader } from "lucide-react";
 
 interface NavItem {
   label: string;
@@ -54,7 +55,7 @@ const NavBar = ({ pageName }: { pageName: string }) => {
                         <NavigationMenuList>
                             {isLoading ? (
                                 <div className="flex items-center gap-2 px-4 opacity-50">
-                                    <span className="h-4 w-4 animate-spin rounded-full border-2 border-primary border-t-transparent"></span>
+                                    <Loader className="w-4 h-4 animate-spin animation-duration-[2.5s]" />
                                     <span className="text-sm font-medium">Loading...</span>
                                 </div>
                             ) : (

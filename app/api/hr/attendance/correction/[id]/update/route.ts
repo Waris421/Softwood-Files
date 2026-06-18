@@ -4,9 +4,6 @@ import { NextRequest, NextResponse } from "next/server";
 const AUTH_COOKIE_NAME = 'authToken';
 
 export async function GET(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
-    const { id } = await params;
-    const URL = API_MAP.HR.OFFICE.getOfficeUpdate(id);
-
     const authToken = request.cookies.get(AUTH_COOKIE_NAME);
     if (!authToken) {
         return NextResponse.json(
@@ -15,7 +12,10 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
         );
     }
 
-    const backendResponse = await fetch(`${URL}`,{
+    const { id } = await params;
+    const backendURL = API_MAP.HR.ATTENDANCE.CORRECTION.getUpdateCorrection(id);
+
+    const backendResponse = await fetch(`${backendURL}`,{
         headers: {
             'Authorization': `Token ${authToken.value}`,
             'Content-Type': 'application/json',
@@ -33,15 +33,11 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
         );
     }
 
-    const officeData = await backendResponse.json();
-    return NextResponse.json(officeData);
+    const adjustmentData = await backendResponse.json();
+    return NextResponse.json(adjustmentData);
 }
 
 export async function POST(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
-    const { id } = await params;
-    const requestBody = await request.json();
-    const URL = API_MAP.HR.OFFICE.getOfficeUpdate(id);
-
     const authToken = request.cookies.get(AUTH_COOKIE_NAME);
     if (!authToken) {
         return NextResponse.json(
@@ -50,7 +46,11 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
         );
     }
 
-    const backendResponse = await fetch(URL, {
+    const { id } = await params;
+    const requestBody = await request.json();
+    const backendURL = API_MAP.HR.ATTENDANCE.CORRECTION.getUpdateCorrection(id);
+
+    const backendResponse = await fetch(backendURL, {
         method: 'POST',
         headers: {
         'Authorization': `Token ${authToken.value}`,

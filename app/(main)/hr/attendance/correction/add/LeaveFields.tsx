@@ -1,10 +1,11 @@
 'use client';
 
 import { THEME } from "@/_components/constants/ui";
-import { DateRangePicker } from "@/_components/Datepicker/Datepicker";
+import { DatePicker, DateRangePicker } from "@/_components/Datepicker/Datepicker";
 import { SingleDropdown } from "@/_components/Dropdown/Dropdown";
 import { DropdownOption } from "@/_components/Dropdown/types";
 import { FormField } from "@/_components/generic/FormItems";
+import TimePicker from "@/_components/Timepicker/Timepicker.";
 import { UserMinus } from "lucide-react";
 
 interface LeaveFieldsProps {
@@ -13,8 +14,18 @@ interface LeaveFieldsProps {
   onChange: (field: any, value: any) => void;
 }
 
+const FULL_LEAVE_TYPES = ['FSL', 'FCL', 'AL', 'CPL'];
+const HALF_LEAVE_TYPES = ['HSL', 'HCL']
+const SHORT_LEAVE_TYPES = ['SHL']
+
 export function LeaveFields({ data, errors, onChange }: LeaveFieldsProps) {
     const LeaveOptions: DropdownOption[] = data.AllowableOptions;
+    const selectedLeaveType = data.SelectedLeaveType;
+
+    const isFullLeave = FULL_LEAVE_TYPES.includes(selectedLeaveType);
+    const isHalfLeave = HALF_LEAVE_TYPES.includes(selectedLeaveType);
+    const isShortLeave = SHORT_LEAVE_TYPES.includes(selectedLeaveType);
+    
     
     return (
         <>
@@ -27,15 +38,53 @@ export function LeaveFields({ data, errors, onChange }: LeaveFieldsProps) {
                     onSelect={(selectedOption: DropdownOption) => onChange('SelectedLeaveType', selectedOption?.value)}
                 />
             </FormField>
-            <FormField label="Leave Date" error={errors.LeaveStartDate} required>
-                <DateRangePicker
-                    value={data.LeavesRange}
-                    onChange={(val) => {
-                        onChange("LeavesRange", val || { from: "", to: "" });
-                    }}
-                    placeholder="Pick start and end date"
-                />
-            </FormField>
+
+            {(isHalfLeave || isShortLeave) && (
+                <FormField label="Leave Date" error={errors.LeaveDate} required>
+                    <DatePicker 
+                        value={data.LeaveDate}
+                        inputName="LeaveDate"
+                        onChange={(val) => onChange('LeaveDate', val)}
+                    />
+                </FormField>
+            )}
+            
+            {isFullLeave && (
+                <FormField label="Leave Date" error={errors.LeavesRange} required>
+                    <DateRangePicker
+                        value={data.LeavesRange}
+                        onChange={(val) => {
+                            onChange("LeavesRange", val || { from: "", to: "" });
+                        }}
+                        placeholder="Pick start and end date"
+                    />
+                </FormField>
+            )}
+
+            {isShortLeave && (
+                <>
+                    <FormField label="Start Time" error={errors.SHLStartTime} required>
+                        <TimePicker 
+                            inputName="SHLStartTime"
+                            value={data.SHLStartTime}
+                            onChange={(val) => onChange('SHLStartTime', val)}
+                        />
+                    </FormField>
+
+                    <FormField label="Duration" error={errors.SHLDuration} required>
+                        <input 
+                            type="number"
+                            placeholder="Max 120"
+                            className={THEME.TextInput}
+                            min={0}
+                            max={120}
+                            value={data.SHLDuration}
+                            onChange={(e) => onChange('SHLDuration', e.target.value)}
+                        />
+                    </FormField>
+                </>
+            )}
+            
             <FormField label="Leave Reason" error={errors.LeaveReason}>
                 <input 
                     type="text" 

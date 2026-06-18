@@ -36,9 +36,9 @@ export const THEME = {
         dark:border-slate-400 dark:text-white dark:bg-slate-700
     `,
 
-    TextInput: 'input w-full rounded-lg bg-gray-300 dark:bg-gray-800 hover:ring-2 hover:shadow-md transition-shadow placeholder:text-[10px]',
+    TextInput: 'input w-full rounded-lg bg-gray-200 dark:bg-gray-800 hover:ring-2 hover:shadow-md transition-shadow placeholder:text-[10px]',
     TextInputReadOnly: 'input w-full rounded-lg bg-gray-400 dark:bg-gray-700',
-    DropDown: 'w-full h-10 rounded-lg justify-between bg-gray-300 dark:bg-gray-800',
+    DropDown: 'w-full h-10 rounded-lg justify-between bg-gray-200 dark:bg-gray-800',
     Slider: 'flex-1 w-full min-w-30 rounded-lg bg-gray-300 dark:bg-gray-800',
     CheckBox: 'checkbox rounded-lg checkbox-lg bg-gray-300 dark:bg-gray-800',
     
@@ -63,7 +63,8 @@ export const THEME = {
         NormalText: 'text-gray-800 dark:text-gray-100',
         RedText: 'text-red-600 dark:text-red-500',
         BlueText: 'text-blue-600 dark:text-blue-500',
-        GrayText: 'text-gray-900 dark:text-gray-100',
-        GreenText: 'text-green-600 dark:text-green-500'
+        GrayText: 'text-gray-600 dark:text-gray-400',
+        GreenText: 'text-green-600 dark:text-green-500',
+        AmberText: 'text-amber-500 dark:text-amber-400',
     }
 }

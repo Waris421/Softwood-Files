@@ -197,7 +197,9 @@ export const API_MAP = {
                         }
                     });
                     return url.toString();
-                }
+                },
+                getUpdateCorrection: (id: string) => `${SERVER_URLs.HRServer}/hr/attendance/correction/${id}/update`,
+                getUpdateLeave: (id: string) => `${SERVER_URLs.HRServer}/hr/attendance/leave/${id}/update`,
             },
         },
         HOLIDAY: {
