@@ -1,4 +1,4 @@
-import { URLs } from "@/_components/constants/urls"
+import { API_MAP } from "@/_components/urls/api-map"
 import { NextRequest, NextResponse } from "next/server"
 
 const AUTH_COOKIE_NAME = 'authToken'
@@ -11,7 +11,7 @@ export async function GET(req: NextRequest) {
 
     const { searchParams } = new URL(req.url)
     try {
-        const res = await fetch(`${URLs.HRServer}/marketing/export-data/exporters?${searchParams.toString()}`, {
+        const res = await fetch(API_MAP.MARKETING.EXPORT_DATA.getExporters(searchParams), {
             headers: { 'Authorization': authToken.value, 'Accept': 'application/json' },
         })
         const data = await res.json().catch(() => [])

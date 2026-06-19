@@ -1,4 +1,4 @@
-import { URLs } from "@/_components/constants/urls"
+import { API_MAP } from "@/_components/urls/api-map"
 import { NextRequest, NextResponse } from "next/server"
 
 const AUTH_COOKIE_NAME = 'authToken'
@@ -8,7 +8,7 @@ export async function GET(req: NextRequest) {
     if (!authToken) return NextResponse.json({ message: 'Unauthorized' }, { status: 401 })
 
     try {
-        const res = await fetch(`${URLs.HRServer}/marketing/export-data/pending`, {
+        const res = await fetch(API_MAP.MARKETING.EXPORT_DATA.getPending(), {
             headers: { 'Authorization': authToken.value, 'Accept': 'application/json' },
         })
         const data = await res.json()

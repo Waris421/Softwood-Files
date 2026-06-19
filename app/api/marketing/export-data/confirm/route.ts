@@ -1,4 +1,4 @@
-import { URLs } from "@/_components/constants/urls"
+import { API_MAP } from "@/_components/urls/api-map"
 import { NextRequest, NextResponse } from "next/server"
 
 const AUTH_COOKIE_NAME = 'authToken'
@@ -9,7 +9,7 @@ export async function POST(req: NextRequest) {
 
     const body = await req.json()
     try {
-        const res = await fetch(`${URLs.HRServer}/marketing/export-data/confirm`, {
+        const res = await fetch(API_MAP.MARKETING.EXPORT_DATA.confirm(), {
             method: 'POST',
             headers: {
                 'Authorization': authToken.value,

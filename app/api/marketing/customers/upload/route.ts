@@ -1,8 +1,7 @@
-import { URLs } from "@/_components/constants/urls";
+import { API_MAP } from "@/_components/urls/api-map"
 import { NextRequest, NextResponse } from "next/server";
 
 // the Django endpoint that will receive the customer file
-const UPLOAD_URL = `${URLs.HRServer}/marketing/customers/upload`;
 const AUTH_COOKIE_NAME = 'authToken';
 
 export async function POST(req: NextRequest) {
@@ -19,7 +18,7 @@ export async function POST(req: NextRequest) {
     // forward it straight to Django with the auth token attached
     let backendResponse: Response;
     try {
-        backendResponse = await fetch(UPLOAD_URL, {
+        backendResponse = await fetch(API_MAP.MARKETING.CUSTOMERS.upload(), {
             method: 'POST',
             headers: { 'Authorization': `${authToken.value}` },
             body: formData,

@@ -7,6 +7,7 @@ const SERVER_URLs = {
     MMCServer: 'http://127.0.0.1:8000',
     MerchServer: 'http://127.0.0.1:8000',
     FTPServer: 'http://127.0.0.1:8000',
+    MarketingServer: 'http://127.0.0.1:8000',
 } as const;
 
 export const API_MAP = {
@@ -332,6 +333,51 @@ export const API_MAP = {
 
                 return url.toString();
             },
+        },
+    },
+    MARKETING: {
+        EXPORT_DATA: {
+            getCountries: (searchParams: URLSearchParams) => {
+                const url = new URL(`${SERVER_URLs.MarketingServer}/marketing/export-data/countries`)
+                url.search = searchParams.toString()
+                return url.toString()
+            },
+            getMonths: (searchParams: URLSearchParams) => {
+                const url = new URL(`${SERVER_URLs.MarketingServer}/marketing/export-data/months`)
+                url.search = searchParams.toString()
+                return url.toString()
+            },
+            getImporters: (searchParams: URLSearchParams) => {
+                const url = new URL(`${SERVER_URLs.MarketingServer}/marketing/export-data/importers`)
+                url.search = searchParams.toString()
+                return url.toString()
+            },
+            getExporters: (searchParams: URLSearchParams) => {
+                const url = new URL(`${SERVER_URLs.MarketingServer}/marketing/export-data/exporters`)
+                url.search = searchParams.toString()
+                return url.toString()
+            },
+            getDetails: (searchParams: URLSearchParams) => {
+                const url = new URL(`${SERVER_URLs.MarketingServer}/marketing/export-data/details`)
+                url.search = searchParams.toString()
+                return url.toString()
+            },
+            getStats: (searchParams: URLSearchParams) => {
+                const url = new URL(`${SERVER_URLs.MarketingServer}/marketing/export-data/stats`)
+                url.search = searchParams.toString()
+                return url.toString()
+            },
+            getDownload: (searchParams: URLSearchParams) => {
+                const url = new URL(`${SERVER_URLs.MarketingServer}/marketing/export-data/download`)
+                url.search = searchParams.toString()
+                return url.toString()
+            },
+            uploadFile: () => `${SERVER_URLs.MarketingServer}/marketing/export-data/upload-file`,
+            getPending:  () => `${SERVER_URLs.MarketingServer}/marketing/export-data/pending`,
+            confirm:     () => `${SERVER_URLs.MarketingServer}/marketing/export-data/confirm`,
+        },
+        CUSTOMERS: {
+            upload: () => `${SERVER_URLs.MarketingServer}/marketing/customers/upload`,
         },
     },
 } as const;
