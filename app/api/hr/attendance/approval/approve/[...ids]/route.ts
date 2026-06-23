@@ -3,7 +3,7 @@ import { NextRequest, NextResponse } from "next/server";
 
 const AUTH_COOKIE_NAME = 'authToken';
 
-export async function GET(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
+export async function GET(request: NextRequest, { params }: { params: Promise<{ ids: string[] }> }) {
     const authToken = request.cookies.get(AUTH_COOKIE_NAME);
     if (!authToken) {
         return NextResponse.json(
@@ -11,9 +11,8 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
             { status: 401 }
         );
     }
-
-    const { id } = await params;
-    const backendURL = API_MAP.HR.ATTENDANCE.CORRECTION.getUpdateLeave(id);
+    const { ids } = await params;
+    const backendURL = API_MAP.HR.ATTENDANCE.CORRECTION.getApproveRequest(ids);
 
     const backendResponse = await fetch(`${backendURL}`,{
         headers: {
@@ -33,21 +32,21 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
         );
     }
 
-    const adjustmentData = await backendResponse.json();
-    return NextResponse.json(adjustmentData);
+    const approvalData = await backendResponse.json();
+    return NextResponse.json(approvalData);
 }
 
-export async function POST(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
+export async function POST(request: NextRequest, { params }: { params: Promise<{ ids: string[] }> }) {
     const authToken = request.cookies.get(AUTH_COOKIE_NAME);
     if (!authToken) {
         return NextResponse.json(
             { error: 'Unauthorized' }, 
             { status: 401 }
         );
-    }
+    }   
 
-    const { id } = await params;
-    const backendURL = API_MAP.HR.ATTENDANCE.CORRECTION.getUpdateLeave(id);
+    const { ids } = await params;
+    const backendURL = API_MAP.HR.ATTENDANCE.CORRECTION.getApproveRequest(ids);
     const requestBody = await request.json();
 
     const backendResponse = await fetch(backendURL, {

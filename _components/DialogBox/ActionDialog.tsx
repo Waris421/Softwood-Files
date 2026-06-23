@@ -32,8 +32,8 @@ const ActionDialog: React.FC<ActionDialogProps> = ({
                 const rect = anchorRef.current.getBoundingClientRect();
 
                 // Constants
-                const BUTTON_HEIGHT = 33;
-                const HEADER_AND_PADDING = 80;
+                const BUTTON_HEIGHT = 56;
+                const HEADER_AND_PADDING = title || description ? 90 : 20;
                 const DIALOG_WIDTH = 320;
                 const VIEWPORT_MARGIN = 16;
 
@@ -54,9 +54,9 @@ const ActionDialog: React.FC<ActionDialogProps> = ({
 
                 let top: string;
                 if (shouldShowAbove) {
-                    top = `${rect.top + window.scrollY - 80}px`;
+                    top = `${rect.top + window.scrollY - 0}px`;
                 } else {
-                    top = `${rect.bottom + window.scrollY - 100}px`;
+                    top = `${rect.bottom + window.scrollY + 0}px`;
                 }
 
                 setStyle({
@@ -72,7 +72,7 @@ const ActionDialog: React.FC<ActionDialogProps> = ({
         } else if (!isOpen) {
             setStyle({ opacity: 0, visibility: 'hidden' });
         }
-    }, [isOpen, anchorRef, actions.length])
+    }, [isOpen, anchorRef, actions.length, title, description])
     
     if (!isOpen) return null;
 
@@ -84,19 +84,25 @@ const ActionDialog: React.FC<ActionDialogProps> = ({
         >
             <DialogContent
                 style={style}
-                className="fixed z-50 w-80 gap-0 p-0 outline-none sm:max-w-[320px] translate-x-0 translate-y-0 duration-200"
+                className="fixed z-50 w-80 max-w-[320px] p-1.5 bg-base-100 rounded-xl border border-base-200 shadow-xl outline-none translate-x-0 translate-y-0 transition-all duration-200"
             >
-                <DialogHeader>
-                    <DialogTitle className="text-sm font-bold">
-                        {title || 'Choose an action'}
-                    </DialogTitle>
-                    <DialogDescription className="text-xs">
-                        {description || 'Please select one of the following options to proceed.'}
-                    </DialogDescription>
-                </DialogHeader>
+                {(title || description) && (
+                    <DialogHeader className="px-3 pt-3 pb-2 border-b border-base-200/60 mb-1">
+                        {title && (
+                            <DialogTitle className="text-xs font-semibold uppercase tracking-wider text-base-content/50">
+                                {title}
+                            </DialogTitle>
+                        )}
+                        {description && (
+                            <DialogDescription className="text-sm text-base-content/80 mt-0.5 leading-relaxed">
+                                {description}
+                            </DialogDescription>
+                        )}
+                    </DialogHeader>
+                )}
                 <div className="grid grid-cols-1 p-2">
                     {actions.map((action, index) => {
-                        const commonClassName = "flex items-center gap-3 w-full p-3 rounded-md hover:bg-accent hover:text-accent-foreground transition-colors text-left cursor-pointer";
+                        const commonClassName = "group flex items-center gap-3 w-full p-2.5 rounded-lg hover:bg-base-200/70 transition-all text-left cursor-pointer active:scale-[0.99]";
 
                         const handleClick = () => {
                             if (action.onClick) action.onClick();
@@ -106,14 +112,16 @@ const ActionDialog: React.FC<ActionDialogProps> = ({
                         const content = (
                             <>
                                 {action.icon && (
-                                    <div className="p-2 rounded bg-muted group-hover:bg-background transition-colors">
+                                    <div className="flex items-center justify-center w-8 h-8 rounded-md bg-base-200 text-base-content group-hover:bg-base-100 transition-colors shrink-0">
                                         {action.icon}
                                     </div>
                                 )}
-                                <div className="flex flex-col">
-                                    <p className="text-sm font-medium leading-none">{action.label}</p>
+                                <div className="flex flex-col min-w-0">
+                                    <p className="text-sm font-medium text-base-content truncate">
+                                        {action.label}
+                                    </p>
                                     {action.subLabel && (
-                                        <p className="text-xs text-muted-foreground mt-1">
+                                        <p className="text-xs text-base-content/60 truncate mt-0.5">
                                             {action.subLabel}
                                         </p>
                                     )}

@@ -3,6 +3,7 @@
 import React from 'react';
 import { THEME } from '../constants/ui';
 import { ExternalLink } from 'lucide-react';
+import { cn } from './utils';
 
 interface InputWIthUrlProps extends React.InputHTMLAttributes<HTMLInputElement> {
     error?: string;
@@ -42,7 +43,7 @@ const InputWithURL = ({ url, error, value, ...props }: InputWIthUrlProps) => {
                     <button
                         onClick={handleOpenLink}
                         type="button"
-                        className="btn btn-ghost btn-sm absolute right-2 text-primary hover:bg-primary/10"
+                        className={THEME.ButtonInvisible}
                         title="Open link in new tab"
                     >
                         <ExternalLink size={18} />
@@ -51,7 +52,7 @@ const InputWithURL = ({ url, error, value, ...props }: InputWIthUrlProps) => {
             </div>
             {error && (
                 <label className="label">
-                <span className="label-text-alt text-error">{error}</span>
+                <span className={cn("label-text-alt", THEME.Text.RedText)}>{error}</span>
                 </label>
             )}
         </div>

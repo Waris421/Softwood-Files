@@ -173,7 +173,14 @@ export const FormProvider = ({ children, code }: { children: React.ReactNode, co
     }, [isDirty]);
 
     //Call this function to tell browser they can reload the page without warning
-    const markAsClean = useCallback(() => setIsDirty(false), []);
+    const markAsClean = useCallback(() => {
+        isInitializing.current = true;
+        setIsDirty(false);
+
+        setTimeout(() => {
+            isInitializing.current = false;
+        }, 50);
+    }, []);
 
     const contextValue = useMemo(() => ({
         setFormData, 

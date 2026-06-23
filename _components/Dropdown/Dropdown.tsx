@@ -1,7 +1,7 @@
 'use client'
 
 import { useEffect, useMemo, useState } from "react";
-import { Check, ChevronsUpDown, Loader2, X} from "lucide-react";
+import { Check, ChevronsUpDown, Loader, Loader2, X} from "lucide-react";
 import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList} from "@/_components/ui/command";
 import { cn } from "@/_components/generic/utils";
 import { Checkbox } from "../ui/checkbox";
@@ -112,29 +112,29 @@ function SingleDropdown({
                     <Button
                         variant="outline"
                         role="combobox"
-                        className={THEME.DropDown}
+                        className={THEME.Popover.PopoverTrigger}
                     >
                         <span className={cn(
                             "truncate",
-                            !selectedValue ? "text-muted-foreground text-[9px]" : "",
+                            !selectedValue ? THEME.Popover.Placeholder : "",
                         )}>
                             {(selectedValue as DropdownOption)?.label || placeholder}
                         </span>
                         <div className="flex items-center ml-2 border-l pl-2 gap-1">
-                            <ChevronsUpDown className="h-4 w-4 opacity-50 shrink-0" />
+                            <ChevronsUpDown className={THEME.Popover.ChevronIcon} />
                             {selectedValue && (
                                 <span
                                     role="button"
                                     onPointerDown={handleClear}
-                                    className="p-0.5 hover:bg-secondary rounded-sm transition-colors cursor-pointer"
+                                    className={THEME.Popover.ClearButton}
                                 >
-                                    <X className="h-3.5 w-3.5 text-muted-foreground hover:text-foreground" />
+                                    <X className={THEME.Popover.ClearIcon} />
                                 </span>
                             )}
                         </div>
                     </Button>
                 </PopoverTrigger>
-                <PopoverContent className="p-0 w-(--radix-popover-trigger-width) min-w-max">
+                <PopoverContent className={THEME.Popover.PopoverContent}>
                     <Command filter={applySearch}>
                         <CommandInput placeholder="Type to search" />
                         <CommandList>
@@ -148,15 +148,15 @@ function SingleDropdown({
                                             value={`${option.label} ${option.value}`.toLowerCase()}
                                             onSelect={() => handleSelect(option)}
                                             className={cn(
-                                                "flex items-center justify-between py-2 px-3 cursor-pointer",
-                                                isSelected ? "bg-accent text-accent-foreground" : ""
+                                                THEME.Popover.PopoverItem,
+                                                isSelected ? THEME.Popover.PopoverItemActive : ""
                                             )}
                                         >
-                                            <span className="truncate flex-1">
+                                            <span className={THEME.Popover.OptionLabel}>
                                                 {option.label} {showValue ? `(${option.value})` : ''}
                                             </span>
                                             {isSelected && (
-                                                <Check className="ml-2 h-4 w-4 shrink-0"/>
+                                                <Check className={THEME.Popover.CheckIcon}/>
                                             )}
                                         </CommandItem>
                                     )
@@ -178,7 +178,7 @@ function SingleDropdown({
 
 function SingleDropdownAsync({
     apiUrl,
-    widthClass = "w-75",
+    widthClass = "w-72",
     placeholder = "Type to search...",
     inputName,
     onSelect,
@@ -277,37 +277,37 @@ function SingleDropdownAsync({
                     <Button
                         variant="outline"
                         role="combobox"
-                        className={THEME.DropDown}
+                        className={THEME.Popover.PopoverTrigger}
                     >
                         <span className={cn(
                             "truncate",
-                            !selectedValue ? "text-muted-foreground text-[9px]" : ""
+                            !selectedValue ? THEME.Popover.Placeholder : ""
                         )}>
                             {(selectedValue as DropdownOption)?.label || placeholder}
                         </span>
                         <div className="flex items-center ml-2 border-l pl-2 gap-1">
-                            <ChevronsUpDown className="h-4 w-4 opacity-50 shrink-0" />
+                            <ChevronsUpDown className={THEME.Popover.ChevronIcon} />
                             {selectedValue && (
                                 <span
                                     role="button"
                                     onPointerDown={handleClear}
-                                    className="p-0.5 hover:bg-secondary rounded-sm transition-colors cursor-pointer"
+                                    className={THEME.Popover.ClearButton}
                                 >
-                                    <X className="h-3.5 w-3.5 text-muted-foreground hover:text-foreground" />
+                                    <X className={THEME.Popover.ClearIcon}/>
                                 </span>
                             )}
                         </div>
                     </Button>
                 </PopoverTrigger>
-                <PopoverContent className="p-0 w-(--radix-popover-trigger-width) min-w-max">
+                <PopoverContent className={THEME.Popover.PopoverContent} align="start">
                     <Command shouldFilter={false}>
                             <CommandInput placeholder="Type to search..." onValueChange={debouncedSearch} />
                             <CommandList>
-                                {isLoading && <div className="p-4 text-center"><Loader2 className="animate-spin h-4 w-4 inline" /></div>}
-                                {error && <div className="p-2 text-red-500 text-xs">{error}</div>}
+                                {isLoading && <div className="p-4 text-center"><Loader className="animate-spin h-4 w-4 inline" /></div>}
+                                {error && <div className={cn("p-2 text-xs", THEME.Text.RedText)}>{error}</div>}
                                 {!isLoading && !error && options.length === 0 && <CommandEmpty>No results found.</CommandEmpty>}
                                 <CommandGroup>
-                                    {options.map((option) => {
+                                    {options.map((option) => {"p-2 text-xs"
                                         const isSelected = selectedValue?.value === option.value;
                                         return (
                                             <CommandItem
@@ -315,15 +315,15 @@ function SingleDropdownAsync({
                                                 value={`${option.label} ${option.value}`.toLowerCase()}
                                                 onSelect={() => handleSelect(option)}
                                                 className={cn(
-                                                    "flex items-center justify-between py-2 px-3 cursor-pointer",
-                                                    isSelected ? "bg-accent text-accent-foreground" : ""
+                                                    THEME.Popover.PopoverItem,
+                                                    isSelected ? THEME.Popover.PopoverItemActive : ""
                                                 )}
                                             >
-                                                <span className="truncate flex-1">
+                                                <span className={THEME.Popover.OptionLabel}>
                                                     {option.label} {showValue ? `(${option.value})` : ''}
                                                 </span>
                                                 {isSelected && (
-                                                    <Check className="ml-2 h-4 w-4 shrink-0"/>
+                                                    <Check className={THEME.Popover.CheckIcon}/>
                                                 )}
                                             </CommandItem>
                                         )
@@ -419,7 +419,7 @@ function MultiDropdown({
     if (!mounted) {
         return (
             <div className={cn("w-40", widthClass)}>
-                <Button variant="outline" className="w-full justify-between opacity-50 cursor-not-allowed">
+                <Button variant="outline" className={THEME.Popover.PopoverTrigger}>
                     <span className="truncate">{placeholder}</span>
                     <ChevronsUpDown className="opacity-50" />
                 </Button>
@@ -431,34 +431,34 @@ function MultiDropdown({
         <div className={cn("relative", widthClass)}>
             <Popover open={open} onOpenChange={setOpen}>
                 <PopoverTrigger asChild>
-                    <Button variant="outline" className={cn(THEME.DropDown, "w-full justify-between")}>
+                    <Button variant="outline" className={THEME.Popover.PopoverTrigger}>
                         <span className={cn(
                             "truncate",
-                            selected.length === 0 ? "text-muted-foreground text-[9px]" : ""
+                            selected.length === 0 ? THEME.Popover.Placeholder : ""
                         )}>
                             {selected.length > 0 ? `${selected.length} Selected` : placeholder}
                         </span>
                         <div className="flex items-center ml-2 border-l pl-2 gap-1">
-                            <ChevronsUpDown className="h-4 w-4 opacity-50" />
+                            <ChevronsUpDown className={THEME.Popover.ChevronIcon} />
                             {selected.length > 0 &&(
                                 <span
                                     role="button"
                                     onPointerDown={handleClear}
-                                    className="p-0.5 hover:bg-secondary rounded-sm transition-colors cursor-pointer"
+                                    className={THEME.Popover.ClearButton}
                                 >
-                                    <X className="h-3.5 w-3.5 text-muted-foreground hover:text-foreground" />
+                                    <X className={THEME.Popover.ClearIcon}/>
                                 </span>
                             )}
                         </div>
                     </Button>
                 </PopoverTrigger>
-                <PopoverContent className="p-0 w-(--radix-popover-trigger-width) min-w-max">
+                <PopoverContent className={THEME.Popover.PopoverContent}>
                     <Command filter={applySearch}>
                         <div className="flex items-center border-b px-3">
                             <Checkbox 
                                 checked={isAllVisibleSelected} 
                                 onCheckedChange={handleSelectAll}
-                                className="h-4 w-4"
+                                className={THEME.CheckBox}
                                 aria-label="Select all visible"
                                 disabled={sanitizedOptions.length === 0}
                             />
@@ -473,20 +473,28 @@ function MultiDropdown({
                             <CommandEmpty>No results found.</CommandEmpty>
                             {/* Only render this ONCE */}
                             <CommandGroup>
-                                {sanitizedOptions.map((opt) => (
-                                    <CommandItem
-                                        key={opt.value}
-                                        value={`${opt.label} ${opt.value}`.toLowerCase()}
-                                        onSelect={() => toggleOption(opt)}
-                                        className="cursor-pointer"
-                                    >
-                                        <Checkbox
-                                            checked={selected.some((s) => s.value === opt.value)}
-                                            className="h-4 w-4 mr-2"
-                                        />
-                                        {opt.label} {showValue ? `(${opt.value})` : ""}
-                                    </CommandItem>
-                                ))}
+                                {sanitizedOptions.map((opt) => {
+                                    const isSelected = selected.some((s) => s.value === opt.value);
+                                    return (
+                                        <CommandItem
+                                            key={opt.value}
+                                            value={`${opt.label} ${opt.value}`.toLowerCase()}
+                                            onSelect={() => toggleOption(opt)}
+                                            className={cn(
+                                                THEME.Popover.PopoverItem,
+                                                isSelected ? THEME.Popover.PopoverItemActive : "",
+                                            )}
+                                        >
+                                            <Checkbox
+                                                checked={isSelected}
+                                                className={THEME.CheckBox}
+                                            />
+                                            <span className={THEME.Popover.OptionLabel}>
+                                                {opt.label} {showValue ? `(${opt.value})` : ""}
+                                            </span>
+                                        </CommandItem>
+                                    )
+                                })}
                             </CommandGroup>
                         </CommandList>
                     </Command>
@@ -600,7 +608,7 @@ function MultiDropdownAsync({
     if (!mounted) {
         return (
             <div className={cn("w-40", widthClass)}>
-                <Button variant="outline" className="w-full justify-between opacity-50 cursor-not-allowed">
+                <Button variant="outline" className={THEME.Popover.PopoverTrigger}>
                     <span className="truncate">{placeholder}</span>
                     <ChevronsUpDown className="opacity-50" />
                 </Button>
@@ -612,26 +620,26 @@ function MultiDropdownAsync({
         <div className={cn("relative", widthClass)}>
             <Popover open={open} onOpenChange={setOpen}>
                 <PopoverTrigger asChild>
-                    <Button variant="outline" className={cn(THEME.DropDown, "w-full justify-between")}>
-                        <span className={cn("truncate", selected.length === 0 ? "text-muted-foreground text-[9px]" : "")}>
+                    <Button variant="outline" className={THEME.Popover.PopoverTrigger}>
+                        <span className={cn("truncate", selected.length === 0 ? THEME.Popover.Placeholder : "")}>
                             {selected.length > 0 ? `${selected.length} Selected` : placeholder}
                         </span>
                         <div className="flex items-center ml-2 border-l pl-2 gap-1">
-                            <ChevronsUpDown className="h-4 w-4 opacity-50" />
+                            <ChevronsUpDown className={THEME.Popover.ChevronIcon} />
                             {selected.length > 0 && (
                                 <span
                                     role="button"
                                     onPointerDown={handleClear}
-                                    className="p-0.5 hover:bg-secondary rounded-sm transition-colors cursor-pointer"
+                                    className={THEME.Popover.ClearButton}
                                 >
-                                    <X className="h-3.5 w-3.5 text-muted-foreground hover:text-foreground" />
+                                    <X className={THEME.Popover.ClearIcon} />
                                 </span>
                             )}
                         </div>
                     </Button>
                 </PopoverTrigger>
 
-                <PopoverContent className="p-0 w-(--radix-popover-trigger-width) min-w-max">
+                <PopoverContent className={THEME.Popover.PopoverContent}>
                     <Command shouldFilter={false}>
                         <div className="flex items-center border-b px-3">
                             <Checkbox 
@@ -649,25 +657,33 @@ function MultiDropdownAsync({
                         </div>
 
                         <CommandList>
-                            {isLoading && <div className="p-4 text-center"><Loader2 className="animate-spin h-4 w-4 inline" /></div>}
-                            {error && <div className="p-2 text-red-500 text-xs">{error}</div>}
+                            {isLoading && <div className="p-4 text-center"><Loader className="animate-spin h-4 w-4 inline" /></div>}
+                            {error && <div className={cn("p-2 text-xs", THEME.Text.RedText)}>{error}</div>}
                             {!isLoading && !error && options.length === 0 && <CommandEmpty>No results found.</CommandEmpty>}
                             
                             <CommandGroup>
-                                {options.map((opt) => (
-                                    <CommandItem
-                                        key={opt.value}
-                                        value={`${opt.label} ${opt.value}`.toLowerCase()}
-                                        onSelect={() => toggleOption(opt)}
-                                        className="cursor-pointer"
-                                    >
-                                        <Checkbox
-                                            checked={selected.some((s) => s.value === opt.value)}
-                                            className="h-4 w-4 mr-2"
-                                        />
-                                        {opt.label} {showValue ? `(${opt.value})` : ""}
-                                    </CommandItem>
-                                ))}
+                                {options.map((opt) => {
+                                    const isSelected = selected.some((s) => s.value === opt.value);
+                                    return (
+                                        <CommandItem
+                                            key={opt.value}
+                                            value={`${opt.label} ${opt.value}`.toLowerCase()}
+                                            onSelect={() => toggleOption(opt)}
+                                            className={cn(
+                                                THEME.Popover.PopoverItem,
+                                                isSelected ? THEME.Popover.PopoverItemActive : "",
+                                            )}
+                                        >
+                                            <Checkbox
+                                                checked={isSelected}
+                                                className="h-4 w-4 mr-2"
+                                            />
+                                            <span className={THEME.Popover.OptionLabel}>
+                                                {opt.label} {showValue ? `(${opt.value})` : ""}
+                                            </span>
+                                        </CommandItem>
+                                    )
+                                })}
                             </CommandGroup>
                         </CommandList>
                     </Command>

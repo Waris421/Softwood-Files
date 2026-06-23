@@ -6,6 +6,7 @@ import { THEME } from "../constants/ui";
 import { cn } from "../generic/utils";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "../ui/dialog";
 import LoadingIcon from "../generic/Loading";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "../ui/table";
 
 interface ColumnConfig {
     header: string; // The name displayed in the table
@@ -99,7 +100,7 @@ export function SearchPicker({
                     <div className={cn(THEME.TextInputReadOnly, "cursor-pointer flex items-center justify-between gap-2 w-full")}>
                         <span className={cn(
                             "overflow-x-auto whitespace-nowrap min-w-0 scrollbar-none",
-                            selectedLabel ? "text-foreground" : "text-gray-400"
+                            selectedLabel ? "text-base-content" : "text-base-content/30"
                         )}>
                             {selectedLabel || placeholder}
                         </span>
@@ -130,19 +131,19 @@ export function SearchPicker({
                             <LoadingIcon />
                         </div>
                     ): (
-                        <div className="overflow-x-auto overflow-y-auto border rounded-lg">
-                            <table className="table table-pin-rows table-sm w-full">
-                                <thead>
-                                    <tr>
+                        <div className={cn("relative min-h-75", THEME.Table.TableContainer)}>
+                            <Table className="table table-pin-rows table-sm w-full">
+                                <TableHeader>
+                                    <TableRow>
                                         {columnMapping.map((col, idx) => (
-                                            <th key={`header-${idx}`} className="capitalize whitespace-nowrap bg-gray-100 dark:bg-gray-600 opacity-90">
+                                            <TableHead key={`header-${idx}`} className="bg-base-300">
                                                 {col.header}
-                                            </th>
+                                            </TableHead>
                                         ))}
-                                    </tr>
-                                    <tr>
+                                    </TableRow>
+                                    <TableRow>
                                         {columnMapping.map((col, idx) => (
-                                            <th key={`search-${idx}`} className="p-2 bg-gray-100 dark:bg-gray-600 opacity-90">
+                                            <TableHead key={`search-${idx}`} className="p-2 bg-base-100">
                                                 <input
                                                     autoFocus={idx === 0}
                                                     placeholder={`Filter ${col.header}...`}
@@ -150,22 +151,22 @@ export function SearchPicker({
                                                     value={searchTerms[idx] || ""}
                                                     onChange={(e) => setSearchTerms(prev => ({ ...prev, [idx]: e.target.value }))}
                                                 />
-                                            </th>
+                                            </TableHead>
                                         ))}
-                                    </tr>
-                                </thead>
-                                <tbody>
+                                    </TableRow>
+                                </TableHeader>
+                                <TableBody>
                                         {filteredData.map((row, rowIndex) => (
-                                            <tr key={rowIndex} className={cn(THEME.Table.RowHover, 'cursor-pointer')} onClick={() => handleRowClick(row)}>
+                                            <TableRow key={rowIndex} className={cn(THEME.Table.RowHover, 'cursor-pointer')} onClick={() => handleRowClick(row)}>
                                                 {columnMapping.map((col, colIndex) => (
-                                                    <td key={`${rowIndex}-${colIndex}`} className="whitespace-nowrap">
+                                                    <TableCell key={`${rowIndex}-${colIndex}`} className="whitespace-nowrap">
                                                         {String(row[col.key] ?? "")}
-                                                    </td>
+                                                    </TableCell>
                                                 ))}
-                                            </tr>
+                                            </TableRow>
                                         ))}
-                                </tbody>
-                            </table>
+                                </TableBody>
+                            </Table>
                         </div>
                     )}
                 </div>
@@ -266,7 +267,7 @@ export function SearchPickerAsync({
                     <div className={cn(THEME.TextInputReadOnly, "cursor-pointer flex items-center justify-between gap-2 w-full")}>
                         <span className={cn(
                             "overflow-x-auto whitespace-nowrap min-w-0 scrollbar-none",
-                            selectedLabel ? "text-foreground" : "text-gray-400"
+                            selectedLabel ? "text-base-content" : "text-base-content/30"
                         )}>
                             {selectedLabel || placeholder}
                         </span>
@@ -287,19 +288,19 @@ export function SearchPickerAsync({
                     </DialogDescription>
                 </DialogHeader>
                 <div className="p-6 overflow-hidden flex flex-col flex-1">
-                    <div className="overflow-x-auto overflow-y-auto border rounded-lg relative min-h-75">
-                        <table className="table table-pin-rows table-sm w-full">
-                            <thead>
-                                <tr>
+                    <div className={cn("relative min-h-75", THEME.Table.TableContainer)}>
+                        <Table className={THEME.Table.Wrapper}>
+                            <TableHeader className={THEME.Table.HeaderRow}>
+                                <TableRow className="bg-base-200">
                                     {columnMapping.map((col, idx) => (
-                                        <th key={`h-${idx}`} className="bg-gray-100 dark:bg-gray-600">
+                                        <TableHead key={`h-${idx}`} className="p-1 border-b text-center">
                                             {col.header}
-                                        </th>
+                                        </TableHead>
                                     ))}
-                                </tr>
-                                <tr>
+                                </TableRow>
+                                <TableRow>
                                     {columnMapping.map((col, idx) => (
-                                        <th key={`s-${idx}`} className="p-2 bg-gray-100 dark:bg-gray-600">
+                                        <TableHead key={`s-${idx}`} className="p-1 border-b text-center">
                                             <input
                                                 autoFocus={idx === 0}
                                                 placeholder={`Search ${col.header}...`}
@@ -307,36 +308,43 @@ export function SearchPickerAsync({
                                                 value={searchTerms[idx] || ""}
                                                 onChange={(e) => setSearchTerms(prev => ({ ...prev, [idx]: e.target.value }))}
                                             />
-                                        </th>
+                                        </TableHead>
                                     ))}
-                                </tr>
-                            </thead>
-                            <tbody>
+                                </TableRow>
+                            </TableHeader>
+                            <TableBody>
                                 {loading ? (
-                                    <tr>
-                                        <td colSpan={columnMapping.length} className="text-center py-10">
+                                    <TableRow>
+                                        <TableCell colSpan={columnMapping.length} className="text-center py-10">
                                             <div className="flex justify-center"><LoadingIcon /></div>
-                                        </td>
-                                    </tr>
+                                        </TableCell>
+                                    </TableRow>
                                 ): data.length === 0 ? (
-                                    <tr>
-                                        <td colSpan={columnMapping.length} className="text-center py-10 text-gray-400">
+                                    <TableRow>
+                                        <TableCell colSpan={columnMapping.length} className={cn("text-center py-10", THEME.Text.GrayText)}>
                                             No results found
-                                        </td>
-                                    </tr>
+                                        </TableCell>
+                                    </TableRow>
                                 ): (
                                     data.map((row, rowIndex) => (
-                                        <tr key={rowIndex} className={cn(THEME.Table.RowHover, 'cursor-pointer')} onClick={() => handleRowClick(row)}>
+                                        <TableRow
+                                            key={rowIndex}
+                                            className={cn(
+                                                "transition-colors cursor-pointer",
+                                                THEME.Table.RowHover,
+                                            )}
+                                            onClick={() => handleRowClick(row)}
+                                        >
                                             {columnMapping.map((col, colIndex) => (
-                                                <td key={`${rowIndex}-${colIndex}`} className="whitespace-nowrap">
+                                                <TableCell key={`${rowIndex}-${colIndex}`} className="whitespace-nowrap">
                                                     {String(row[col.key] ?? "")}
-                                                </td>
+                                                </TableCell>
                                             ))}
-                                        </tr>
+                                        </TableRow>
                                     ))
                                 )}
-                            </tbody>
-                        </table>
+                            </TableBody>
+                        </Table>
                     </div>
                 </div>
             </DialogContent>

@@ -13,6 +13,7 @@ import VariantForm from "./Form_Variant";
 import RouteForm from "./Form_Route";
 import ConsumptionForm from "./Form_Consumption";
 import AttachmentForm from "./Form_Attachments";
+import { cn } from "@/_components/generic/utils";
 
 type FormProps = {
     code: string
@@ -63,7 +64,6 @@ function GlobalSubmitButton() {
                 show: true,
                 subject: 'Success',
                 message: 'Saved Successfully',
-                action: () => (window.location.reload())
             });
         } catch (err: any) {
             setMessageConfig({
@@ -133,7 +133,10 @@ export default function ParentContainer({code}: FormProps) {
                 <LoadingContainer>
                     <div className="flex flex-col min-h-screen">
                         <Tabs defaultValue="consumption" className="w-full px-4 pb-2">
-                            <div className="sticky top-16 z-30 bg-gray-100 dark:bg-gray-600 opacity-90 border-b border-base-200 px-4">
+                            <div className={cn(
+                                "sticky top-16 z-30 border-b border-base-200 px-4",
+                                THEME.Background.Gray
+                            )}>
                                 <header className="py-4">
                                     <StyleForm>
                                         <GlobalSubmitButton />

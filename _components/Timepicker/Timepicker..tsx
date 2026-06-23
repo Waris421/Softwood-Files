@@ -113,36 +113,48 @@ export default function TimePicker({
                         </div>
                     </Button>
                 </PopoverTrigger>
-                <PopoverContent className="p-0 w-auto">
+                <PopoverContent className={cn("p-0 w-auto", THEME.Background.Highlighted100)}>
                     <div className="flex h-64 divide-x">
                         <ScrollArea className="w-20">
                             <div className="flex flex-col p-2">
-                                {hours.map((hour) => (
-                                    <Button
-                                        key={hour}
-                                        ref={hourToScrollTo === hour ? selectedHourRef : null}
-                                        variant={selectedHour === hour ? "default" : "ghost"}
-                                        className="sm:w-full shrink-0 aspect-square"
-                                        onClick={() => handleTimeSelect('hour', hour)}
-                                    >
-                                        {hour}
-                                    </Button>
-                                ))}
+                                {hours.map((hour) => {
+                                    const isSelected = selectedHour === hour;
+                                    return (
+                                        <Button
+                                            key={hour}
+                                            ref={hourToScrollTo === hour ? selectedHourRef : null}
+                                            variant={isSelected ? "default" : "ghost"}
+                                            className={cn(
+                                                "sm:w-full shrink-0 aspect-square",
+                                                isSelected ? "text-base-100" : ""
+                                            )}
+                                            onClick={() => handleTimeSelect('hour', hour)}
+                                        >
+                                            {hour}
+                                        </Button>
+                                    )
+                                })}
                             </div>
                         </ScrollArea>
                         <ScrollArea className="w-20">
                             <div className="flex flex-col p-2">
-                                {minutes.map((minute) => (
-                                    <Button
-                                        key={minute}
-                                        ref={minuteToScrollTo === minute ? selectedMinuteRef : null}
-                                        variant={selectedMinute === minute ? "default" : "ghost"}
-                                        className="sm:w-full shrink-0 aspect-square"
-                                        onClick={() => handleTimeSelect('minute', minute)}
-                                    >
-                                        {minute}
-                                    </Button>
-                                ))}
+                                {minutes.map((minute) => {
+                                    const isSelected = selectedMinute === minute;
+                                    return (
+                                        <Button
+                                            key={minute}
+                                            ref={minuteToScrollTo === minute ? selectedMinuteRef : null}
+                                            variant={isSelected ? "default" : "ghost"}
+                                            className={cn(
+                                                "sm:w-full shrink-0 aspect-square",
+                                                isSelected ? "text-base-100" : ""
+                                            )}
+                                            onClick={() => handleTimeSelect('minute', minute)}
+                                        >
+                                            {minute}
+                                        </Button>
+                                    )
+                                })}
                             </div>
                         </ScrollArea>
                     </div>

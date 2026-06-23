@@ -31,7 +31,6 @@ export default function RootLayout({
         className={`${schibstedGrotesk.variable} ${martianMono.variable} bg-base-200 antialiased h-full`}
       >
         <ThemeProvider
-          attribute="class"
           defaultTheme="system"
           enableSystem
           disableTransitionOnChange

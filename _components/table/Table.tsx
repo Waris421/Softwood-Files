@@ -13,6 +13,7 @@ import { Slider } from "../ui/slider";
 import { PrintTable } from "../Print/Table";
 import { useEffect, useMemo, useRef, useState, useTransition } from "react";
 import { Switch } from "../Switch/Switch";
+import { cn } from "../generic/utils";
 
 //Paramters for the dropdown table
 interface DataTableProps<TData, TValue> {
@@ -327,7 +328,7 @@ export function DataTable<TData, TValue> ({
             </div>
 
             {/*The main table*/}
-            <div className="relative rounded-lg border bg-card shadow-sm overflow-x-auto">
+            <div className="relative rounded-lg border bg-base-100 shadow-sm overflow-x-auto">
                 <Table className="w-full table-auto">
                     <TableHeader className="bg-muted/50">
                         {table.getHeaderGroups().map((headerGroup) => (
@@ -371,7 +372,7 @@ export function DataTable<TData, TValue> ({
                                 <TableCell colSpan={columns.length} className="h-24 text-center">
                                     <div className="flex flex-col items-center justify-center gap-2 text-error">
                                         <AlertCircle className="h-8 w-8" />
-                                        <p className="font-medium">{error}</p>
+                                        <p className={cn("font-medium", THEME.Text.RedText)}>{error}</p>
                                     </div>
                                 </TableCell>
                             </TableRow>
@@ -379,7 +380,10 @@ export function DataTable<TData, TValue> ({
                             table.getRowModel().rows.map((row) => {
                                 const customClasses = getRowClassName ? getRowClassName(row.original) : "";
                                 return (
-                                    <TableRow key={row.id} className={`hover:bg-muted/50 transition-colors ${customClasses}`}>
+                                    <TableRow key={row.id} className={cn(
+                                        THEME.Table.RowHover,
+                                        customClasses
+                                    )}>
                                         {row.getVisibleCells().map((cell) => {
                                             const specificHandler = columnClickHandlers?.[cell.column.id];
                                             const isClickable = !!specificHandler;
@@ -392,6 +396,12 @@ export function DataTable<TData, TValue> ({
                                                         if (isClickable) {
                                                             e.currentTarget.focus();
                                                             specificHandler(cell, e);
+                                                        }
+                                                    }}
+                                                    onKeyDown={(e) => {
+                                                        if (isClickable && (e.key === "Enter" || e.key === " ")) {
+                                                            e.preventDefault();
+                                                            specificHandler(cell);
                                                         }
                                                     }}
                                                     className={`p-4 align-middle text-center wrap-break-word whitespace-normal

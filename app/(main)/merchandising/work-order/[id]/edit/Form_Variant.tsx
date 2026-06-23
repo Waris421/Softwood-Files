@@ -142,9 +142,9 @@ export default function VariantForm() {
     }, [watchedItems?.items]);
 
     return (
-        <div className="w-full space-y-4">
+        <div className={THEME.Table.Wrapper}>
             <form className="space-y-4 p-4" autoComplete="off">
-                <div className="overflow-x-auto rounded-lg border border-base-300">
+                <div className={THEME.Table.TableContainer}>
                     <table className="table w-full">
                         <thead className={THEME.Table.HeaderRow}>
                             <tr className="bg-base-200">
@@ -163,7 +163,6 @@ export default function VariantForm() {
                                         className={cn(
                                             "transition-colors",
                                             THEME.Table.RowHover,
-                                            indexToDelete === index && "bg-destructive/40"
                                         )}
                                     >
                                         <td className="p-1 w-100">
@@ -175,7 +174,7 @@ export default function VariantForm() {
                                                 maxLength={255}
                                             />
                                             {errors.items?.[index]?.Name && (
-                                                <p className="text-[10px] text-red-500 mt-1">{errors.items[index]?.Name?.message}</p>
+                                                <p className={cn("text-[10px] mt-1", THEME.Text.RedText)}>{errors.items[index]?.Name?.message}</p>
                                             )}
                                         </td>
 
@@ -188,7 +187,7 @@ export default function VariantForm() {
                                                 maxLength={255}
                                             />
                                             {errors.items?.[index]?.Quantity && (
-                                                <p className="text-[10px] text-red-500 mt-1">{errors.items[index]?.Quantity?.message}</p>
+                                                <p className={cn("text-[10px] mt-1", THEME.Text.RedText)}>{errors.items[index]?.Quantity?.message}</p>
                                             )}
                                         </td>
                                         <td className="p-1 w-100">
@@ -200,7 +199,7 @@ export default function VariantForm() {
                                                 maxLength={255}
                                             />
                                             {errors.items?.[index]?.Description && (
-                                                <p className="text-[10px] text-red-500 mt-1">{errors.items[index]?.Description?.message}</p>
+                                                <p className={cn("text-[10px] mt-1", THEME.Text.RedText)}>{errors.items[index]?.Description?.message}</p>
                                             )}
                                         </td>
                                         <td className="p-1 w-40">
@@ -212,7 +211,7 @@ export default function VariantForm() {
                                                     className="h-8 w-8 cursor-pointer"
                                                     onClick={() => addEmptyRow(index)}
                                                 >
-                                                    <Plus className="w-4 h-4" color="#38A169" />
+                                                    <Plus className={cn("w-4 h-4", THEME.Text.GreenText)} />
                                                 </Button>
                                                 <Button
                                                     type="button"
@@ -221,7 +220,7 @@ export default function VariantForm() {
                                                     className="h-8 w-8 cursor-pointer"
                                                     onClick={() => handleRemoveClick(index)}
                                                 >
-                                                    <Minus className="w-4 h-4" color="#E53E3E"/>
+                                                    <Minus className={cn("w-4 h-4", THEME.Text.RedText)}/>
                                                 </Button>
                                             </div>
                                         </td>
@@ -244,7 +243,7 @@ export default function VariantForm() {
                     <AlertDialogFooter>
                         <AlertDialogCancel>Cancel</AlertDialogCancel>
                         <AlertDialogAction
-                            className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                            className={THEME.ButtonSecondary}
                             onClick={() => indexToDelete !== null && executeDelete(indexToDelete)}
                         >
                             Delete Row

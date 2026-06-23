@@ -11,6 +11,7 @@ import { THEME } from "@/_components/constants/ui";
 import VariantForm from "./Form_Variant";
 import RequirementForm from "./Form_Requirement";
 import AttachmentForm from "./Form_Attachments";
+import { cn } from "@/_components/generic/utils";
 
 type FormProps = {
     id: number
@@ -176,7 +177,10 @@ export default function ParentContainer({id}: FormProps) {
                 <LoadingContainer>
                     <div className="flex flex-col min-h-screen">
                         <Tabs defaultValue="requirement" className="w-full px-4 pb-2">
-                            <div className="sticky top-16 z-30 bg-gray-100 dark:bg-gray-600 opacity-90 border-b border-base-200 px-4">
+                            <div className={cn(
+                                "sticky top-16 z-30 border-b border-base-200 px-4",
+                                THEME.Background.Gray
+                            )}>
                                 <header className="py-4">
                                     <OrderForm>
                                         <div className="flex gap-2 w-full">

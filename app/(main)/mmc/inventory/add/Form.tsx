@@ -6,6 +6,7 @@ import { DropdownOption } from "@/_components/Dropdown/types";
 import { FormField } from "@/_components/generic/FormItems";
 import LoadingIcon from "@/_components/generic/Loading";
 import MessageBox from "@/_components/generic/MessageBox";
+import { cn } from "@/_components/generic/utils";
 import { Switch } from "@/_components/Switch/Switch";
 import { CheckCircle2, Loader2, RefreshCw, Save, SquarePlus } from "lucide-react";
 import { useRouter } from "next/navigation";
@@ -293,7 +294,7 @@ export default function InventoryForm({
     );
 
     return (
-        <div className="max-w-6xl mx-auto p-6 bg-base-100 rounded-xl shadow-xl border border-base-200">
+        <div className={cn("max-w-6xl mx-auto p-6 rounded-xl shadow-xl border border-base-200", THEME.Background.Highlighted100)}>
             <div className="flex items-center gap-3 mb-8 border-b pb-4">
                 <SquarePlus className="text-primary w-6 h-6" />
                 <h2 className="text-2xl font-bold">Inventory Card Addition</h2>

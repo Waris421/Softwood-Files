@@ -92,7 +92,7 @@ function DatePicker ({
                         </div>
                     </Button>
                 </PopoverTrigger>
-                <PopoverContent className="p-0 w-(--radix-popover-trigger-width) min-w-max">
+                <PopoverContent className={cn("p-0 w-(--radix-popover-trigger-width) min-w-max", THEME.Background.Highlighted100)}>
                     <Calendar 
                         mode="single"
                         className="w-full"
@@ -176,7 +176,10 @@ function DateRangePicker({
                         </div>
                     </Button>
                 </PopoverTrigger>
-                <PopoverContent className="p-0 w-auto" align="start">
+                <PopoverContent
+                    className={cn("p-0 w-auto", THEME.Background.Highlighted100)}
+                    align="start"
+                >
                     <Calendar 
                         autoFocus
                         mode="range"

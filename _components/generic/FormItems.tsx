@@ -17,7 +17,7 @@ const ErrorLabel = ({ message }: { message?: string }) => {
 export const FormField = ({ label, error, required, children }: any) => (
     <div className="form-control w-full">
         <label className="label font-semibold text-sm">
-            {label}{required && <span className="text-error ml-1">*</span>}
+            {label}{required && <span className="ml-1">*</span>}
         </label>
         {children}
         <ErrorLabel message={error} />

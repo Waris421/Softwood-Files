@@ -2,13 +2,14 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
-
 import LogoutButton from "../auth/LogoutBtn"
 import HomeButton from "../generic/HomeBtn";
 import { ThemeToggle } from "../generic/ThemeToggle";
 import BackForthButton from "../generic/BackForthBtn";
 import { NavigationMenu, NavigationMenuContent, NavigationMenuItem, NavigationMenuLink, NavigationMenuList, NavigationMenuTrigger, navigationMenuTriggerStyle, NavigationMenuViewport } from "../ui/navigation-menu";
 import { Loader } from "lucide-react";
+import { cn } from "../generic/utils";
+import { THEME } from "../constants/ui";
 
 interface NavItem {
   label: string;
@@ -48,7 +49,7 @@ const NavBar = ({ pageName }: { pageName: string }) => {
     }, [pageName]);
 
     return (
-        <div className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-backdrop-filter:bg-background/60">
+        <div className="sticky top-0 z-50 w-full border-b bg-base-100/90 backdrop-blur supports-backdrop-filter:bg-background/60">
             <div className="flex h-16 items-center justify-between w-full">
                 <div className="flex items-center">
                     <NavigationMenu>
@@ -73,7 +74,7 @@ const NavBar = ({ pageName }: { pageName: string }) => {
                                                                 <NavigationMenuLink asChild>
                                                                     <Link
                                                                         href={child.href}
-                                                                        className="block select-none space-y-1 rounded-md p-3 leading-none no-underline outline-none transition-colors hover:bg-accent hover:text-accent-foreground"
+                                                                        className="block select-none space-y-1 rounded-md p-3 leading-none no-underline outline-none transition-colors hover:bg-base-300 hover:text-accent-foreground"
                                                                     >
                                                                         <div className="text-sm font-medium leading-none">
                                                                             {child.label}
@@ -91,21 +92,16 @@ const NavBar = ({ pageName }: { pageName: string }) => {
                                                 </NavigationMenuContent>
                                             </>
                                         ) : (
-                                            <>
-                                                <NavigationMenuLink asChild className={navigationMenuTriggerStyle()}>
-                                                    <Link href={item.href || "#"}>
-                                                        {item.label}
-                                                    </Link>
-                                                </NavigationMenuLink>
-                                            </>
+                                            <NavigationMenuLink asChild className={navigationMenuTriggerStyle()}>
+                                                <Link href={item.href || "#"}>
+                                                    {item.label}
+                                                </Link>
+                                            </NavigationMenuLink>
                                         )}
                                     </NavigationMenuItem>
                                 ))
                             )}
                         </NavigationMenuList>
-                        <div className="absolute left-0 top-full flex justify-center">
-                            <NavigationMenuViewport />
-                        </div>
                     </NavigationMenu>
                 </div>
                 <div className="flex items-center gap-2 ml-auto">
@@ -118,7 +114,7 @@ const NavBar = ({ pageName }: { pageName: string }) => {
                 </div>
             </div>
             {error && (
-                <div className="bg-destructive text-destructive-foreground py-1 text-center text-xs">
+                <div className={cn("py-1 text-center text-xs", THEME.Text.RedText)}>
                     {error}
                 </div>
             )}

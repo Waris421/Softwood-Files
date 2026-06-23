@@ -176,10 +176,10 @@ export const FileUploadCompact = ({
         >
             <label
                 className={cn(
-                    "group flex items-center justify-center gap-2 h-9 px-3 border border-dashed rounded-md transition-all",
+                    "group flex items-center justify-center gap-2 h-9 px-3 border border-secondary-content rounded-md transition-all",
                     disabled 
-                        ? "cursor-not-allowed border-base-300 bg-base-200/50 opacity-60" 
-                        : "cursor-pointer border-base-300 hover:border-primary hover:bg-base-200",
+                        ? "cursor-not-allowed border-base-300 bg-base-200 opacity-60" 
+                        : "cursor-pointer hover:brightness-80",
                     !disabled && isDragging && "border-primary bg-primary/5"
                 )}
             >

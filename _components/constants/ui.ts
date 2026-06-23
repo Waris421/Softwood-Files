@@ -1,70 +1,85 @@
 export const THEME = {
     ButtonBasic: `
-        btn rounded-lg border-none text-white shadow-md 
-        bg-linear-to-b from-indigo-500 to-slate-700 
-        hover:from-indigo-600 hover:to-slate-900 
-        dark:from-indigo-600 dark:to-slate-900 dark:hover:from-indigo-500 dark:hover:to-black
-        transition-all duration-150 active:scale-95 active:shadow-inner
+        btn rounded-lg border-none text-base-content shadow-md 
+        bg-linear-to-b from-indigo-500 to-slate-800 
+        hover:brightness-80 
+        transition-all duration-150 active:scale-85 active:shadow-inner
     `,
     ButtonBasicSelected: `
-        btn btn-sm rounded-lg border-none text-white shadow-inner scale-95
-        bg-linear-to-b from-indigo-700 to-slate-900
-        dark:from-indigo-800 dark:to-black
+        btn btn-sm rounded-lg border-none text-base-content shadow-inner scale-95
     `,
 
     ButtonSecondary: `
-        btn rounded-lg border-none text-white shadow-md
+        btn rounded-lg border-none text-base-content shadow-md
         bg-linear-to-b from-emerald-500 to-teal-700
-        hover:from-emerald-600 hover:to-teal-800
-        dark:from-teal-600 dark:to-slate-800 dark:hover:from-teal-500 dark:hover:to-teal-900
+        hover:brightness-80
         transition-all duration-150 active:scale-95 active:shadow-inner
     `,
     ButtonSecondarySelected: `
-        btn btn-sm rounded-lg border-none text-white shadow-inner scale-95
+        btn btn-sm rounded-lg border-none text-base-content shadow-inner scale-95
         bg-linear-to-b from-teal-700 to-emerald-900
-        dark:from-teal-800 dark:to-black
     `,
 
     ButtonOutLine: `
-        btn btn-outline rounded-lg border-slate-300 text-slate-700
-        hover:bg-slate-100 hover:border-slate-400 dark:border-slate-700
-        dark:text-slate-300 dark:hover:bg-slate-800
+        btn btn-outline bg-base rounded-lg border-slate-300 text-base-content
+        hover:brightness-80
         transition-all duration-150 active:scale-95 active:shadow-inner
     `,
     ButtonOutLineSelected: `
-        btn btn-outline btn-sm rounded-lg border-slate-500 text-slate-900 bg-slate-200 scale-95 shadow-inner
-        dark:border-slate-400 dark:text-white dark:bg-slate-700
+        btn btn-outline btn-sm rounded-lg border-slate-500
+        text-slate-900 bg-slate-200 scale-95 shadow-inner
+    `,
+    ButtonInvisible: `
+        btn btn-ghost rounded-lg text-base-content
+        hover:brightness-80
+        transition-all duration-150 active:scale-95 active:shadow-inner
     `,
 
-    TextInput: 'input w-full rounded-lg bg-gray-200 dark:bg-gray-800 hover:ring-2 hover:shadow-md transition-shadow placeholder:text-[10px]',
-    TextInputReadOnly: 'input w-full rounded-lg bg-gray-400 dark:bg-gray-700',
-    DropDown: 'w-full h-10 rounded-lg justify-between bg-gray-200 dark:bg-gray-800',
-    Slider: 'flex-1 w-full min-w-30 rounded-lg bg-gray-300 dark:bg-gray-800',
-    CheckBox: 'checkbox rounded-lg checkbox-lg bg-gray-300 dark:bg-gray-800',
+    TextInput: 'input w-full rounded-lg bg-base-200 hover:brightness-80 placeholder:text-[10px]',
+    TextInputReadOnly: 'input w-full rounded-lg bg-base-400',
+    DropDown: 'w-full h-10 rounded-lg justify-between bg-base-200',
+    Slider: 'flex-1 w-full min-w-30 rounded-lg bg-base-200',
+    CheckBox: 'rounded-lg bg-base-200 shrink-0',
     
     HyperLink: 'label-text-alt link link-hover',
     ErrorText: 'label-text-alt flex items-center gap-1 text-red-500',
 
     Table: {
-        Wrapper: "w-full space-y-4 [--base-200:theme(colors.slate.100)] [--base-300:theme(colors.slate.200)] dark:[--base-200:theme(colors.slate.800)] dark:[--base-300:theme(colors.slate.700)]",
-        HeaderRow: "bg-[var(--base-200)]",
-        TableContainer: "overflow-x-auto rounded-lg border border-[var(--base-300)]",
-        RowHover: "hover:bg-slate-500/10 dark:hover:bg-slate-400/10",
+        Wrapper: "w-full space-y-4 bg-base-100",
+        HeaderRow: "bg-base-200",
+        TableContainer: "overflow-x-auto rounded-lg border",
+        RowHover: "hover:brightness-90",
         Footer: "mt-4 p-4 bg-base-200 rounded-lg border border-base-300",
     },
 
     Background: {
-        Base: "bg-gray-100 dark:bg-gray-900",
-        Highlighted100: "bg-gray-200 dark:bg-gray-800",
-        Highlighted200: "bg-gray-300 dark:bg-gray-700",
+        Base: "bg-base",
+        Highlighted100: "bg-base-100",
+        Highlighted200: "bg-base-200",
+        Highlighted300: "bg-base-300",
+        Green: "bg-green-500",
+        Gray: "bg-gray-500",
     },
 
     Text: {
-        NormalText: 'text-gray-800 dark:text-gray-100',
-        RedText: 'text-red-600 dark:text-red-500',
-        BlueText: 'text-blue-600 dark:text-blue-500',
-        GrayText: 'text-gray-600 dark:text-gray-400',
-        GreenText: 'text-green-600 dark:text-green-500',
-        AmberText: 'text-amber-500 dark:text-amber-400',
+        NormalText: 'text-base-content',
+        RedText: 'text-error',
+        BlueText: 'text-info/75',
+        GrayText: 'text-base-content/30',
+        GreenText: 'text-success',
+        AmberText: 'text-warning',
+    },
+
+    Popover: {
+        PopoverTrigger: "w-full justify-between h-9 px-3 border rounded-md text-sm font-medium shadow-sm transition-colors",
+        PopoverContent: "w-[var(--radix-popover-trigger-width)] p-0 bg-base-100 border rounded-md shadow-md",
+        PopoverItem: "flex items-center justify-between bg-base-300 py-2 px-3 cursor-pointer text-sm rounded-lg transition-colors",
+        PopoverItemActive: "bg-success-content",
+        Placeholder: "text-muted-foreground text-[9px]",
+        ClearButton: "p-0.5 hover:bg-secondary rounded-sm transition-colors cursor-pointer",
+        ClearIcon: "h-3.5 w-3.5 text-muted-foreground hover:text-foreground",
+        ChevronIcon: "h-4 w-4 opacity-50 shrink-0",
+        OptionLabel: "whitespace-normal wrap-break-word flex-1",
+        CheckIcon: "ml-2 h-4 w-4 shrink-0 text-info",
     }
 }

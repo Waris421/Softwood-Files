@@ -214,7 +214,7 @@ const listColumns: ColumnDef<Attendance>[] = [
                                 </TooltipTrigger>
                                 <TooltipContent>
                                     {InTimeAdjustmentApproval === null && "Adjustment approval pending"}
-                                    {InTimeAdjustmentApproval === true && "Adjustment approved"}
+                                    {InTimeAdjustmentApproval === true && `Adjustment approved.`}
                                     {InTimeAdjustmentApproval === false && `Adjustment rejected. Reason: ${InTimeAdjustmentComments}`}
                                 </TooltipContent>
                             </Tooltip>
@@ -426,7 +426,7 @@ const listColumns: ColumnDef<Attendance>[] = [
                             </Badge>
                         )}
 
-                        {!AbsentFlag && !HolidayFlag && !WeekendFlag && (
+                        {!AbsentFlag && !HolidayFlag && !FullLeaveFlag && !WeekendFlag && (
                             <>
                                 {!InTimeFlag && (
                                     <TooltipProvider>

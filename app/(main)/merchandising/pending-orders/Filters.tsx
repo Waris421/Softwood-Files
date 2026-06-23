@@ -4,6 +4,7 @@ import { THEME } from "@/_components/constants/ui";
 import { MultiDropdown, MultiDropdownAsync, SingleDropdown, SingleDropdownAsync } from "@/_components/Dropdown/Dropdown";
 import { DropdownOption } from "@/_components/Dropdown/types";
 import { FormField } from "@/_components/generic/FormItems";
+import { cn } from "@/_components/generic/utils";
 import { PackageCheck, RefreshCw } from "lucide-react";
 import { useState } from "react";
 
@@ -94,7 +95,10 @@ export default function Filters({
     }
 
     return (
-        <div className="sticky top-16 z-30 bg-gray-100 dark:bg-gray-600 opacity-90 border-b border-base-200 px-4">
+        <div className={cn(
+            "sticky top-16 z-30 border-b border-base-200 px-4",
+            THEME.Background.Gray
+        )}>
             <form onSubmit={handleSubmit} className="grid grid-cols-1 md:grid-cols-6 gap-6">
                 <FormField label='Starting Order' error={errors.StartingOrder} required>
                     <SingleDropdownAsync 

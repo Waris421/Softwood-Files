@@ -38,7 +38,7 @@ const BackForthButton = () => {
                         <Button
                             variant="ghost"
                             size="icon"
-                            className="cursor-pointer text-gray-800 hover:bg-gray-800 dark:text-gray-200"
+                            className="cursor-pointer text-base-content"
                             aria-label="Go Back"
                             disabled={!canGoBack}
                             onClick={handleBackClick}
@@ -59,7 +59,7 @@ const BackForthButton = () => {
                         <Button
                             variant="ghost"
                             size="icon"
-                            className="cursor-pointer text-gray-800 hover:bg-gray-800 dark:text-gray-200"
+                            className="cursor-pointer text-base-content"
                             aria-label="Go Forward"
                             onClick={handleForwardClick}
                         >

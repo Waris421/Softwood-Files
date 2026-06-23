@@ -7,7 +7,7 @@ import { useEffect, useMemo, useState } from "react";
 import { THEME } from "@/_components/constants/ui";
 import { cn } from "@/_components/generic/utils";
 import { Button } from "@/_components/ui/button";
-import { CheckCircle2, CircleArrowUp, ListChecks, Loader2, Plus, RefreshCw, Scale} from "lucide-react";
+import { CheckCircle2, CircleArrowUp, ListChecks, Loader, Loader2, Plus, RefreshCw, Scale} from "lucide-react";
 import { SingleDropdownAsync } from "@/_components/Dropdown/Dropdown";
 
 const rowSchema = z.object({
@@ -282,7 +282,7 @@ export default function AllocationTable({
                     >
                         {isReallocating ? (
                             <>
-                                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                                <Loader className="mr-2 h-4 w-4 animate-spin" />
                                 ....
                             </>
                         ) : (

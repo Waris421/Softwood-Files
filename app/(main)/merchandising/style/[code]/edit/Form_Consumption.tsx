@@ -12,7 +12,7 @@ import { Button } from "@/_components/ui/button";
 import { Minus, Plus } from "lucide-react";
 import { cn } from "@/_components/generic/utils";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/_components/ui/alert-dialog";
-import { SearchPicker } from "@/_components/DialogBox/SearchPicker";
+import { SearchPicker, SearchPickerAsync } from "@/_components/DialogBox/SearchPicker";
 
 //If we need to do any validation on rows, do so here.
 const rowSchema = z.object({
@@ -189,7 +189,7 @@ export default function ConsumptionForm() {
                                                 render={({field}) => {
                                                     const type = watchedItems?.items?.[index]?.Type;
                                                     return (
-                                                        <SearchPicker 
+                                                        <SearchPickerAsync
                                                             id={`search-picker-inv-${index}`}
                                                             apiUrl={`/api/options/inventories?type=${type}`}
                                                             displayColumn="label"
@@ -200,7 +200,8 @@ export default function ConsumptionForm() {
                                                                 {header: 'Unit', key: 'Unit'},
                                                             ]}
                                                             customClasses={{
-                                                                trigger: "w-100",
+                                                                trigger: "w-full",
+                                                                dialog: "max-w-[75vw]!"
                                                             }}
                                                             value={field.value}
                                                             onSelect={(value) => {

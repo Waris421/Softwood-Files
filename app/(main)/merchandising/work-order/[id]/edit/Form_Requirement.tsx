@@ -165,7 +165,7 @@ export default function RequirementForm() {
         }
 
         //Default
-        return "text-base-content";
+        return THEME.Text.NormalText;
     }
 
     //Helper function to get the requirement history
@@ -221,9 +221,9 @@ export default function RequirementForm() {
     })
 
     return (
-        <form className="space-y-4 p-4" autoComplete="off">
-            <div className="overflow-x-auto rounded-lg border border-base-300">
-                <table className="table w-full">
+        <form className="space-y-4 p-0" autoComplete="off">
+            <div className={THEME.Table.TableContainer}>
+                <table className={THEME.Table.Wrapper}>
                     <thead className={THEME.Table.HeaderRow}>
                         {/* Header Row */}
                         <tr className="bg-base-200">
@@ -249,7 +249,7 @@ export default function RequirementForm() {
                             </td>
                             <td className="p-1">
                                 <input 
-                                    className="input input-bordered input-xs w-full font-normal"
+                                    className={THEME.TextInput}
                                     placeholder="Filter name..."
                                     value={filters.inventory}
                                     onChange={(e) => setFilters(f => ({...f, inventory: e.target.value}))}
@@ -257,7 +257,7 @@ export default function RequirementForm() {
                             </td>
                             <td className="p-1">
                                 <input 
-                                    className="input input-bordered input-xs w-full font-normal"
+                                    className={THEME.TextInput}
                                     placeholder="Filter variant..."
                                     value={filters.variant}
                                     onChange={(e) => setFilters(f => ({...f, variant: e.target.value}))}
@@ -265,28 +265,28 @@ export default function RequirementForm() {
                             </td>
                             <td className="p-1 text-center">
                                 <Checkbox 
-                                    className="size-7"
+                                    className="size-6"
                                     checked={filters.requiredOnly}
                                     onCheckedChange={(v) => setFilters(f => ({...f, requiredOnly: !!v}))}
                                 />
                             </td>
                             <td className="p-1 text-center">
                                 <Checkbox 
-                                    className="size-7"
+                                    className="size-6"
                                     checked={filters.orderedDiff}
                                     onCheckedChange={(v) => setFilters(f => ({...f, orderedDiff: !!v}))}
                                 />
                             </td>
                             <td className="p-1 text-center">
                                 <Checkbox 
-                                    className="size-7"
+                                    className="size-6"
                                     checked={filters.receivedDiff}
                                     onCheckedChange={(v) => setFilters(f => ({...f, receivedDiff: !!v}))}
                                 />
                             </td>
                             <td className="p-1 text-center">
                                 <Checkbox 
-                                    className="size-7"
+                                    className="size-6"
                                     checked={filters.issuedDiff}
                                     onCheckedChange={(v) => setFilters(f => ({...f, issuedDiff: !!v}))}
                                 />
@@ -328,7 +328,7 @@ export default function RequirementForm() {
                                                 <PopoverTrigger asChild>
                                                     <button
                                                         type="button"
-                                                        className="btn btn-ghost btn-xs btn-circle hover:bg-slate-200 dark:hover:bg-slate-700"
+                                                        className={cn(THEME.ButtonInvisible, "btn-xs btn-circle")}
                                                         onClick={() => getRequirementHistory(rowData.id)}
                                                     >
                                                         <Info size={14} />
@@ -339,27 +339,24 @@ export default function RequirementForm() {
                                                     side="right"
                                                     align="start"
                                                     sideOffset={10}
-                                                    className="w-130 p-0 shadow-2xl border border-slate-300 bg-white dark:bg-slate-800 dark:border-slate-600 overflow-hidden"
+                                                    className="w-130 p-0 bg-base-300 shadow-2xl border rounded-lg overflow-hidden"
                                                 >
-                                                    <div className="bg-slate-50 dark:bg-slate-90w-112.50/50 px-3 py-2 border-b border-slate-200 dark:border-slate-700 flex justify-between items-center">
+                                                    <div className=" px-3 py-2 border flex justify-between items-center">
                                                         <div className="flex flex-col gap-0.5 max-w-[85%]">
-                                                            <span className="text-[10px] font-bold uppercase tracking-wider text-blue-600 dark:text-blue-400">
+                                                            <span className="text-[10px] font-bold uppercase tracking-wider text-accent">
                                                                 Requirement History
                                                             </span>
-                                                            <h4 className="text-[12px] font-semibold text-slate-800 truncate">
+                                                            <h4 className="text-[12px] font-semibold text-primary truncate">
                                                                 {rowData.InventoryName}
                                                                 {rowData.Variant && (
-                                                                    <span className="ml-1.5 px-1.5 py-0.5 rounded bg-slate-200 dark:bg-slate-700 text-slate-600 dark:text-slate-300 font-medium text-[10px]">
+                                                                    <span className="ml-1.5 px-1.5 py-0.5 rounded bg-info font-medium text-[10px]">
                                                                         {rowData.Variant}
                                                                     </span>
                                                                 )}
                                                             </h4>
                                                         </div>
                                                         <div className="flex items-center gap-2">
-                                                            {isLoadingHistory && (
-                                                                <span className="loading loading-spinner loading-xs text-blue-500"></span>
-                                                            )}
-                                                            <PopoverClose className="btn btn-ghost btn-xs btn-circle text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 transition-colors">
+                                                            <PopoverClose className={cn(THEME.ButtonInvisible,"btn-xs")}>
                                                                 <X size={14} />
                                                                 <span className="sr-only">Close</span>
                                                             </PopoverClose>
@@ -372,17 +369,17 @@ export default function RequirementForm() {
                                                             <div className="space-y-3 p-2">
                                                                 {[1, 2, 3].map((i) => (
                                                                     <div key={i} className="flex gap-2">
-                                                                    <div className="h-3 bg-slate-100 dark:bg-slate-700 animate-pulse rounded w-1/4"></div>
-                                                                    <div className="h-3 bg-slate-100 dark:bg-slate-700 animate-pulse rounded w-1/4"></div>
-                                                                    <div className="h-3 bg-slate-100 dark:bg-slate-700 animate-pulse rounded w-1/2"></div>
+                                                                    <div className="h-3 bg-base-200 animate-pulse rounded w-1/4"></div>
+                                                                    <div className="h-3 bg-base-200 animate-pulse rounded w-1/4"></div>
+                                                                    <div className="h-3 bg-base-200 animate-pulse rounded w-1/2"></div>
                                                                     </div>
                                                                 ))}
                                                             </div>
                                                         ) : historyData.length > 0 ? (
                                                             <div className="max-h-72 overflow-y-auto overflow-x-auto">
-                                                                <table className="table table-xs w-full text-slate-700 dark:text-slate-200">
+                                                                <table className="table table-xs w-full">
                                                                     <thead>
-                                                                        <tr className="text-slate-400 border-b border-slate-100 dark:border-slate-700">
+                                                                        <tr className={THEME.Table.HeaderRow}>
                                                                             <th className="w-20 font-medium px-1">Date</th>
                                                                             <th className="w-16 font-medium px-1">Type</th>
                                                                             <th className="w-16 font-medium px-1">ID</th>
@@ -391,9 +388,9 @@ export default function RequirementForm() {
                                                                             <th className="w-20 font-medium px-1 text-right">Total</th>
                                                                         </tr>
                                                                     </thead>
-                                                                    <tbody className="divide-y divide-slate-50 dark:divide-slate-700/50">
+                                                                    <tbody>
                                                                         {historyData.map((item) => (
-                                                                            <tr key={item.id} className="hover:bg-slate-50 dark:hover:bg-slate-700/30">
+                                                                            <tr key={item.id} className={THEME.Table.RowHover}>
                                                                                 <td className="py-2 px-1 whitespace-nowrap text-[10px]">
                                                                                 {item.TransactionDate}
                                                                                 </td>
@@ -409,26 +406,22 @@ export default function RequirementForm() {
                                                                                     >
                                                                                         <code className={cn(
                                                                                                 "text-[10px] font-mono font-medium px-1.5 py-0.5 rounded",
-                                                                                                "bg-blue-50 dark:bg-blue-900/30",
-                                                                                                "text-blue-700 dark:text-blue-300",
-                                                                                                "border border-blue-100 dark:border-blue-800",
-                                                                                                "group-hover:bg-blue-100 dark:group-hover:bg-blue-800/50",
-                                                                                                "group-hover:border-blue-300 dark:group-hover:border-blue-500",
-                                                                                                "transition-colors cursor-pointer",
+                                                                                                "bg-accent text-accent-content",
+                                                                                                "hover:brightness-80 transition-all cursor-pointer",
                                                                                             )}
                                                                                         >
                                                                                             {item.id}
                                                                                         </code>
-                                                                                        <ExternalLink size={10} className="text-blue-400 opacity-0 group-hover:opacity-100 transition-opacity" />
+                                                                                        <ExternalLink size={10} className="text-accent opacity-0 group-hover:opacity-100 transition-opacity" />
                                                                                     </a>
                                                                                 </td>
                                                                                 <td className="py-2 px-1 text-[10px] truncate" title={item.Source}>
                                                                                     {item.Source}
                                                                                 </td>
-                                                                                <td className="py-2 px-1 text-right font-mono font-bold text-slate-900 dark:text-white">
+                                                                                <td className="py-2 px-1 text-right font-mono font-bold brightness-50">
                                                                                     {item.AllocatedQuantity}
                                                                                 </td>
-                                                                                <td className="py-2 px-1 text-right font-mono text-slate-500 dark:text-slate-400">
+                                                                                <td className="py-2 px-1 text-right font-mono brightness-75">
                                                                                     {item.TotalQuantity}
                                                                                 </td>
                                                                             </tr>
@@ -438,7 +431,7 @@ export default function RequirementForm() {
                                                             </div>
                                                         ) : (
                                                             <div className="py-10 text-center">
-                                                                <p className="text-xs text-slate-400 italic">No history records found.</p>
+                                                                <p className="text-xs">No history records found.</p>
                                                             </div>
                                                         )}
                                                     </div>  
@@ -464,21 +457,22 @@ export default function RequirementForm() {
                                                         type="button"
                                                         className={cn(
                                                             THEME.ButtonOutLine,
-                                                            "w-fit px-2 flex-none"
+                                                            "button-xs",
+                                                            "px-2 flex-none"
                                                         )}
                                                     >
-                                                        <Settings2 size={14} />
+                                                        <Settings2 size={10} />
                                                     </button>
                                                 </PopoverTrigger>
 
                                                 <PopoverContent
                                                     side="bottom"
                                                     align="end"
-                                                    className="w-48 p-3 shadow-xl bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg"
+                                                    className="w-48 p-3 shadow-xl bg-base-100 border rounded-lg"
                                                 >
                                                     <div className="space-y-2">
                                                         <div className="flex flex-col gap-1">
-                                                            <label className="text-[11px] font-bold uppercase tracking-wider text-slate-500">
+                                                            <label className="text-[11px] font-bold uppercase tracking-wider text-secondary-content">
                                                                 Adjustment %
                                                             </label>
                                                             <input 
@@ -495,7 +489,7 @@ export default function RequirementForm() {
                                             </Popover>
                                         </div>
                                         {errors.items?.[realIndex]?.Adjustment && (
-                                            <p className="text-[10px] text-red-500 italic">
+                                            <p className={cn("text-[10px] italic", THEME.Text.RedText)}>
                                                 {errors.items[realIndex]?.Adjustment?.message}
                                             </p>
                                         )}

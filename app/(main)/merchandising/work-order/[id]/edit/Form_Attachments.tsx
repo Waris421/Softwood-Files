@@ -149,7 +149,6 @@ export default function AttachmentForm() {
                                         className={cn(
                                             "transition-colors",
                                             THEME.Table.RowHover,
-                                            indexToDelete === index && "bg-destructive/40"
                                         )}
                                     >
                                         <td className="p-1 w-100">
@@ -167,7 +166,7 @@ export default function AttachmentForm() {
                                                 )}
                                             />
                                             {errors.items?.[index]?.Description && (
-                                                <p className="text-[10px] text-red-500 mt-1">{errors.items[index]?.Description?.message}</p>
+                                                <p className={cn("text-[10px] mt-1", THEME.Text.RedText)}>{errors.items[index]?.Description?.message}</p>
                                             )}
                                         </td>
 

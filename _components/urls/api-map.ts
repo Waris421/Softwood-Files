@@ -187,6 +187,15 @@ export const API_MAP = {
                 return url.toString();
             },
             CORRECTION: {
+                getPendingApprovals: () => `${SERVER_URLs.HRServer}/hr/attendance/approval/pending`,
+                getApproveRequest: (ids: string[]) => {
+                    const url = new URL(`${SERVER_URLs.HRServer}/hr/attendance/approval/approve`);
+                    ids.forEach(id => {
+                        url.searchParams.append('ids', id);
+                    });
+
+                    return url.toString();
+                },
                 getAddCorrection: (searchParams?: URLSearchParams) => {
                     const url = new URL(`${SERVER_URLs.HRServer}/hr/attendance/correction/add`);
                     const allowedKeys = ['date', 'type', 'employee'];

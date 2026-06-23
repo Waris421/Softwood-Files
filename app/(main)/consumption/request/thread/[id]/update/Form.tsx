@@ -69,6 +69,7 @@ export default function ConsumptionForm({ pk }: FormProps){
         control,
         name: "items",
     });
+    
     const { fields, append, remove, insert } = useFieldArray({
         control,
         name: "items"

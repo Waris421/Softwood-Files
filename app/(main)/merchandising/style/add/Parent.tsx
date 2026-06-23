@@ -11,6 +11,7 @@ import LoadingIcon from "@/_components/generic/Loading";
 import { useState } from "react";
 import MessageBox from "@/_components/generic/MessageBox";
 import { useRouter } from "next/navigation";
+import { cn } from "@/_components/generic/utils";
 
 function GlobalSubmitButton() {
     const { getCombinedData, validateAll, markAsClean, isDirty } = useFormRegistry();
@@ -116,7 +117,10 @@ export default function ParentContainer() {
                 <LoadingContainer>
                     <div className="flex flex-col min-h-screen">
                         <Tabs defaultValue="variant" className="w-full px-4 pb-2">
-                            <div className="sticky top-16 z-30 bg-gray-100 dark:bg-gray-600 opacity-90 border-b border-base-200 px-4">
+                            <div className={cn(
+                                "sticky top-16 z-30 border-b border-base-200 px-4",
+                                THEME.Background.Gray
+                            )}>
                                 <header className="py-4">
                                     <StyleForm>
                                         <GlobalSubmitButton />

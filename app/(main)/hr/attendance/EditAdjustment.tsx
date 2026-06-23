@@ -222,7 +222,6 @@ export function EditAdjustmentModal({ onClose, onSuccess, adjustmentId }: EditAd
                                     {submitting ? 'Saving...' : 'Save Adjustment'}
                                 </button>
                             </div>
-                            
                         </form>
                     </div>
                 )}
