@@ -2,11 +2,10 @@
 // Generic selector for Importers and Exporters — same layout as CountrySelector.
 // nameKey tells it which response field to use as display label and URL value.
 import { useState, useEffect, useMemo } from "react"
-import { Check } from "lucide-react"
+import { cn } from "@/_components/generic/utils"
+import { Checkbox } from "@/_components/ui/checkbox"
 import { useSearchParams } from "next/navigation"
-
-const chunk = <T,>(arr: T[], n: number): T[][] =>
-    Array.from({ length: Math.ceil(arr.length / n) }, (_, i) => arr.slice(i * n, (i + 1) * n))
+import { THEME } from "@/_components/constants/ui"
 
 type Props = {
     title: string
@@ -19,7 +18,7 @@ type Props = {
 export default function EntitySelector({ title, endpoint, nameKey, selected, onChange }: Props) {
     const searchParams = useSearchParams()
     const searchParamsString = searchParams.toString()
-    const [items, setItems] = useState<string[]>([])
+    const [items, setItems] = useState<{ name: string; Quantity: string; Price: string | number }[]>([])
     const [loading, setLoading] = useState(true)
     const [search, setSearch] = useState('')
 
@@ -30,92 +29,109 @@ export default function EntitySelector({ title, endpoint, nameKey, selected, onC
         fetch(`${endpoint}?${searchParamsString}`)
             .then(r => r.json())
             .then(data => setItems(
-                Array.isArray(data) ? data.map((d: Record<string, string>) => d[nameKey]).filter(Boolean) : []
+                Array.isArray(data) ? data.map((d: Record<string, any>) => ({
+                    name: d[nameKey],
+                    Quantity: d.Quantity,
+                    Price: d.Price,
+                })).filter(item => item.name) : []
             ))
             .catch(() => {})
             .finally(() => setLoading(false))
     }, [endpoint, nameKey, searchParamsString])
 
-    // Selected names float to top, then unselected in original (quantity-desc) order
     const filtered = useMemo(() => {
         const q = search.toLowerCase()
-        const matches = q ? items.filter(name => name.toLowerCase().includes(q)) : items
-        const sel = new Set(selected)
-        return [
-            ...matches.filter(name => sel.has(name)),
-            ...matches.filter(name => !sel.has(name)),
-        ]
+        const matches = q ? items.filter(item => item.name.toLowerCase().includes(q)) : items
+        return matches.slice(0, 50)
     }, [items, selected, search])
 
-    const allFilteredSelected = filtered.length > 0 && filtered.every(name => selected.includes(name))
+    const allFilteredSelected = filtered.length > 0 && filtered.every(item => selected.includes(item.name))
+    const isSomeFilteredSelected = filtered.length > 0 && filtered.some(item => selected.includes(item.name)) && !allFilteredSelected
 
-    // Deselects filtered items if all selected; otherwise adds all filtered to selection
     const handleSelectAll = () => {
         if (allFilteredSelected) {
-            const filteredSet = new Set(filtered)
-            onChange(selected.filter(n => !filteredSet.has(n)))
+            const filteredNames = new Set(filtered.map(item => item.name))
+            onChange(selected.filter(n => !filteredNames.has(n)))
         } else {
-            onChange([...new Set([...selected, ...filtered])])
+            onChange([...new Set([...selected, ...filtered.map(item => item.name)])])
         }
     }
 
-    const toggle = (name: string) =>
-        onChange(selected.includes(name) ? selected.filter(n => n !== name) : [...selected, name])
+const toggle = (name: string) =>
+    onChange(selected.includes(name) ? selected.filter(n => n !== name) : [...selected, name])
 
     return (
-        <div className="border border-base-300 rounded-lg p-4 w-72 shrink-0">
+        <div className="card shadow-xl border border-base-200 rounded-lg w-full max-w-sm bg-base-100">
+            <div className="card-body p-4 flex flex-col h-96 max-h-96">
+                <div className="z-20 pb-2 border-b border-base-300 bg-base-100">
+                    <div className="flex items-center justify-between py-2 px-1">
+                        <span className="text-xs font-bold text-base-content/70">{title}</span>
+                        <div className="flex items-center justify-center size-8">
+                            <Checkbox
+                                className="size-8 border-base-200"
+                                checked={allFilteredSelected ? true : isSomeFilteredSelected ? "indeterminate" : false}
+                                onCheckedChange={handleSelectAll}
+                            />
+                        </div>
 
-            <div className="flex justify-between items-center mb-3">
-                <span className="font-bold">{title}</span>
-                <button
-                    onClick={handleSelectAll}
-                    className={`btn btn-sm btn-square ${allFilteredSelected ? 'btn-primary' : 'btn-outline'}`}
-                    title={allFilteredSelected ? 'Deselect all' : 'Select all'}
-                >
-                    <Check size={14} />
-                </button>
-            </div>
-
-            <input
-                type="text"
-                placeholder="Type to search"
-                value={search}
-                onChange={e => setSearch(e.target.value)}
-                className="input input-bordered input-sm w-full mb-3"
-            />
-
-            {/* Names in columns of 5, scrolling horizontally — w-40 for longer importer/exporter names */}
-            <div className="overflow-x-auto pb-2">
-                <div className="flex gap-4" style={{ minWidth: 'max-content' }}>
-                    {loading
-                        ? Array.from({ length: 3 }).map((_, i) => (
-                            <div key={i} className="flex flex-col gap-2 w-40">
-                                {Array.from({ length: 5 }).map((_, j) => (
-                                    <div key={j} className="h-4 rounded bg-base-300 animate-pulse" />
-                                ))}
-                            </div>
-                        ))
-                        : filtered.length === 0
-                            ? <p className="text-sm opacity-50 py-4">No results found</p>
-                            : chunk(filtered, 5).map((group, i) => (
-                                <div key={i} className="flex flex-col gap-2 w-40">
-                                    {group.map(name => (
-                                        <label key={name} className="flex items-center gap-2 cursor-pointer">
-                                            <input
-                                                type="checkbox"
-                                                checked={selected.includes(name)}
-                                                onChange={() => toggle(name)}
-                                                className="checkbox checkbox-xs"
-                                            />
-                                            <span className="text-sm truncate">{name}</span>
-                                        </label>
-                                    ))}
-                                </div>
-                            ))
-                    }
+                    </div>
+                    <input
+                        type="text"
+                        placeholder={`Search ${title.toLowerCase()}...`}
+                        value={search}
+                        onChange={e => setSearch(e.target.value)}
+                        className={cn(THEME.TextInput, "w-full mt-1")}
+                    />
                 </div>
-            </div>
 
+                {loading && (
+                    <div className="flex flex-col gap-2 pt-2">
+                        {Array.from({ length: 5 }).map((_, i) => (
+                            <div key={i} className="h-8 rounded bg-base-300 animate-pulse" />
+                        ))}
+                    </div>
+                )}
+
+                {!loading && (
+                    <div className="overflow-y-auto grow pr-1 Custom-scrollbar">
+                        <table className="table table-compact w-full">
+                            <tbody>
+                                {filtered.length === 0 ? (
+                                    <tr>
+                                        <td colSpan={2} className="text-center py-8 text-xs text-base-content/50">
+                                            No results found
+                                        </td>
+                                    </tr>
+                                ) : (
+                                    filtered.map((item) => (
+                                        <tr
+                                            key={item.name}
+                                            className="cursor-pointer transition-colors border-b border-base-200 hover:bg-base-200 bg-base-100"
+                                            onClick={() => toggle(item.name)}
+                                        >
+                                            <td className="py-2">
+                                                <div className="font-medium text-sm text-base-content">
+                                                    {item.name}
+                                                </div>
+                                                <div className="text-xs text-base-content/60 mt-0.5">
+                                                    {item.Quantity} @ ${parseFloat(String(item.Price)).toFixed(2)}
+                                                </div>
+                                            </td>
+                                            <td className="text-center py-2 align-middle" onClick={(e) => e.stopPropagation()}>
+                                                <Checkbox
+                                                    className="size-5 border-base-200"
+                                                    checked={selected.includes(item.name)}
+                                                    onCheckedChange={() => toggle(item.name)}
+                                                />
+                                            </td>
+                                        </tr>
+                                    ))
+                                )}
+                            </tbody>
+                        </table>
+                    </div>
+                )}
+            </div>
         </div>
     )
 }
